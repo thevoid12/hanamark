@@ -1,12 +1,12 @@
 {
   "filepath": {
-    "sourceMDRoot": "../../srcmd",
-    "destinationMD": "../../destmd"
+    "sourceMDRoot": "./test/sourcemd/",
+    "destinationMD": "./test/destinationmd/"
   },
-  "filemap": [
-    {
-      "sourcefile": "../../",
-      "sourceImage": "../../"
-    }
-  ]
+  "userMeta": {
+    "by": "void",
+    "email": "thisisvoiddd1@gmail.com",
+    "twitter": ""
+  },
+  "fileMeta": {}
 }
