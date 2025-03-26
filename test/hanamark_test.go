@@ -7,7 +7,8 @@ import (
 
 func TestParseMarkdownToHtml(t *testing.T) {
 	mdDir := "./test.md"
-	err := parser.ParseMarkdownToHtml(mdDir)
+	destDir := "./test.html"
+	err := parser.ParseMarkdownToHtml(mdDir, destDir)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
