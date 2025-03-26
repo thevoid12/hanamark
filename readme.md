@@ -17,3 +17,6 @@ this is hanamark v1 powering https://www.thisisvoid.in
 - watchdog
 - build is a one time static runner
 - watchdog runs all the time looks if any new file comes into the destination folder if so parses and commits to blog 
+
+## logger
+- using uber's zap logger for logging
