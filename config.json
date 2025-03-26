@@ -1,0 +1,12 @@
+{
+  "filepath": {
+    "sourceMDRoot": "../../srcmd",
+    "destinationMD": "../../destmd"
+  },
+  "filemap": [
+    {
+      "sourcefile": "../../",
+      "sourceImage": "../../"
+    }
+  ]
+}
