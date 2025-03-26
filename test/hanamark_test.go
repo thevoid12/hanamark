@@ -6,8 +6,8 @@ import (
 )
 
 func TestParseMarkdownToHtml(t *testing.T) {
-	mdstring := "# this is a test heading - void "
-	err := parser.ParseMarkdownToHtml(mdstring)
+	mdDir := "./test.md"
+	err := parser.ParseMarkdownToHtml(mdDir)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
