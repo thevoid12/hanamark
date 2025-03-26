@@ -1,12 +1,25 @@
 {
   "filepath": {
     "sourceMDRoot": "./test/sourcemd/",
-    "destinationMD": "./test/destinationmd/"
+    "destMDRoot": "./test/destinationmd/"
   },
   "userMeta": {
     "by": "void",
     "email": "thisisvoiddd1@gmail.com",
     "twitter": ""
   },
-  "fileMeta": {}
+  "fileMeta": {
+    "baseFiles": [
+      "index.html",
+      "blogs.html",
+      "readlogs.html",
+      "projects.html",
+      "watchlog.html",
+      "reads.html"
+    ],
+    "baseFilesMap": {
+      "blogs.html": "./blogs_src/",
+      "readlogs.html": "./readlogs_src/"
+    }
+  }
 }

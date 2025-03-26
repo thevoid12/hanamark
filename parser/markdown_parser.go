@@ -9,9 +9,10 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-func ParseMarkdownToHtml(mdFilepath string) error {
+// ParseMarkdownToHtml parses markdown from source directory and stores it in destination directory
+func ParseMarkdownToHtml(sourceMDPath string, destHtmlPath string) error {
 
-	mdInputfile, err := os.ReadFile(mdFilepath)
+	mdInputfile, err := os.ReadFile(sourceMDPath)
 	if err != nil {
 		return err
 	}
@@ -24,7 +25,7 @@ func ParseMarkdownToHtml(mdFilepath string) error {
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 	result := markdown.Render(doc, renderer)
-	f, err := os.Create("../test/test.html")
+	f, err := os.Create(destHtmlPath)
 	if err != nil {
 		fmt.Println(err)
 
