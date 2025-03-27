@@ -3,10 +3,13 @@ package parser
 import (
 	"context"
 	"errors"
+	"fmt"
 	logs "hanamark/logger"
+	"hanamark/model"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -31,23 +34,24 @@ func CreateUpdateBasefile(ctx context.Context) error {
 				return err
 			}
 		}
-		err = parseSubFolderFilesToHtml(ctx, bfdir)
+		pageMeta, err := parseSubFolderFilesToHtml(ctx, bfdir)
 		if err != nil {
 			l.Sugar().Error("parse subfolder files to html failed", err)
 			return err
 		}
+		fmt.Println(pageMeta)
 	}
 	return nil
 }
 
-func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) error {
+func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (meta []*model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
 	rootDestDir := viper.GetString("filepath.destMDRoot")
 
 	// traverse through the sub directory of src  and create links to the base file in destination
-	err := filepath.Walk(filepath.Join(rootDestDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(filepath.Join(rootDestDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -73,13 +77,20 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) error {
 			}
 
 			// Generate markdown with file links
-			err = ParseMarkdownToHtml(filepath.Join(rootSrcDir, baseFiledir), destPath)
+			GeneratedHtml, err := ParseMarkdownToHtml(filepath.Join(rootSrcDir, baseFiledir))
 			if err != nil {
 				l.Sugar().Error("Error parsing markdown to html", err)
 				return err
 			}
+			meta = append(meta, &model.PageMeta{
+				GenHtml:     GeneratedHtml,
+				PageName:    "",
+				PageTitle:   "",
+				Date:        time.Now(),
+				DestPageDir: destPath,
+			})
 		}
 		return nil
 	})
-	return err
+	return meta, err
 }

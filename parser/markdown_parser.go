@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gomarkdown/markdown"
@@ -9,12 +8,12 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-// ParseMarkdownToHtml parses markdown from source directory and stores it in destination directory
-func ParseMarkdownToHtml(sourceMDPath string, destHtmlPath string) error {
+// ParseMarkdownToHtml parses markdown from source directory into html string
+func ParseMarkdownToHtml(sourceMDPath string) (string, error) {
 
 	mdInputfile, err := os.ReadFile(sourceMDPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.SuperSubscript | parser.Includes
@@ -25,17 +24,17 @@ func ParseMarkdownToHtml(sourceMDPath string, destHtmlPath string) error {
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 	result := markdown.Render(doc, renderer)
-	f, err := os.Create(destHtmlPath)
-	if err != nil {
-		fmt.Println(err)
+	// f, err := os.Create(destHtmlPath)
+	// if err != nil {
+	// 	fmt.Println(err)
 
-	}
-	defer f.Close()
-	_, err = f.Write(result)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+	// }
+	// defer f.Close()
+	// _, err = f.Write(result)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return err
+	// }
 
-	return nil
+	return string(result), nil
 }
