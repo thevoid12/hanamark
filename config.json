@@ -20,6 +20,7 @@
     "baseFilesMap": {
       "blogs.html": "./blogs_src/",
       "readlogs.html": "./readlogs_src/"
-    }
+    },
+    "templateMap": {}
   }
 }
