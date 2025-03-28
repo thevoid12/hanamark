@@ -25,5 +25,10 @@
       "./blogs_src/": "blogpage_template.html",
       "./readlogs_src/": "readlog_template.html"
     }
+  },
+  "toExtractHeading": true,
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
   }
 }

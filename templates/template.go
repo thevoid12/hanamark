@@ -3,7 +3,6 @@ package tmplt
 import (
 	"bytes"
 	"context"
-	"errors"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"os"
@@ -19,8 +18,8 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	templateMap := viper.GetStringMapString("filepath.templateMap")
 	baseTemplatehtml, ok := templateMap[meta.PageType]
 	if !ok {
-		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered")
-		return "", errors.New("this type of file is not configured in config so template cannot be rendered")
+		// there is no templating configured, so the input generated html is the output rendered template
+		return meta.GenHtml, nil
 	}
 
 	tmpl, err := template.ParseFiles(baseTemplatehtml)

@@ -15,7 +15,7 @@ import (
 )
 
 // root files need to be updated in the end after all parsing in dest folder is done
-func CreateUpdateBasefile(ctx context.Context) error {
+func SaveBasefile(ctx context.Context) error {
 
 	l := logs.GetLoggerctx(ctx)
 
