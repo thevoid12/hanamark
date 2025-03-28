@@ -3,9 +3,9 @@ package parser
 import (
 	"context"
 	"errors"
-	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
+	tmplt "hanamark/templates"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,17 +34,19 @@ func CreateUpdateBasefile(ctx context.Context) error {
 				return err
 			}
 		}
-		pageMeta, err := parseSubFolderFilesToHtml(ctx, bfdir)
+		err = parseSubFolderFilesToHtml(ctx, bfdir)
 		if err != nil {
 			l.Sugar().Error("parse subfolder files to html failed", err)
 			return err
 		}
-		fmt.Println(pageMeta)
+
+		// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
+
 	}
 	return nil
 }
 
-func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (meta []*model.PageMeta, err error) {
+func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (err error) {
 	l := logs.GetLoggerctx(ctx)
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
@@ -82,15 +84,25 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (meta []
 				l.Sugar().Error("Error parsing markdown to html", err)
 				return err
 			}
-			meta = append(meta, &model.PageMeta{
+			meta := &model.PageMeta{
 				GenHtml:     GeneratedHtml,
 				PageName:    "",
 				PageTitle:   "",
 				Date:        time.Now(),
 				DestPageDir: destPath,
-			})
+				PageType:    "",
+			}
+			outputHtml, err := tmplt.RenderTemplate(ctx, meta)
+			if err != nil {
+				return err
+			}
+			err = tmplt.WriteIntoFile(ctx, outputHtml, meta)
+			if err != nil {
+				return err
+			}
+
 		}
 		return nil
 	})
-	return meta, err
+	return err
 }
