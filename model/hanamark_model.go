@@ -8,6 +8,7 @@ type PageMeta struct {
 	GenHtml     string // generated html
 	PageName    string
 	PageTitle   string
+	PageType    string
 	Date        time.Time
 	DestPageDir string
 }

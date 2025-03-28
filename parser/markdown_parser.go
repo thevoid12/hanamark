@@ -24,17 +24,6 @@ func ParseMarkdownToHtml(sourceMDPath string) (string, error) {
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 	result := markdown.Render(doc, renderer)
-	// f, err := os.Create(destHtmlPath)
-	// if err != nil {
-	// 	fmt.Println(err)
-
-	// }
-	// defer f.Close()
-	// _, err = f.Write(result)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
 
 	return string(result), nil
 }
