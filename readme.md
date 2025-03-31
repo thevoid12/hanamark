@@ -20,3 +20,6 @@ this is hanamark v1 powering https://www.thisisvoid.in
 
 ## logger
 - using uber's zap logger for logging
+
+## how to customize this
+- add your favoutire css
