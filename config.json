@@ -19,8 +19,7 @@
       "reads.html"
     ],
     "baseFilesMap": {
-      "blogs.html": "./blogs_src/",
-      "readlogs.html": "./readlogs_src/"
+      "blogs.html": "./blogs_src/"
     },
     "templateMap": {
       "./blogs_src/": "blogpost_template.html",
