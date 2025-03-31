@@ -26,13 +26,18 @@ func SaveBasefile(ctx context.Context) error {
 
 	for basefileName, bfdir := range baseFileMap {
 
-		_, err := os.Stat(basefileName)
+		rootDestDir := viper.GetString("filepath.destMDRoot")
+		newdir := filepath.Join(rootDestDir, bfdir)
+		_, err := os.Stat(newdir)
 		if errors.Is(err, os.ErrNotExist) {
-			_, err := os.Create(bfdir)
+			err := os.MkdirAll(newdir, 0755)
 			if err != nil {
 				l.Sugar().Error("create file failed", err)
 				return err
 			}
+		} else if err != nil {
+			l.Sugar().Error("file path not found", err)
+			return err
 		}
 		metaList, err := parseSubFolderFilesToHtml(ctx, bfdir)
 		if err != nil {
@@ -74,8 +79,7 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 			// Construct the corresponding destination path
 			destPath := filepath.Join(rootDestDir, relPath)
 			destDir := filepath.Dir(destPath)
-			extension := filepath.Ext(destDir)
-			destDir = strings.TrimSuffix(destDir, extension) + ".html"
+
 			// Ensure the destination directory exists
 			err = os.MkdirAll(destDir, os.ModePerm)
 			if err != nil {
@@ -84,12 +88,12 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 			}
 
 			// Generate markdown with file links
-			GeneratedHtml, err := ParseMarkdownToHtml(filepath.Join(rootSrcDir, baseFiledir))
+			GeneratedHtml, err := ParseMarkdownToHtml(path)
 			if err != nil {
 				l.Sugar().Error("Error parsing markdown to html", err)
 				return err
 			}
-			tilte, err := ExtractHeadingInMarkdown(ctx, filepath.Join(rootSrcDir, baseFiledir))
+			tilte, err := ExtractHeadingInMarkdown(ctx, path)
 			if err != nil {
 				return err
 			}
