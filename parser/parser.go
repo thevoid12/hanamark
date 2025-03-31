@@ -16,7 +16,7 @@ import (
 )
 
 // root files need to be updated in the end after all parsing in dest folder is done
-func SaveBasefile(ctx context.Context) error {
+func ParseFiles(ctx context.Context) error {
 
 	l := logs.GetLoggerctx(ctx)
 
@@ -25,30 +25,37 @@ func SaveBasefile(ctx context.Context) error {
 	// in its corresponding subfolder
 	baseFileMap := viper.GetStringMapString("fileMeta.baseFilesMap")
 
-	for basefileName, bfdir := range baseFileMap {
+	baseFiles := viper.GetStringSlice("fileMeta.baseFiles")
+	var metaList []*model.PageMeta
 
-		rootDestDir := viper.GetString("filepath.destMDRoot")
-		newdir := filepath.Join(rootDestDir, bfdir)
-		_, err := os.Stat(newdir)
-		if errors.Is(err, os.ErrNotExist) {
-			err := os.MkdirAll(newdir, 0755)
-			if err != nil {
-				l.Sugar().Error("create file failed", err)
+	for _, basefileName := range baseFiles {
+
+		// for basefileName, bfdir := range baseFileMap {
+		bfdir, ok := baseFileMap[basefileName]
+		if ok {
+			rootDestDir := viper.GetString("filepath.destMDRoot")
+			newdir := filepath.Join(rootDestDir, bfdir)
+			_, err := os.Stat(newdir)
+			if errors.Is(err, os.ErrNotExist) {
+				err := os.MkdirAll(newdir, 0755)
+				if err != nil {
+					l.Sugar().Error("create file failed", err)
+					return err
+				}
+			} else if err != nil {
+				l.Sugar().Error("file path not found", err)
 				return err
 			}
-		} else if err != nil {
-			l.Sugar().Error("file path not found", err)
-			return err
+			metaList, err = parseSubFolderFilesToHtml(ctx, bfdir)
+			if err != nil {
+				l.Sugar().Error("parse subfolder files to html failed", err)
+				return err
+			}
+			basefileName = bfdir // for subfolders we identify using their sub directory
 		}
-		metaList, err := parseSubFolderFilesToHtml(ctx, bfdir)
-		if err != nil {
-			l.Sugar().Error("parse subfolder files to html failed", err)
-			return err
-		}
-
 		// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
-
-		err = tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
+		// of if there are no sub folder the base file md is directly converted to html
+		err := tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
 		if err != nil {
 			return err
 		}
