@@ -1,0 +1,172 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  font-weight: 450;
+  line-height: 1.7;
+  margin: 0 auto;
+  padding: .5rem 1rem;
+  max-width: 40.625em
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 1.25em 0 0.5em 0;
+  line-height: 1.2;
+}
+
+a:link {
+  color: #00e;
+}
+
+a:visited {
+  color: #518;
+}
+
+a:focus,
+a:hover {
+  color: #03f;
+}
+
+a:active {
+  color: #e00;
+}
+
+h1 a:empty:before,
+h2 a:empty:before,
+h3 a:empty:before,
+h4 a:empty:before,
+h5 a:empty:before,
+h6 a:empty:before {
+  content: "#";
+}
+
+h1 a:empty,
+h2 a:empty,
+h3 a:empty,
+h4 a:empty,
+h5 a:empty,
+h6 a:empty {
+  visibility: hidden;
+  padding-left: 0.25em;
+}
+
+h1:hover a:empty,
+h2:hover a:empty,
+h3:hover a:empty,
+h4:hover a:empty,
+h5:hover a:empty,
+h6:hover a:empty {
+  visibility: visible;
+}
+
+img {
+  max-width: 100%;
+}
+
+figure {
+  margin: 1em 0;
+  text-align: center;
+}
+
+figcaption {
+  font-size: small;
+}
+
+pre,
+code,
+samp,
+kbd {
+  font-family: monospace, monospace;
+}
+
+pre,
+code,
+kbd {
+  color: #050;
+}
+
+samp {
+  color: #730;
+}
+
+pre,
+blockquote {
+  background: #eee;
+  padding: 0.5em;
+}
+
+pre {
+  overflow: auto;
+}
+
+blockquote {
+  border-left: medium solid #ccc;
+  margin: 1em 0;
+}
+
+blockquote :first-child {
+  margin-top: 0;
+}
+
+blockquote :last-child {
+  margin-bottom: 0;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: thin solid #999;
+  padding: 0.3em 0.4em;
+  text-align: left;
+}
+
+
+:where(html) {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%
+}
+
+img {
+  max-width: 100%
+}
+
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #666;
+}
+
+.menu {
+  max-width: 800px;
+  font-family: Arial, sans-serif;
+}
+
+.menu-item {
+  display: grid;
+  grid-template-columns: 120px auto 200px;
+  /* Fixed width for Date & Link, flexible Name */
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd;
+  align-items: center;
+}
+
+.link a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 100%;
+}
