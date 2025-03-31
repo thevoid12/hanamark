@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"os"
@@ -17,14 +18,21 @@ import (
 func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	l := logs.GetLoggerctx(ctx)
 
-	templateMap := viper.GetStringMapString("filepath.templateMap")
-	baseTemplatehtml, ok := templateMap[meta.PageType]
+	templateKey := meta.BaseFile
+
+	templateMap := viper.GetStringMapString("fileMeta.templateMap")
+	baseTemplatehtml, ok := templateMap[templateKey]
 	if !ok {
 		// there is no templating configured, so the input generated html is the output rendered template
 		return meta.GenHtml, nil
 	}
 
-	tmpl, err := template.ParseFiles(baseTemplatehtml)
+	path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fmt.Println(err)
+	}
+
+	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered", err)
 		return "", err
@@ -43,18 +51,23 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 func RenderBaseTemplate(ctx context.Context, meta []*model.PageMeta, basefileName string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	templateMap := viper.GetStringMapString("filepath.templateMap")
-	baseTemplatehtml, ok := templateMap[basefileName]
+	templateKey := basefileName
+
+	templateMap := viper.GetStringMapString("fileMeta.templateMap")
+	baseTemplatehtml, ok := templateMap[templateKey]
 	if !ok {
 		return errors.New("base template not configured")
 	}
 
-	tmpl, err := template.ParseFiles(baseTemplatehtml)
+	baseTemplatepath := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
+
+	tmpl, err := template.ParseFiles(baseTemplatepath)
 	if err != nil {
 		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered", err)
 		return err
 	}
-	f, err := os.Create(filepath.Join(viper.GetString("destMDRoot"), basefileName))
+	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), basefileName)
+	f, err := os.Create(opBaseFile)
 	if err != nil {
 		l.Sugar().Error("file creation failed", err)
 		return err
