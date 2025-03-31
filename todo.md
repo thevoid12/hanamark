@@ -3,3 +3,4 @@
 - [ ] every base.html needs to be autofilled by the number of posts
 - [ ] link goodreads api
 - [ ] add minutes read feature
+- [ ] handle images
