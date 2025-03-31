@@ -1,0 +1,27 @@
+<!doctype>
+
+<div class="wrapper">
+  <div class="topborder"></div>
+  <div class="leftborder"></div>
+  <title> Void</title>
+  <div class="page">
+    {{ template "header.html" }}
+    <div class="cont">
+      <div class="desc">
+        <div class="description">
+          <p>
+          </p>
+        </div>
+
+        <div class="blog">
+          <ol>
+            {{ range .}}
+            <li><a href="{{.DestPageDir}}">{{.PageTitle}}</a></li>
+            <br>
+            {{end}}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ template "footer.html" }}

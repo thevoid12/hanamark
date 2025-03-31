@@ -25,7 +25,6 @@
     },
     "templateMap": {
       "./blogs_src/": "blogpost_template.html",
-      "./readlogs_src/": "readlog_template.html",
       "index.html": "index_template.html",
       "blogs.html": "blogs_template.html",
       "readlogs.html": "readlogs_template.html",
