@@ -1,7 +1,8 @@
 {
   "filepath": {
     "sourceMDRoot": "./sourcemd/",
-    "destMDRoot": "./destinationmd/"
+    "destMDRoot": "./destinationmd/",
+    "templatePath": "../templates"
   },
   "userMeta": {
     "by": "void",
@@ -22,7 +23,7 @@
       "readlogs.html": "./readlogs_src/"
     },
     "templateMap": {
-      "./blogs_src/": "blogpage_template.html",
+      "./blogs_src/": "blogpost_template.html",
       "./readlogs_src/": "readlog_template.html",
       "index.html": "index_template.html",
       "blogs.html": "blogs_template.html",

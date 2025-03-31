@@ -11,6 +11,6 @@ func CleanSpaces(s string) string {
 
 func RemoveExtentionFromFile(path string) string {
 	ext := filepath.Ext(path)
-	path = path[0 : len(path)-(len(ext)+1)]
+	path = path[0 : len(path)-(len(ext))]
 	return path
 }

@@ -6,6 +6,7 @@ import (
 	logs "hanamark/logger"
 	"hanamark/model"
 	tmplt "hanamark/templates"
+	"hanamark/util"
 	"os"
 	"path/filepath"
 	"strings"
@@ -78,6 +79,8 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 
 			// Construct the corresponding destination path
 			destPath := filepath.Join(rootDestDir, relPath)
+			destPath = util.RemoveExtentionFromFile(destPath)
+			destPath += ".html"
 			destDir := filepath.Dir(destPath)
 
 			// Ensure the destination directory exists
@@ -104,6 +107,7 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 				Date:        time.Now(),
 				DestPageDir: destPath,
 				PageType:    "",
+				BaseFile:    baseFiledir,
 			}
 			outputHtml, err := tmplt.RenderTemplate(ctx, meta)
 			if err != nil {

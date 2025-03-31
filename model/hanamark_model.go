@@ -11,6 +11,7 @@ type PageMeta struct {
 	PageType    string
 	Date        time.Time
 	DestPageDir string
+	BaseFile    string // base file is the index file for each subfiles if exists or the root file itself eg blogs.html,index.html,projects.html etc
 }
 
 // key is baseName value is  pageMeta
