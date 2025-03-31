@@ -9,8 +9,8 @@ import (
 	"hanamark/util"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -89,6 +89,12 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 				return err
 			}
 
+			srcFileInfo, err := os.Stat(path)
+			if err != nil {
+				l.Sugar().Error("get stats of the source file failed", err)
+				return err
+			}
+			lastModfiedTime := srcFileInfo.ModTime()
 			// Generate markdown with file links
 			GeneratedHtml, err := ParseMarkdownToHtml(path)
 			if err != nil {
@@ -103,9 +109,8 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 				GenHtml:     GeneratedHtml,
 				PageName:    "",
 				PageTitle:   tilte,
-				Date:        time.Now(),
+				Date:        lastModfiedTime,
 				DestPageDir: destPath,
-				PageType:    "",
 				BaseFile:    baseFiledir,
 			}
 			outputHtml, err := tmplt.RenderTemplate(ctx, meta)
@@ -121,6 +126,11 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 			meta.DestPageDir = destPath
 			metaList = append(metaList, meta)
 		}
+		// Sorting based on Date field in desc order so that latest record is always at the top
+		sort.SliceStable(metaList, func(i, j int) bool {
+			return metaList[i].Date.After(metaList[j].Date)
+		})
+
 		return nil
 	})
 	return metaList, err
