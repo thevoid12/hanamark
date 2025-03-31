@@ -1,7 +1,7 @@
 {
   "filepath": {
-    "sourceMDRoot": "./test/sourcemd/",
-    "destMDRoot": "./test/destinationmd/"
+    "sourceMDRoot": "./sourcemd/",
+    "destMDRoot": "./destinationmd/"
   },
   "userMeta": {
     "by": "void",
