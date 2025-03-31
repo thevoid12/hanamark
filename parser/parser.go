@@ -82,7 +82,6 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 			destPath = util.RemoveExtentionFromFile(destPath)
 			destPath += ".html"
 			destDir := filepath.Dir(destPath)
-
 			// Ensure the destination directory exists
 			err = os.MkdirAll(destDir, os.ModePerm)
 			if err != nil {
@@ -118,6 +117,8 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaLis
 				return err
 			}
 			meta.GenHtml = "" // there is no use of storing it in memory
+			destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destMDRoot"))
+			meta.DestPageDir = destPath
 			metaList = append(metaList, meta)
 		}
 		return nil

@@ -14,3 +14,12 @@ func RemoveExtentionFromFile(path string) string {
 	path = path[0 : len(path)-(len(ext))]
 	return path
 }
+
+func RemoveRootPartOfDir(oldpath, destMDRoot string) string {
+	// Normalize destMDRoot to match the format of originalPath
+	normalizedRoot := strings.TrimPrefix(destMDRoot, "./")
+
+	res := filepath.Join(".", strings.TrimPrefix(oldpath, normalizedRoot))
+
+	return res
+}
