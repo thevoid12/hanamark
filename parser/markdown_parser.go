@@ -25,7 +25,7 @@ func ParseMarkdownToHtml(sourceMDPath string) (string, error) {
 	p := parser.NewWithExtensions(extensions)
 	doc := p.Parse(mdInputfile)
 	// create HTML renderer with extensions
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank | html.CompletePage
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 	result := markdown.Render(doc, renderer)

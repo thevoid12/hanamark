@@ -62,7 +62,7 @@ func TestSaveBaseFile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = parser.SaveBasefile(ctx)
+	err = parser.ParseFiles(ctx)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

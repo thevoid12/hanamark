@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+
 	logs "hanamark/logger"
+	"hanamark/parser"
+	"hanamark/util"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -40,6 +43,15 @@ func main() {
 	ctx := context.Background()
 	ctx = logs.SetLoggerctx(ctx, l)
 
-	l.Sugar().Info("cache initialized successfully")
+	err = parser.ParseFiles(ctx)
+	if err != nil {
+		l.Sugar().Error("error parsing files", err)
+		return
+	}
+	err = util.CopyImages(viper.GetString("filepath.sourceImagePath"), viper.GetString("filepath.destImagePath"))
+	if err != nil {
+		l.Sugar().Error("copy image files failed", err)
+		return
+	}
 
 }
