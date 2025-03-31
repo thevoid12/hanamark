@@ -29,7 +29,6 @@ func ParseFiles(ctx context.Context) error {
 	var metaList []*model.PageMeta
 
 	for _, basefileName := range baseFiles {
-
 		// for basefileName, bfdir := range baseFileMap {
 		bfdir, ok := baseFileMap[basefileName]
 		if ok {
@@ -51,7 +50,6 @@ func ParseFiles(ctx context.Context) error {
 				l.Sugar().Error("parse subfolder files to html failed", err)
 				return err
 			}
-			basefileName = bfdir // for subfolders we identify using their sub directory
 		}
 		// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
 		// of if there are no sub folder the base file md is directly converted to html
