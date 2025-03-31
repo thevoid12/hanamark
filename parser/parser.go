@@ -34,7 +34,7 @@ func SaveBasefile(ctx context.Context) error {
 				return err
 			}
 		}
-		err = parseSubFolderFilesToHtml(ctx, bfdir)
+		metaList, err := parseSubFolderFilesToHtml(ctx, bfdir)
 		if err != nil {
 			l.Sugar().Error("parse subfolder files to html failed", err)
 			return err
@@ -42,18 +42,23 @@ func SaveBasefile(ctx context.Context) error {
 
 		// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
 
+		err = tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
+		if err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
 
-func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (err error) {
+func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaList []*model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
 	rootDestDir := viper.GetString("filepath.destMDRoot")
 
 	// traverse through the sub directory of src  and create links to the base file in destination
-	err = filepath.Walk(filepath.Join(rootDestDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(filepath.Join(rootSrcDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -84,10 +89,14 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (err err
 				l.Sugar().Error("Error parsing markdown to html", err)
 				return err
 			}
+			tilte, err := ExtractHeadingInMarkdown(ctx, filepath.Join(rootSrcDir, baseFiledir))
+			if err != nil {
+				return err
+			}
 			meta := &model.PageMeta{
 				GenHtml:     GeneratedHtml,
 				PageName:    "",
-				PageTitle:   "",
+				PageTitle:   tilte,
 				Date:        time.Now(),
 				DestPageDir: destPath,
 				PageType:    "",
@@ -100,9 +109,10 @@ func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (err err
 			if err != nil {
 				return err
 			}
-
+			meta.GenHtml = "" // there is no use of storing it in memory
+			metaList = append(metaList, meta)
 		}
 		return nil
 	})
-	return err
+	return metaList, err
 }

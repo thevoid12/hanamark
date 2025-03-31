@@ -12,3 +12,6 @@ type PageMeta struct {
 	Date        time.Time
 	DestPageDir string
 }
+
+// key is baseName value is  pageMeta
+var MiscData map[string][]*PageMeta

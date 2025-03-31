@@ -23,7 +23,13 @@
     },
     "templateMap": {
       "./blogs_src/": "blogpage_template.html",
-      "./readlogs_src/": "readlog_template.html"
+      "./readlogs_src/": "readlog_template.html",
+      "index.html": "index_template.html",
+      "blogs.html": "blogs_template.html",
+      "readlogs.html": "readlogs_template.html",
+      "projects.html": "projects_template.html",
+      "watchlog.html": "watchlog_template.html",
+      "reads.html": "read_template.html"
     }
   },
   "toExtractHeading": true,
