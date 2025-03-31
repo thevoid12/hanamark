@@ -3,9 +3,11 @@ package tmplt
 import (
 	"bytes"
 	"context"
+	"errors"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"github.com/spf13/viper"
@@ -36,6 +38,35 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func RenderBaseTemplate(ctx context.Context, meta []*model.PageMeta, basefileName string) error {
+	l := logs.GetLoggerctx(ctx)
+
+	templateMap := viper.GetStringMapString("filepath.templateMap")
+	baseTemplatehtml, ok := templateMap[basefileName]
+	if !ok {
+		return errors.New("base template not configured")
+	}
+
+	tmpl, err := template.ParseFiles(baseTemplatehtml)
+	if err != nil {
+		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered", err)
+		return err
+	}
+	f, err := os.Create(filepath.Join(viper.GetString("destMDRoot"), basefileName))
+	if err != nil {
+		l.Sugar().Error("file creation failed", err)
+		return err
+	}
+	defer f.Close()
+	err = tmpl.Execute(f, meta)
+	if err != nil {
+		l.Sugar().Error("Error executing template", err)
+		return err
+	}
+
+	return nil
 }
 
 func WriteIntoFile(ctx context.Context, input string, meta *model.PageMeta) error {
