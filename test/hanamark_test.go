@@ -5,6 +5,7 @@ import (
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/parser"
+	"hanamark/util"
 	"log"
 	"testing"
 
@@ -62,6 +63,17 @@ func TestSaveBaseFile(t *testing.T) {
 		t.Error(err)
 	}
 	err = parser.SaveBasefile(ctx)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+}
+
+func TestCopyFiles(t *testing.T) {
+	_, err := setTest()
+	if err != nil {
+		t.Error(err)
+	}
+	err = util.CopyImages(viper.GetString("filepath.sourceImagePath"), viper.GetString("filepath.destImagePath"))
 	if err != nil {
 		t.Errorf(err.Error())
 	}

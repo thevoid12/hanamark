@@ -2,7 +2,9 @@
   "filepath": {
     "sourceMDRoot": "./sourcemd/",
     "destMDRoot": "./destinationmd/",
-    "templatePath": "../templates"
+    "templatePath": "../templates",
+    "sourceImagePath": "./sourcemd/images",
+    "destImagePath": "./destinationmd/images"
   },
   "userMeta": {
     "by": "void",
