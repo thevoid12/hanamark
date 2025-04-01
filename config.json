@@ -12,16 +12,13 @@
     "twitter": ""
   },
   "fileMeta": {
-    "baseFiles": [
-      "index.html",
-      "blogs.html",
-      "readlogs.html",
-      "projects.html",
-      "watchlog.html",
-      "reads.html"
-    ],
     "baseFilesMap": {
-      "blogs.html": "./blogs_src/"
+      "index.html": "./index.md",
+      "blogs.html": "./blogs_src/",
+      "readlogs.html": "./readlogs.md",
+      "projects.html": "./projects.md",
+      "watchlog.html": "./watchlogs.md",
+      "reads.html": "./reads.md"
     },
     "templateMap": {
       "./blogs_src/": "blogpost_template.html",
