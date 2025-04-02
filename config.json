@@ -17,7 +17,7 @@
       "blogs.html": "./blogs_src/",
       "readlogs.html": "./readlogs.md",
       "projects.html": "./projects.md",
-      "watchlog.html": "./watchlogs.md",
+      "watchlogs.html": "./watchlogs.md",
       "reads.html": "./reads.md"
     },
     "templateMap": {
@@ -26,7 +26,7 @@
       "blogs.html": "blogs_template.html",
       "readlogs.html": "readlogs_template.html",
       "projects.html": "projects_template.html",
-      "watchlog.html": "watchlog_template.html",
+      "watchlogs.html": "watchlog_template.html",
       "reads.html": "read_template.html"
     }
   },
