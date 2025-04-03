@@ -6,4 +6,6 @@
 - [x] handle images
 - [ ] Configuring Dependabot
 - [x] date needs to be fixed
-- [ ] fill meta for solo base files
+- [x] fill meta for solo base files
+- [ ] add google analytics to the blog site
+- [ ] need to copy the whole assets folder

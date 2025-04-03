@@ -3,14 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{.PageTitle}}</title>
-
+  <title>{{ .PageTitle }}</title>
 </head>
-{{ template "header.html" }}
 
 <body>
-  {{.GenHtml}}
+  {{ template "header.html" }}
+
+  <div class="blog-post-container">
+    <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
+    <div class="blog-post-content">
+      {{ .GenHtml }}
+    </div>
+  </div>
+
+  {{ template "footer.html" }}
 </body>
-{{ template "footer.html" }}
 
 </html>
