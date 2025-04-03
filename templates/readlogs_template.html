@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ .PageTitle }}</title>
+</head>
+
+<body>
+  {{ template "header.html" }}
+
+  <div class="blog-post-container">
+    <div class="blog-post-content">
+      {{ .GenHtml }}
+    </div>
+  </div>
+
+  {{ template "footer.html" }}
+</body>
+
+</html>
