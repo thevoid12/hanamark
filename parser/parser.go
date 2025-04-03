@@ -3,7 +3,6 @@ package parser
 import (
 	"context"
 	"errors"
-	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
 	tmplt "hanamark/templates"
@@ -49,6 +48,13 @@ func ParseFiles(ctx context.Context) error {
 				l.Sugar().Error("parse subfolder files to html failed", err)
 				return err
 			}
+			// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
+			// of if there are no sub folder the base file md is directly converted to html
+			err = tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
+			if err != nil {
+				return err
+			}
+
 		} else {
 			// process pure base files(which has no subdirectory)
 			rootSrcDir := viper.GetString("filepath.sourceMDRoot")
@@ -63,12 +69,6 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			metaList = append(metaList, meta)
-		}
-		// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
-		// of if there are no sub folder the base file md is directly converted to html
-		err := tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
-		if err != nil {
-			return err
 		}
 
 	}
@@ -109,7 +109,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
 	rootDestDir := viper.GetString("filepath.destMDRoot")
-	fmt.Println(info)
+
 	if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
 		// Determine relative path from source root
 		relPath, err := filepath.Rel(rootSrcDir, path)
