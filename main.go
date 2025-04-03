@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"text/template"
 
 	logs "hanamark/logger"
 	"hanamark/parser"
@@ -42,6 +43,12 @@ func main() {
 
 	ctx := context.Background()
 	ctx = logs.SetLoggerctx(ctx, l)
+
+	_, err = template.ParseGlob("templates/*.html")
+	if err != nil {
+		l.Sugar().Error("parse glob added failed", err)
+		return
+	}
 
 	err = parser.ParseFiles(ctx)
 	if err != nil {

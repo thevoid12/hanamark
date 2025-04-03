@@ -32,14 +32,15 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 		fmt.Println(err)
 	}
 
-	tmpl, err := template.ParseFiles(path)
+	// Parse all templates, but only execute the ones needed
+	tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
 	if err != nil {
-		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered", err)
+		l.Sugar().Error("Template parsing error:", err)
 		return "", err
 	}
 
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, meta) // i could have directly written into the html but i am retarded
+	err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written into the html but i am retarded
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return "", err
@@ -48,7 +49,8 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	return buf.String(), nil
 }
 
-func RenderBaseTemplate(ctx context.Context, meta []*model.PageMeta, basefileName string) error {
+// RenderBaseLinkTemplate processes base files which has links of other sub files
+func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, basefileName string) error {
 	l := logs.GetLoggerctx(ctx)
 
 	templateKey := basefileName
@@ -59,13 +61,13 @@ func RenderBaseTemplate(ctx context.Context, meta []*model.PageMeta, basefileNam
 		return errors.New("base template not configured")
 	}
 
-	baseTemplatepath := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
-
-	tmpl, err := template.ParseFiles(baseTemplatepath)
+	// Parse all templates, but only execute the ones needed
+	tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
 	if err != nil {
-		l.Sugar().Error("this type of file is not configured in config so template cannot be rendered", err)
+		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
+
 	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), basefileName)
 	f, err := os.Create(opBaseFile)
 	if err != nil {
@@ -73,7 +75,7 @@ func RenderBaseTemplate(ctx context.Context, meta []*model.PageMeta, basefileNam
 		return err
 	}
 	defer f.Close()
-	err = tmpl.Execute(f, meta)
+	err = tmpl.ExecuteTemplate(f, baseTemplatehtml, meta)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err

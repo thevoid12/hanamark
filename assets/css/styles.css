@@ -170,3 +170,12 @@ img {
   display: block;
   max-width: 100%;
 }
+
+
+/* Custom Styles */
+
+.header {
+  display: inline;
+  justify-content: space-between;
+  align-items: baseline;
+}
