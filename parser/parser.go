@@ -50,7 +50,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
 			// of if there are no sub folder the base file md is directly converted to html
-			err = tmplt.RenderBaseTemplate(ctx, metaList, basefileName)
+			err = tmplt.RenderBaseLinkTemplate(ctx, metaList, basefileName)
 			if err != nil {
 				return err
 			}

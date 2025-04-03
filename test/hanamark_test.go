@@ -8,6 +8,7 @@ import (
 	"hanamark/util"
 	"log"
 	"testing"
+	"text/template"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -33,7 +34,10 @@ func setTest() (context.Context, error) {
 		return ctx, err
 	}
 	ctx = logs.SetLoggerctx(ctx, l)
-
+	_, err = template.ParseGlob("../templates/*.html")
+	if err != nil {
+		return ctx, err
+	}
 	return ctx, nil
 }
 
