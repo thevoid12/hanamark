@@ -1,16 +1,25 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{.PageTitle}}</title>
-
+  <title>Blog Posts</title>
 </head>
-{{ template "header.html" }}
 
 <body>
-  {{.GenHtml}}
+  {{ template "header.html" }}
+
+  <ul class="blog-post-list">
+    {{ range . }}
+    <li class="blog-post-item">
+      <a href="{{ .DestPageDir }}" class="blog-post-title">{{ .PageTitle }}</a>
+      <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
+    </li>
+    {{ end }}
+  </ul>
+
+  {{ template "footer.html" }}
 </body>
-{{ template "footer.html" }}
 
 </html>
