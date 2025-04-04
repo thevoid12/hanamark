@@ -4,7 +4,9 @@
     "destMDRoot": "./destinationmd/",
     "templatePath": "../templates",
     "sourceAssetsPath": "./sourcemd/assets/",
-    "destAssetsPath": "./destinationmd/assets/"
+    "destAssetsPath": "../personal-site/assets/",
+    "hanamarkCssPath": "./assets/css/",
+    "destCssPath": "../personal-site/assets/css/"
   },
   "userMeta": {
     "by": "void",

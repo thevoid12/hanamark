@@ -4,7 +4,9 @@
     "destMDRoot": "../personal-site/",
     "templatePath": "./templates",
     "sourceAssetsPath": "../markdown-blog/assets/",
-    "destAssetsPath": "../personal-site/assets/"
+    "destAssetsPath": "../personal-site/assets/",
+    "hanamarkCssPath": "./assets/css/",
+    "destCssPath": "../personal-site/assets/css/"
   },
   "userMeta": {
     "by": "void",
