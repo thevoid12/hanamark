@@ -3,8 +3,8 @@
     "sourceMDRoot": "./sourcemd/",
     "destMDRoot": "./destinationmd/",
     "templatePath": "../templates",
-    "sourceImagePath": "./sourcemd/images",
-    "destImagePath": "./destinationmd/images"
+    "sourceAssetsPath": "./sourcemd/assets/",
+    "destAssetsPath": "./destinationmd/assets/"
   },
   "userMeta": {
     "by": "void",

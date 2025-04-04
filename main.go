@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"text/template"
 
 	logs "hanamark/logger"
@@ -44,7 +45,7 @@ func main() {
 	ctx := context.Background()
 	ctx = logs.SetLoggerctx(ctx, l)
 
-	_, err = template.ParseGlob("templates/*.html")
+	_, err = template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
 	if err != nil {
 		l.Sugar().Error("parse glob added failed", err)
 		return
@@ -55,7 +56,7 @@ func main() {
 		l.Sugar().Error("error parsing files", err)
 		return
 	}
-	err = util.CopyImages(viper.GetString("filepath.sourceImagePath"), viper.GetString("filepath.destImagePath"))
+	err = util.CopyAssets(viper.GetString("filepath.sourceAssetsPath"), viper.GetString("filepath.destAssetsPath"))
 	if err != nil {
 		l.Sugar().Error("copy image files failed", err)
 		return

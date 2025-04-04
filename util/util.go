@@ -27,8 +27,8 @@ func RemoveRootPartOfDir(oldpath, destMDRoot string) string {
 	return res
 }
 
-// CopyImages copies images from sourceDir to destDir, preserving the directory structure
-func CopyImages(sourceDir, destDir string) error {
+// CopyAssets copies images from sourceDir to destDir, preserving the directory structure
+func CopyAssets(sourceDir, destDir string) error {
 	// Ensure the destination directory exists
 	err := os.MkdirAll(destDir, os.ModePerm)
 	if err != nil {
@@ -43,12 +43,6 @@ func CopyImages(sourceDir, destDir string) error {
 
 		// Skip directories, they will be created when copying files
 		if info.IsDir() {
-			return nil
-		}
-
-		// Check if the file is an image (basic check using extensions)
-		ext := strings.ToLower(filepath.Ext(info.Name()))
-		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" && ext != ".bmp" && ext != ".webp" {
 			return nil
 		}
 
