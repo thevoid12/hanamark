@@ -53,7 +53,14 @@ func main() {
 	}
 	err = util.CopyAssets(viper.GetString("filepath.sourceAssetsPath"), viper.GetString("filepath.destAssetsPath"))
 	if err != nil {
-		l.Sugar().Error("copy image files failed", err)
+		l.Sugar().Error("copy assets files failed", err)
+		return
+	}
+
+	// copy css from hanamark template to dest output css template
+	err = util.CopyAssets(viper.GetString("filepath.hanamarkCssPath"), viper.GetString("filepath.destCssPath"))
+	if err != nil {
+		l.Sugar().Error("copy css files failed", err)
 		return
 	}
 
