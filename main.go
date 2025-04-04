@@ -11,22 +11,17 @@ import (
 	"hanamark/util"
 	"log"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	fmt.Println("hiiii bitch this is hanamark")
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("there is a error loading environment variables", err)
-		return
-	}
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath("./") // path to look for the config file in
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
