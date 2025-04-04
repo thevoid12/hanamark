@@ -6,26 +6,19 @@ import (
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
-	"log"
 	"testing"
 	"text/template"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func setTest() (context.Context, error) {
 	ctx := context.Background()
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("there is a error loading environment variables", err)
-		return ctx, err
-	}
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath("./") // path to look for the config file in
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
 		return ctx, nil
 	}

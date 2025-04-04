@@ -4,7 +4,6 @@ go 1.23.3
 
 require (
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
-	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.20.0
 	go.uber.org/zap v1.27.0
 )

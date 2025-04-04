@@ -30,7 +30,6 @@
       "about.html": "about_template.html"
     }
   },
-  "toExtractHeading": true,
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
