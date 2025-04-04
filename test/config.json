@@ -1,0 +1,38 @@
+{
+  "filepath": {
+    "sourceMDRoot": "./sourcemd/",
+    "destMDRoot": "./destinationmd/",
+    "templatePath": "../templates",
+    "sourceImagePath": "./sourcemd/images",
+    "destImagePath": "./destinationmd/images"
+  },
+  "userMeta": {
+    "by": "void",
+    "email": "thisisvoiddd1@gmail.com",
+    "twitter": ""
+  },
+  "fileMeta": {
+    "baseFilesMap": {
+      "index.html": "./index.md",
+      "blogs.html": "./blogs_src/",
+      "readlogs.html": "./readlogs.md",
+      "projects.html": "./projects.md",
+      "watchlogs.html": "./watchlogs.md",
+      "reads.html": "./reads.md"
+    },
+    "templateMap": {
+      "./blogs_src/": "blogpost_template.html",
+      "index.html": "index_template.html",
+      "blogs.html": "blogs_template.html",
+      "readlogs.html": "readlogs_template.html",
+      "projects.html": "projects_template.html",
+      "watchlogs.html": "watchlog_template.html",
+      "reads.html": "read_template.html"
+    }
+  },
+  "toExtractHeading": true,
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
+  }
+}

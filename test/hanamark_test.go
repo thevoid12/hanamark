@@ -23,7 +23,7 @@ func setTest() (context.Context, error) {
 	}
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.AddConfigPath("../") // path to look for the config file in
+	viper.AddConfigPath("./") // path to look for the config file in
 
 	err = viper.ReadInConfig()
 	if err != nil {
