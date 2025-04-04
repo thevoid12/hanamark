@@ -125,7 +125,6 @@
 
  th,
  td {
-   border: thin solid #999;
    padding: 0.3em 0.4em;
    text-align: left;
  }
@@ -318,4 +317,55 @@
 
  .blog-post-date {
    color: rgba(0, 0, 0, 0.6);
+ }
+
+
+ /* Table Styles */
+ .table-wrapper {
+   overflow-x: auto;
+   padding: 16px;
+   max-width: 100%;
+   box-sizing: border-box;
+ }
+
+ .table-wrapper table {
+   width: 100%;
+   border-collapse: collapse;
+   font-size: 14px;
+   table-layout: auto;
+   word-break: break-word;
+ }
+
+ .table-wrapper thead th {
+   background-color: #f9f9f9;
+   text-align: left;
+   padding: 12px;
+   font-weight: 500;
+   text-transform: uppercase;
+   color: #666;
+   border-bottom: none;
+ }
+
+ .table-wrapper tbody td {
+   border-bottom: none;
+   color: #333;
+   white-space: normal;
+   word-break: break-word;
+ }
+
+ .table-wrapper tbody tr:hover {
+   background-color: #f5f5f5;
+ }
+
+ .table-action-btn {
+   color: #007bff;
+   background: none;
+   border: none;
+   font-weight: 500;
+   cursor: pointer;
+   transition: color 0.3s;
+ }
+
+ .table-action-btn:hover {
+   color: #0056b3;
  }
