@@ -10,8 +10,8 @@
   {{ template "header.html" }}
 
   <div class="blog-post-container">
-    <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
-    <div class="blog-post-content">
+    <span class="blog-post-date">Last Updated:{{ .Date.Format "2 January 2006" }}</span>
+    <div class="table-wrapper">
       {{ .GenHtml }}
     </div>
   </div>
