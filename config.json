@@ -1,10 +1,10 @@
 {
   "filepath": {
-    "sourceMDRoot": "./sourcemd/",
-    "destMDRoot": "./destinationmd/",
-    "templatePath": "../templates",
-    "sourceImagePath": "./sourcemd/images",
-    "destImagePath": "./destinationmd/images"
+    "sourceMDRoot": "../markdown-blog/",
+    "destMDRoot": "../personal-site/",
+    "templatePath": "./templates",
+    "sourceAssetsPath": "../markdown-blog/assets/",
+    "destAssetsPath": "../personal-site/assets/"
   },
   "userMeta": {
     "by": "void",

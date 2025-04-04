@@ -77,7 +77,7 @@ func TestCopyFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = util.CopyImages(viper.GetString("filepath.sourceImagePath"), viper.GetString("filepath.destImagePath"))
+	err = util.CopyAssets(viper.GetString("filepath.sourceAssetsPath"), viper.GetString("filepath.destAssetsPath"))
 	if err != nil {
 		t.Errorf(err.Error())
 	}
