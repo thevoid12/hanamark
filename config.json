@@ -1,12 +1,12 @@
 {
   "filepath": {
     "sourceMDRoot": "../markdown-blog/",
-    "destMDRoot": "../personal-site/",
+    "destMDRoot": "../thisisvoid/",
     "templatePath": "./templates",
     "sourceAssetsPath": "../markdown-blog/assets/",
-    "destAssetsPath": "../personal-site/assets/",
+    "destAssetsPath": "../thisisvoid/assets/",
     "hanamarkCssPath": "./assets/css/",
-    "destCssPath": "../personal-site/assets/css/"
+    "destCssPath": "../thisisvoid/assets/css/"
   },
   "userMeta": {
     "by": "void",
@@ -20,7 +20,8 @@
       "projects.html": "./projects.md",
       "watchlogs.html": "./watchlogs.md",
       "reads.html": "./reads.md",
-      "about.html": "./about.md"
+      "about.html": "./about.md",
+      "mycodes.html": "./mycodes_4c54e2fd-700a-447d-8232-50a8617cf7d2.md"
     },
     "templateMap": {
       "./blogs_src/": "blogpost_template.html",
@@ -29,7 +30,8 @@
       "projects.html": "projects_template.html",
       "watchlogs.html": "watchlog_template.html",
       "reads.html": "read_template.html",
-      "about.html": "about_template.html"
+      "about.html": "about_template.html",
+      "mycodes.html":"v_project_template.html"
     }
   },
   "logger": {
