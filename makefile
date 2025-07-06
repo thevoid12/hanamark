@@ -19,7 +19,7 @@ makehanamark:
 	cd hanamark && \
 	make run && \
 	cd .. && \
-	cd personal-site/ && \
+	cd thisisvoid/ && \
 	git add . && \
 	git commit -m "personal site_$(DATE)" &&\
 	git push && \
