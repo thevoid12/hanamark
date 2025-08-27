@@ -23,4 +23,4 @@ makehanamark:
 	git add . && \
 	git commit -m "personal site_$(DATE)" &&\
 	git push && \
-	@echo "deployed successfully..."
+	@echo "deployed hanamark parsed blog successfully..."
