@@ -40,7 +40,7 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	}
 
 	var buf bytes.Buffer
-	err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written into the html but i am retarded
+	err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written it into the html but i am retarded
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return "", err
