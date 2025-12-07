@@ -27,7 +27,7 @@ func setTest() (context.Context, error) {
 		return ctx, err
 	}
 	ctx = logs.SetLoggerctx(ctx, l)
-	_, err = template.ParseGlob("../templates/*.html")
+	_, err = template.ParseGlob("./templates/*.html")
 	if err != nil {
 		return ctx, err
 	}
@@ -39,7 +39,7 @@ func TestParseMarkdownToHtml(t *testing.T) {
 	//	destDir := "./test.html"
 	htlmString, err := parser.ParseMarkdownToHtml(mdDir)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 	fmt.Println(htlmString)
 }
@@ -49,7 +49,7 @@ func TestExtractHeadingInMarkdown(t *testing.T) {
 	ctx := context.Background()
 	_, err := parser.ExtractHeadingInMarkdown(ctx, mdDir)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 }
 
@@ -61,7 +61,7 @@ func TestSaveBaseFile(t *testing.T) {
 	}
 	err = parser.ParseFiles(ctx)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 }
 
@@ -72,6 +72,6 @@ func TestCopyFiles(t *testing.T) {
 	}
 	err = util.CopyAssets(viper.GetString("filepath.sourceAssetsPath"), viper.GetString("filepath.destAssetsPath"))
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 }
