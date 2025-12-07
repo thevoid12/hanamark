@@ -12,11 +12,8 @@ type PageMeta struct {
 	Date        time.Time
 	DestPageDir string
 	BaseFile    string // base file is the index file for each subfiles if exists or the root file itself eg blogs.html,index.html,projects.html etc
-	// TODO: remove the basefile variable
 
 }
 
-type ListPage struct {
-	Base     string
-	TempPath string
-}
+// key is baseName value is  pageMeta
+var MiscData map[string][]*PageMeta

@@ -1,17 +1,36 @@
 {
   "filepath": {
-    "sourceMDRoot": "./point_A/",
-    "destMDRoot": "./point_B/",
-    "templatePath": "./templates",
-    "sourceAssetsPath": "./point_A/assets/",
-    "destAssetsPath": "./point_B/assets/",
+    "sourceMDRoot": "./sourcemd/",
+    "destMDRoot": "./destinationmd/",
+    "templatePath": "../templates",
+    "sourceAssetsPath": "./sourcemd/assets/",
+    "destAssetsPath": "../personal-site/assets/",
     "hanamarkCssPath": "./assets/css/",
-    "destCssPath": "./point_B/assets/css/"
+    "destCssPath": "../personal-site/assets/css/"
   },
   "userMeta": {
     "by": "void",
     "email": "thisisvoiddd1@gmail.com",
     "twitter": ""
+  },
+  "fileMeta": {
+    "baseFilesMap": {
+      "index.html": "./blogs_src/",
+      "readlogs.html": "./readlogs.md",
+      "projects.html": "./projects.md",
+      "watchlogs.html": "./watchlogs.md",
+      "reads.html": "./reads.md",
+      "about.html": "./about.md"
+    },
+    "templateMap": {
+      "./blogs_src/": "blogpost_template.html",
+      "index.html": "index_template.html",
+      "readlogs.html": "readlogs_template.html",
+      "projects.html": "projects_template.html",
+      "watchlogs.html": "watchlog_template.html",
+      "reads.html": "read_template.html",
+      "about.html": "about_template.html"
+    }
   },
   "logger": {
     "filepath": "hanamark.logs",
