@@ -3,19 +3,18 @@ package tmplt
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/viper"
 )
 
 // takes in the base template and appends the content the base template and gives us back the final html string
-func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
+func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) (string, error) {
 	l := logs.GetLoggerctx(ctx)
 
 	templateKey := meta.BaseFile
@@ -27,11 +26,12 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 		return meta.GenHtml, nil
 	}
 
-	path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println(err)
-	}
+	// path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
+	// if _, err := os.Stat(path); os.IsNotExist(err) {
+	// 	fmt.Println(err)
+	// }
 
+	// TODO: we got to write it to the template from templatePath
 	// Parse all templates, but only execute the ones needed
 	tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
 	if err != nil {
@@ -49,33 +49,48 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta) (string, error) {
 	return buf.String(), nil
 }
 
-// RenderBaseLinkTemplate processes base files which has links of other sub files
-func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, basefileName string) error {
+// RenderBaseLinkTemplate processes files which has links of other sub files. ususlly every folder has individual files
+// and the files are linked if it is a sub folder!
+func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *model.ListPage) error {
 	l := logs.GetLoggerctx(ctx)
+	baseFolderName := lp.Base
+	// templateKey := basefileName
 
-	templateKey := basefileName
-
-	templateMap := viper.GetStringMapString("fileMeta.templateMap")
-	baseTemplatehtml, ok := templateMap[templateKey]
-	if !ok {
-		return errors.New("base template not configured")
-	}
+	// templateMap := viper.GetStringMapString("fileMeta.templateMap")
+	// baseTemplatehtml, ok := templateMap[templateKey]
+	// if !ok {
+	// 	return errors.New("base template not configured")
+	// }
 
 	// Parse all templates, but only execute the ones needed
-	tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
+	// tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
+	// if err != nil {
+	// 	l.Sugar().Error("Template parsing error:", err)
+	// 	return err
+	// }
+	tmpl, err := template.ParseFiles(lp.TempPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
+	// TODO: if there is a filemeta to change the base folder name give it more preced
 
-	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), basefileName)
+	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
 	f, err := os.Create(opBaseFile)
 	if err != nil {
 		l.Sugar().Error("file creation failed", err)
 		return err
 	}
 	defer f.Close()
-	err = tmpl.ExecuteTemplate(f, baseTemplatehtml, meta)
+	for _, m := range meta {
+		dir, err := filepath.Rel(baseFolderName, m.DestPageDir)
+		if err != nil {
+			l.Sugar().Error("error in getting relative path", err)
+			return err
+		}
+		m.DestPageDir = dir
+	}
+	err = tmpl.Execute(f, meta)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err
