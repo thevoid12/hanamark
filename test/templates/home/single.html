@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 
 <head>
-  {{ template "analytics.html" }}
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ .PageTitle }}</title>
 </head>
 
 <body>
-  {{ template "header.html" }}
+
   <h1>This is blog single template!</h1>
   <div class="blog-post-container">
     <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  {{ template "footer.html" }}
+
 </body>
 
 </html>

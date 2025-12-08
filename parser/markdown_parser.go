@@ -33,6 +33,7 @@ func ParseMarkdownToHtml(sourceMDPath string) (string, error) {
 	return string(result), nil
 }
 
+// TODO: need to take care of fontmatter as well
 func ExtractHeadingInMarkdown(ctx context.Context, sourceMDPath string) (string, error) {
 	// Read the Markdown file
 	mdInputfile, err := os.ReadFile(sourceMDPath)

@@ -19,3 +19,5 @@
 - [ ] under same directory do parallel processing
 - [ ] we need to parse the list page
 - [ ] we can also specify the listing _md page of list page or atlead just add fontmatter if they wish
+- [ ] page title extraction logic needs to be fixed considering front matter
+- [ ] extract font matter in the md reading phase itself and discard frm the read md with the extract logic. carry fm all the way along as a method. use meta as a method if possible
