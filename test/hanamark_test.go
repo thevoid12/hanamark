@@ -75,3 +75,13 @@ func TestCopyFiles(t *testing.T) {
 		t.Error(err.Error())
 	}
 }
+
+func TestParseFrontMatter(t *testing.T) {
+	mdDir := "./test.md"
+	ctx := context.Background()
+	fm, err := parser.ParseFrontMatter(ctx, mdDir)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	fmt.Println(fm)
+}

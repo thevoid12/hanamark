@@ -18,3 +18,4 @@
 - [ ] do linting and static analysis
 - [ ] under same directory do parallel processing
 - [ ] we need to parse the list page
+- [ ] we can also specify the listing _md page of list page or atlead just add fontmatter if they wish

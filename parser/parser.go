@@ -67,7 +67,21 @@ func ParseFiles(ctx context.Context) error {
 		if !d.IsDir() {
 			templatePath = filepath.Dir(templatePath)
 			// non directory will have single templates!
-			singleTemplate = filepath.Join(templatePath, "single.html") //TODO: this needs to go to enums as well as we need to check for front matter instead as front matter is the topmost priority
+			fm, err := ParseFrontMatter(ctx, path)
+			if err != nil {
+				return err
+			}
+			templatefm := ""
+			if len(fm) != 0 {
+				if v, ok := fm[model.TEMPLATE].(string); ok {
+					templatefm = v
+				}
+			}
+			if templatefm == "" {
+				singleTemplate = filepath.Join(templatePath, "single.html")
+			} else {
+				singleTemplate = filepath.Join(templateRootPath, templatefm)
+			}
 			fmt.Println("A:", singleTemplate)
 			l.Info("A:" + singleTemplate)
 			if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() { // TODO: an updated feature of this is we also need to check fontmatter coz at times they can only add a fontmatter
@@ -79,6 +93,8 @@ func ParseFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
+
+			meta.FrontMatterMap = fm
 			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), path)
 			if err != nil {
 				return err
