@@ -8,8 +8,7 @@
 </head>
 
 <body>
-  {{ template "header.html" }}
-  <h1>This is blog single template!</h1>
+    <h1>This is a sample of custom templating!</h1>
   <div class="blog-post-container">
     <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
     <div class="blog-post-content">
@@ -17,7 +16,6 @@
     </div>
   </div>
 
-  {{ template "footer.html" }}
 </body>
 
 </html>
