@@ -89,7 +89,7 @@ func ParseFiles(ctx context.Context) error {
 			} else if err != nil {
 				return err
 			}
-			meta, err := processFile(ctx, path, singleTemplate)
+			meta, err := processFile(ctx, path, singleTemplate, fm)
 			if err != nil {
 				return err
 			}
@@ -147,7 +147,7 @@ func ParseFiles(ctx context.Context) error {
 	return nil
 }
 
-func processFile(ctx context.Context, sourcePath string, templatePath string) (*model.PageMeta, error) {
+func processFile(ctx context.Context, sourcePath string, templatePath string, fm map[string]any) (*model.PageMeta, error) {
 	// sp: ./pointA/about.md
 	//tp: ./templates/single.html
 	// result: ./pointB/about.html
@@ -200,7 +200,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string) (*
 		l.Sugar().Error("src file not found", err)
 		return nil, err
 	}
-	return parseMarkDownFile(ctx, sourcePath, basefileName, info, templatePath)
+	return parseMarkDownFile(ctx, sourcePath, basefileName, info, templatePath, fm)
 
 	// }
 
@@ -236,7 +236,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string) (*
 // 	return metaList, err
 // }
 
-func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.FileInfo, templatePath string) (meta *model.PageMeta, err error) {
+func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.FileInfo, templatePath string, fm map[string]any) (meta *model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
@@ -263,13 +263,17 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 		lastModfiedTime := info.ModTime()
 		// Generate markdown with file links
-		GeneratedHtml, err := ParseMarkdownToHtml(path)
+		generatedHtml, err := ParseMarkdownToHtml(path)
 		if err != nil {
 			l.Sugar().Error("Error parsing markdown to html", err)
 			return nil, err
 		}
 		title := ""
-		if GeneratedHtml != "" {
+		if generatedHtml != "" {
+			if len(fm) > 0 {
+				// we have to remove the frontmatter from the md else it will also be displayed along the html
+				generatedHtml = string(StripFrontMatter(ctx, []byte(generatedHtml)))
+			}
 			title, err = ExtractHeadingInMarkdown(ctx, path)
 			if err != nil {
 				return nil, err
@@ -277,24 +281,24 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		}
 
 		meta = &model.PageMeta{
-			GenHtml:     GeneratedHtml,
+			GenHtml:     generatedHtml,
 			PageName:    "",
 			PageTitle:   title,
 			Date:        lastModfiedTime,
 			DestPageDir: destPath,
 			BaseFile:    baseFiledir,
 		}
-		outputHtml, err := tmplt.RenderTemplate(ctx, meta, templatePath)
+		err = tmplt.RenderTemplate(ctx, meta, templatePath)
 		if err != nil {
 			return nil, err
 		}
-		err = tmplt.WriteIntoFile(ctx, outputHtml, meta)
-		if err != nil {
-			return nil, err
-		}
+		// err = tmplt.WriteIntoFile(ctx, outputHtml, meta)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		meta.GenHtml = "" // there is no use of storing it in memory
 		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destMDRoot"))
-		meta.DestPageDir = destPath
+		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
 
 	return meta, nil

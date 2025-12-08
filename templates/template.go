@@ -1,7 +1,6 @@
 package tmplt
 
 import (
-	"bytes"
 	"context"
 	logs "hanamark/logger"
 	"hanamark/model"
@@ -14,39 +13,60 @@ import (
 )
 
 // takes in the base template and appends the content the base template and gives us back the final html string
-func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) (string, error) {
+func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	templateKey := meta.BaseFile
+	// templateKey := meta.BaseFile
 
-	templateMap := viper.GetStringMapString("fileMeta.templateMap")
-	baseTemplatehtml, ok := templateMap[templateKey]
-	if !ok {
-		// there is no templating configured, so the input generated html is the output rendered template
-		return meta.GenHtml, nil
-	}
-
-	// path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
-	// if _, err := os.Stat(path); os.IsNotExist(err) {
-	// 	fmt.Println(err)
+	// templateMap := viper.GetStringMapString("fileMeta.templateMap")
+	// baseTemplatehtml, ok := templateMap[templateKey]
+	// if !ok {
+	// 	// there is no templating configured, so the input generated html is the output rendered template
+	// 	return meta.GenHtml, nil
 	// }
 
-	// TODO: we got to write it to the template from templatePath
-	// Parse all templates, but only execute the ones needed
-	tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
+	// // path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
+	// // if _, err := os.Stat(path); os.IsNotExist(err) {
+	// // 	fmt.Println(err)
+	// // }
+
+	// // TODO: we got to write it to the template from templatePath
+	// // Parse all templates, but only execute the ones needed
+	// tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
+	// if err != nil {
+	// 	l.Sugar().Error("Template parsing error:", err)
+	// 	return "", err
+	// }
+
+	// var buf bytes.Buffer
+	// err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written it into the html but i am retarded
+	// if err != nil {
+	// 	l.Sugar().Error("Error executing template", err)
+	// 	return "", err
+	// }
+
+	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
-		return "", err
+		return err
 	}
+	// TODO: if there is a filemeta to change the base folder name give it more preced
 
-	var buf bytes.Buffer
-	err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written it into the html but i am retarded
+	opFile := meta.DestPageDir
+	f, err := os.Create(opFile)
+	if err != nil {
+		l.Sugar().Error("file creation failed", err)
+		return err
+	}
+	defer f.Close()
+
+	err = tmpl.Execute(f, meta)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
-		return "", err
+		return err
 	}
 
-	return buf.String(), nil
+	return nil
 }
 
 // RenderBaseLinkTemplate processes files which has links of other sub files. ususlly every folder has individual files
