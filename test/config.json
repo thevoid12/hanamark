@@ -2,7 +2,7 @@
   "filepath": {
     "sourceMDRoot": "./point_A/",
     "destMDRoot": "./point_B/",
-    "templatePath": "./templates",
+    "templatePath": "./templates/",
     "sourceAssetsPath": "./point_A/assets/",
     "destAssetsPath": "./point_B/assets/",
     "hanamarkCssPath": "./assets/css/",
