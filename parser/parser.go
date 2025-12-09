@@ -71,9 +71,19 @@ func ParseFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			templatefm := ""
+
+			// Check if the file is in draft state. If so we can ignore the file and move forward
 			if len(fm) != 0 {
-				if v, ok := fm[model.TEMPLATE].(string); ok {
+				if v, ok := fm[strings.ToLower(model.DRAFT)].(bool); ok {
+					if v {
+						return nil // skip the file
+					}
+				}
+			}
+			templatefm := ""
+
+			if len(fm) != 0 {
+				if v, ok := fm[strings.ToLower(model.TEMPLATE)].(string); ok {
 					templatefm = v
 				}
 			}

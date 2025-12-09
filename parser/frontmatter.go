@@ -5,6 +5,7 @@ import (
 	"context"
 	logs "hanamark/logger"
 	"os"
+	"strings"
 
 	"github.com/adrg/frontmatter"
 )
@@ -33,6 +34,12 @@ func ParseFrontMatter(ctx context.Context, FilePath string) (fm map[string]any, 
 	if err != nil {
 		return nil, err
 	}
+
+	lower := make(map[string]any, len(fm)) // pre-size: small win
+	for k, v := range fm {
+		lower[strings.ToLower(k)] = v
+	}
+	fm = lower
 	return fm, nil
 }
 
