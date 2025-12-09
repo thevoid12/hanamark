@@ -85,7 +85,7 @@ func ParseFiles(ctx context.Context) error {
 			fmt.Println("A:", singleTemplate)
 			l.Info("A:" + singleTemplate)
 			if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() { // TODO: an updated feature of this is we also need to check fontmatter coz at times they can only add a fontmatter
-				return errors.New("single.html template is missing for the directory" + templatePath)
+				return errors.New("template " + singleTemplate + " is missing for the directory:" + templatePath)
 			} else if err != nil {
 				return err
 			}
@@ -263,7 +263,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 		lastModfiedTime := info.ModTime()
 		// Generate markdown with file links
-		generatedHtml, err := ParseMarkdownToHtml(path)
+		generatedHtml, err := ParseMarkdownToHtml(ctx, path)
 		if err != nil {
 			l.Sugar().Error("Error parsing markdown to html", err)
 			return nil, err
