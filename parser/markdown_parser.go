@@ -14,11 +14,20 @@ import (
 )
 
 // ParseMarkdownToHtml parses markdown from source directory into html string
-func ParseMarkdownToHtml(sourceMDPath string) (string, error) {
+func ParseMarkdownToHtml(ctx context.Context, sourceMDPath string) (string, error) {
 
 	mdInputfile, err := os.ReadFile(sourceMDPath)
 	if err != nil {
 		return "", err
+	}
+	fm, err := ParseFrontMatter(ctx, sourceMDPath)
+	if err != nil {
+		return "", err
+	}
+
+	if len(fm) > 0 {
+		// we got to strip it off from the markdown file
+		mdInputfile = StripFrontMatter(ctx, mdInputfile)
 	}
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.SuperSubscript | parser.Includes
@@ -39,6 +48,16 @@ func ExtractHeadingInMarkdown(ctx context.Context, sourceMDPath string) (string,
 	mdInputfile, err := os.ReadFile(sourceMDPath)
 	if err != nil {
 		return "", fmt.Errorf("error reading file: %w", err)
+	}
+
+	fm, err := ParseFrontMatter(ctx, sourceMDPath)
+	if err != nil {
+		return "", err
+	}
+
+	if len(fm) > 0 {
+		// we got to strip it off from the markdown file
+		mdInputfile = StripFrontMatter(ctx, mdInputfile)
 	}
 
 	// Configure parser extensions

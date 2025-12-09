@@ -37,7 +37,11 @@ func setTest() (context.Context, error) {
 func TestParseMarkdownToHtml(t *testing.T) {
 	mdDir := "./test.md"
 	//	destDir := "./test.html"
-	htlmString, err := parser.ParseMarkdownToHtml(mdDir)
+	ctx, err := setTest()
+	if err != nil {
+		t.Error(err)
+	}
+	htlmString, err := parser.ParseMarkdownToHtml(ctx, mdDir)
 	if err != nil {
 		t.Error(err.Error())
 	}

@@ -36,6 +36,7 @@ func ParseFrontMatter(ctx context.Context, FilePath string) (fm map[string]any, 
 	return fm, nil
 }
 
+// we have to remove the frontmatter from the md else it will also be displayed along the html
 func StripFrontMatter(ctx context.Context, data []byte) []byte {
 	rest := data
 	l := logs.GetLoggerctx(ctx)
