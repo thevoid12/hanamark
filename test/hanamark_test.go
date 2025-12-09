@@ -37,7 +37,11 @@ func setTest() (context.Context, error) {
 func TestParseMarkdownToHtml(t *testing.T) {
 	mdDir := "./test.md"
 	//	destDir := "./test.html"
-	htlmString, err := parser.ParseMarkdownToHtml(mdDir)
+	ctx, err := setTest()
+	if err != nil {
+		t.Error(err)
+	}
+	htlmString, err := parser.ParseMarkdownToHtml(ctx, mdDir)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -74,4 +78,14 @@ func TestCopyFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
+}
+
+func TestParseFrontMatter(t *testing.T) {
+	mdDir := "./test.md"
+	ctx := context.Background()
+	fm, err := parser.ParseFrontMatter(ctx, mdDir)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	fmt.Println(fm)
 }

@@ -4,24 +4,17 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>blog 2</title>
+  <title>{{ .PageTitle }}</title>
 </head>
 
 <body>
-
-  <h1>This is blog single template!</h1>
   <div class="blog-post-container">
-    <span class="blog-post-date">9 December 2025</span>
+    <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
     <div class="blog-post-content">
-      <h1 id="blog-2">blog 2</h1>
-
-<ul>
-<li>this is blog 2</li>
-</ul>
-
+    <h1>This is a sample of custom templating!</h1>
+      {{ .GenHtml }}
     </div>
   </div>
-
 
 </body>
 
