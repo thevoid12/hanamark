@@ -24,6 +24,7 @@ type ListPage struct {
 
 // Constants for All the front matter which are supported by the system
 const (
-	TEMPLATE = "template"
-	TAGS     = "tags" // TODO: needs to be implemented
+	TEMPLATE = "template" // custom templating instead of single and list if needed
+	TAGS     = "tags"     // TODO: needs to be implemented
+	DRAFT    = "draft"    // draft mode documents arent
 )
