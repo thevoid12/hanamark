@@ -28,3 +28,10 @@ const (
 	TAGS     = "tags"     // TODO: needs to be implemented
 	DRAFT    = "draft"    // draft mode documents arent
 )
+
+// Tags
+type Tags struct {
+	TagPath string
+}
+
+var TagMap map[string]Tags // key is the tag name value is the tag property
