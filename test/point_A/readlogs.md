@@ -1,5 +1,5 @@
 ---
-"tags": ["readlogs"]
+tags: ["readlogs"]
 
 ---
 

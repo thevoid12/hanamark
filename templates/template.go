@@ -119,6 +119,48 @@ func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *mod
 	return nil
 }
 
+func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName string) error {
+	l := logs.GetLoggerctx(ctx)
+	baseFolderName := tagMeta[0].TagDestPath
+
+	tmpl, err := template.ParseFiles(tagMeta[0].TagTemplatePath)
+	if err != nil {
+		l.Sugar().Error("Template parsing error:", err)
+		return err
+	}
+	// TODO: if there is a filemeta to change the base folder name give it more preced
+
+	// opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	opBaseFile := baseFolderName
+	dir := filepath.Dir(opBaseFile)
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		l.Sugar().Error("failed to create directories", err)
+		return err
+	}
+	f, err := os.Create(opBaseFile)
+	if err != nil {
+		l.Sugar().Error("file creation failed", err)
+		return err
+	}
+	defer f.Close()
+	// for _, m := range meta {
+	// 	dir, err := filepath.Rel(baseFolderName, m.DestPageDir)
+	// 	if err != nil {
+	// 		l.Sugar().Error("error in getting relative path", err)
+	// 		return err
+	// 	}
+	// 	m.DestPageDir = dir
+	// }
+	err = tmpl.Execute(f, tagMeta)
+	if err != nil {
+		l.Sugar().Error("Error executing tag meta template", err)
+		return err
+	}
+
+	return nil
+}
+
 func WriteIntoFile(ctx context.Context, input string, meta *model.PageMeta) error {
 	l := logs.GetLoggerctx(ctx)
 
