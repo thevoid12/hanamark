@@ -16,5 +16,6 @@
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
-  }
+  },
+  "tags":true
 }
