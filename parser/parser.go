@@ -129,8 +129,17 @@ func ParseFiles(ctx context.Context) error {
 						tagMap[tag] = make([]*model.Tag, 0)
 					}
 					tagMeta.FileHeading = meta.PageTitle
-					destPath := filepath.Join(sourceFilePath, meta.DestPageDir)
-					tagMeta.FileDestPath = destPath
+
+					destRootPath := viper.GetString("filepath.destMDRoot")
+					if sourceFilePath == "" {
+						return errors.New("dest root path in config is empty")
+					}
+					destPath := filepath.Join(destRootPath, meta.DestPageDir)
+					relDir, err := util.RelURL(tagMeta.TagDestPath, destPath)
+					if err != nil {
+						return err
+					}
+					tagMeta.FileDestPath = relDir
 					tagMap[tag] = append(tagMap[tag], tagMeta)
 					tagMetaList = append(tagMetaList, tagMeta)
 				}
