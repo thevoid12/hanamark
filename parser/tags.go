@@ -49,6 +49,8 @@ func ProcessTags(ctx context.Context, tag string) (tagMeta *model.Tag, err error
 		TagDestPath:     destPath,
 		TagName:         tag,
 		TagTemplatePath: tagTemplatePath,
+		FileHeading:     "", // this is filled by calculating the relative directory between the tag html and its corresponding html
+		FileDestPath:    "",
 	}, nil
 
 }
