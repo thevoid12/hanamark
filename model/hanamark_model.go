@@ -39,3 +39,9 @@ type Tag struct {
 }
 
 var TagMap map[string]Tag // key is the tag name value is the tag property
+
+type TagList struct {
+	TagName     string
+	TagDestPath string // the path that leads us to the individual tag list
+	Count       int    // the number of records with the tag name
+}
