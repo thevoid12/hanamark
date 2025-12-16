@@ -22,3 +22,9 @@
 - [x] page title extraction logic needs to be fixed considering front matter
 - [x] extract font matter in the md reading phase itself and discard frm the read md with the extract logic. 
 - [ ] carry fm all the way along as a method. use meta as a method if possible
+- [ ] we need to parse the list page
+- [ ] tags should be available only if it is enabled in config
+- [ ] // TODO: file level tagging needs to be added near the tagged blog list if they prefer it in template
+- [x] desti dir in tagging there is a bug
+- [ ] list and single is confusing give right name especially in tags
+- [ ] we need a 404 page for every messup

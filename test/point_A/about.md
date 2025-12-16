@@ -1,5 +1,6 @@
 ---
-"Draft" : true
+# "Draft" : true
+tags: ["about"]
 ---
 - hiii I am testing
 - hello 
