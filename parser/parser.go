@@ -25,14 +25,20 @@ func ParseFiles(ctx context.Context) error {
 	if sourceFilePath == "" {
 		return errors.New("sourceMDRoot is empty")
 	}
+	destRootPath := viper.GetString("filepath.destMDRoot")
+	if destRootPath == "" {
+		return errors.New("dest root path in config is empty")
+	}
 	templateRootPath := viper.GetString("Filepath.templatePath")
 	if templateRootPath == "" {
 		return errors.New("templatePath is empty")
 	}
 
 	var metaList []*model.PageMeta
-	metaMap := make(map[string][]*model.PageMeta)
-	var ListPages []*model.ListPage // this has the base file names (folder names) of the pages
+	folderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
+	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
+	tagMap := make(map[string][]*model.Tag)             // key is the tag name value is the tag property
+
 	// trying to implement a mirror tree walker
 	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -81,10 +87,19 @@ func ParseFiles(ctx context.Context) error {
 				}
 			}
 			templatefm := ""
-
+			var tags []string
 			if len(fm) != 0 {
 				if v, ok := fm[strings.ToLower(model.TEMPLATE)].(string); ok {
 					templatefm = v
+				}
+
+				raw := fm[strings.ToLower(model.TAGS)].([]interface{})
+				for i, v := range raw {
+					s, ok := v.(string)
+					if !ok {
+						return fmt.Errorf("tag at index %d is not a string", i)
+					}
+					tags = append(tags, s)
 				}
 			}
 			if templatefm == "" {
@@ -99,22 +114,47 @@ func ParseFiles(ctx context.Context) error {
 			} else if err != nil {
 				return err
 			}
+
 			meta, err := processFile(ctx, path, singleTemplate, fm)
 			if err != nil {
 				return err
 			}
+			// TODO: parse tag
+			// process tag
+			if len(tags) > 0 {
+				for _, tag := range tags {
+					tagMeta, err := ProcessTags(ctx, tag)
+					if err != nil {
+						return err
+					}
+
+					if tagMap[tag] == nil {
+						tagMap[tag] = make([]*model.Tag, 0)
+					}
+					tagMeta.FileHeading = meta.PageTitle
+
+					destPath := filepath.Join(destRootPath, meta.DestPageDir)
+					relDir, err := util.RelURL(tagMeta.TagDestPath, destPath)
+					if err != nil {
+						return err
+					}
+					tagMeta.FileDestPath = relDir
+					tagMap[tag] = append(tagMap[tag], tagMeta)
+				}
+			}
 
 			meta.FrontMatterMap = fm
+
 			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), path)
 			if err != nil {
 				return err
 			}
 			folderName := filepath.Dir(relSourcePath)
 			metaList = append(metaList, meta) // TODO: this needs to be a map of foldername and the list of files in the folder
-			if metaMap[folderName] == nil {
-				metaMap[folderName] = make([]*model.PageMeta, 0)
+			if folderMetaMap[folderName] == nil {
+				folderMetaMap[folderName] = make([]*model.PageMeta, 0)
 			}
-			metaMap[folderName] = append(metaMap[folderName], meta)
+			folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
 		} else {
 			// only if all the files in the folders are traversed and we have the metaList we can process the list template coz list is a collection of links to the files in the folder
 
@@ -145,15 +185,35 @@ func ParseFiles(ctx context.Context) error {
 	}
 	// parse the list template
 	for _, lp := range ListPages {
-		if metaMap[lp.Base] == nil {
+		if folderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
 		}
 
-		err := tmplt.RenderBaseLinkTemplate(ctx, metaMap[lp.Base], lp)
+		err := tmplt.RenderBaseLinkTemplate(ctx, folderMetaMap[lp.Base], lp)
 		if err != nil {
 			return err
 		}
 	}
+	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
+	var tagList []*model.TagList // tag list is the data needed to create the tags page which will have the list of tags
+	for tagName, tagMeta := range tagMap {
+		err := tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
+		if err != nil {
+			return err
+		}
+		tagDest, err := util.RelURL(filepath.Join(destRootPath, "tags"), tagMeta[0].TagDestPath)
+		if err != nil {
+			return err
+		}
+		tagList = append(tagList, &model.TagList{
+			TagName:     tagName,
+			TagDestPath: tagDest,
+			Count:       len(tagMeta),
+		})
+	}
+	// render tag list page (TODO: you should do all of these only if config is set true)
+	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
+	tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt)
 	return nil
 }
 
