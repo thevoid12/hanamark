@@ -29,7 +29,19 @@ func RemoveRootPartOfDir(oldpath, destMDRoot string) string {
 
 // relURL finds the relative url between a sounce folder and destination file
 func RelURL(fromFile, toFile string) (string, error) {
-	fromDir := filepath.Dir(fromFile)
+	// if it is a directory then we are already good to go
+	info, err := os.Stat(fromFile)
+	if err != nil {
+		return "", err // path does not exist or permission error
+	}
+
+	fromDir := ""
+	if info.IsDir() {
+		fromDir = fromFile
+	} else {
+		fromDir = filepath.Dir(fromFile)
+
+	}
 
 	rel, err := filepath.Rel(fromDir, toFile)
 	if err != nil {

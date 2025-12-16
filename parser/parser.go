@@ -25,6 +25,10 @@ func ParseFiles(ctx context.Context) error {
 	if sourceFilePath == "" {
 		return errors.New("sourceMDRoot is empty")
 	}
+	destRootPath := viper.GetString("filepath.destMDRoot")
+	if destRootPath == "" {
+		return errors.New("dest root path in config is empty")
+	}
 	templateRootPath := viper.GetString("Filepath.templatePath")
 	if templateRootPath == "" {
 		return errors.New("templatePath is empty")
@@ -117,7 +121,6 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// TODO: parse tag
 			// process tag
-			var tagMetaList []*model.Tag // TODO: file level tagging needs to be added
 			if len(tags) > 0 {
 				for _, tag := range tags {
 					tagMeta, err := ProcessTags(ctx, tag)
@@ -130,10 +133,6 @@ func ParseFiles(ctx context.Context) error {
 					}
 					tagMeta.FileHeading = meta.PageTitle
 
-					destRootPath := viper.GetString("filepath.destMDRoot")
-					if sourceFilePath == "" {
-						return errors.New("dest root path in config is empty")
-					}
 					destPath := filepath.Join(destRootPath, meta.DestPageDir)
 					relDir, err := util.RelURL(tagMeta.TagDestPath, destPath)
 					if err != nil {
@@ -141,7 +140,6 @@ func ParseFiles(ctx context.Context) error {
 					}
 					tagMeta.FileDestPath = relDir
 					tagMap[tag] = append(tagMap[tag], tagMeta)
-					tagMetaList = append(tagMetaList, tagMeta)
 				}
 			}
 
@@ -197,12 +195,25 @@ func ParseFiles(ctx context.Context) error {
 		}
 	}
 	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
+	var tagList []*model.TagList // tag list is the data needed to create the tags page which will have the list of tags
 	for tagName, tagMeta := range tagMap {
 		err := tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
 		if err != nil {
 			return err
 		}
+		tagDest, err := util.RelURL(filepath.Join(destRootPath, "tags"), tagMeta[0].TagDestPath)
+		if err != nil {
+			return err
+		}
+		tagList = append(tagList, &model.TagList{
+			TagName:     tagName,
+			TagDestPath: tagDest,
+			Count:       len(tagMeta),
+		})
 	}
+	// render tag list page (TODO: you should do all of these only if config is set true)
+	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
+	tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt)
 	return nil
 }
 
