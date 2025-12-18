@@ -28,3 +28,5 @@
 - [x] desti dir in tagging there is a bug
 - [ ] list and single is confusing give right name especially in tags
 - [ ] we need a 404 page for every messup
+- [ ] mandate created on date from fontmatter and throw error if that is missing
+- [ ] as of now global sorting of list items but soon sorting order should be mentioned in font matter of list files
