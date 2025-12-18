@@ -17,5 +17,6 @@
     "filepath": "hanamark.logs",
     "level": "debug"
   },
-  "tags":true
+  "tags":true,
+  "sortFilesByCreatedOn":true
 }

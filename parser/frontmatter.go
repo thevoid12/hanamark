@@ -3,7 +3,9 @@ package parser
 import (
 	"bytes"
 	"context"
+	"errors"
 	logs "hanamark/logger"
+	"hanamark/model"
 	"os"
 	"strings"
 
@@ -86,4 +88,47 @@ func StripFrontMatter(ctx context.Context, data []byte) []byte {
 
 		rest = rest[lineEnd+1:]
 	}
+}
+
+// check for a paticular font matter type exist in fontmatter
+// add the check into this whenever a new fontmatter key is added
+// you can either provide the filepath or if you have the frontmatter if you have it already
+func FrontMatterValidator(ctx context.Context, FilePath string, fm map[string]any, fmKey model.FrontMatterKey) (isPresent bool, value any, err error) {
+
+	if len(fm) == 0 {
+		fm, err = ParseFrontMatter(ctx, FilePath)
+		if err != nil {
+			return false, nil, err
+		}
+	}
+	// TODO:This is not scalable but I coudnt think of anything else immideately
+	switch fmKey {
+	case model.TEMPLATE:
+		v, ok := fm[strings.ToLower(string(model.TEMPLATE))]
+		if !ok {
+			return false, nil, nil
+		}
+		return true, v, nil
+
+	case model.DRAFT:
+		v, ok := fm[strings.ToLower(string(model.DRAFT))]
+		if !ok {
+			return false, nil, nil
+		}
+		return true, v, nil
+	case model.TAGS:
+		v, ok := fm[strings.ToLower(string(model.TAGS))]
+		if !ok {
+			return false, nil, nil
+		}
+		return true, v, nil
+	case model.DATE:
+		v, ok := fm[strings.ToLower(string(model.DATE))]
+		if !ok {
+			return false, nil, nil
+		}
+		return true, v, nil
+	}
+
+	return false, nil, errors.New("not supported fontmatter key type!")
 }

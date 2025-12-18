@@ -6,6 +6,7 @@ import (
 	"hanamark/model"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -71,7 +72,7 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath stri
 
 // RenderBaseLinkTemplate processes files which has links of other sub files. ususlly every folder has individual files
 // and the files are linked if it is a sub folder!
-func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *model.ListPage) error {
+func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp *model.ListPage) error {
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := lp.Base
 	// templateKey := basefileName
@@ -93,8 +94,22 @@ func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *mod
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
-	// TODO: if there is a filemeta to change the base folder name give it more preced
 
+	if len(metaList) > 1 {
+		// Sorting based on Date field in desc order so that latest record is always at the top
+		isSortFileByCreatedOn := viper.GetBool("sortFileByCreatedOn")
+		if isSortFileByCreatedOn {
+			sort.SliceStable(metaList, func(i, j int) bool {
+				return metaList[i].CreatedDate.After(metaList[j].CreatedDate)
+			})
+		} else { // sort by updated date
+			sort.SliceStable(metaList, func(i, j int) bool {
+				return metaList[i].UpdatedDate.After(metaList[j].UpdatedDate)
+			})
+		}
+	}
+
+	// TODO: if there is a filemeta to change the base folder name give it more preced
 	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
 	f, err := os.Create(opBaseFile)
 	if err != nil {
@@ -102,7 +117,7 @@ func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *mod
 		return err
 	}
 	defer f.Close()
-	for _, m := range meta {
+	for _, m := range metaList {
 		dir, err := filepath.Rel(baseFolderName, m.DestPageDir)
 		if err != nil {
 			l.Sugar().Error("error in getting relative path", err)
@@ -110,7 +125,7 @@ func RenderBaseLinkTemplate(ctx context.Context, meta []*model.PageMeta, lp *mod
 		}
 		m.DestPageDir = dir
 	}
-	err = tmpl.Execute(f, meta)
+	err = tmpl.Execute(f, metaList)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err

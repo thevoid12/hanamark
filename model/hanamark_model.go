@@ -9,7 +9,8 @@ type PageMeta struct {
 	ReadTime       int    // total time to read that page
 	PageName       string
 	PageTitle      string
-	Date           time.Time
+	CreatedDate    time.Time
+	UpdatedDate    time.Time
 	DestPageDir    string
 	FrontMatterMap map[string]any // will have all the frontmatter from the md file
 	BaseFile       string         // base file is the index file for each subfiles if exists or the root file itself eg blogs.html,index.html,projects.html etc
@@ -23,10 +24,15 @@ type ListPage struct {
 }
 
 // Constants for All the front matter which are supported by the system
+// FrontMatterKey represents a supported front matter field
+type FrontMatterKey string
+
+// Supported front matter keys
 const (
-	TEMPLATE = "template" // custom templating instead of single and list if needed
-	TAGS     = "tags"     // TODO: needs to be implemented
-	DRAFT    = "draft"    // draft mode documents arent
+	TEMPLATE FrontMatterKey = "template"   // custom templating instead of single and list if needed
+	TAGS     FrontMatterKey = "tags"       // tag list for the document
+	DRAFT    FrontMatterKey = "draft"      // draft mode documents are not published
+	DATE     FrontMatterKey = "created_on" // date at which the md file is first created
 )
 
 // Tags
@@ -44,4 +50,30 @@ type TagList struct {
 	TagName     string
 	TagDestPath string // the path that leads us to the individual tag list
 	Count       int    // the number of records with the tag name
+}
+
+var TimeLayouts = []string{
+	time.RFC3339,     // 2006-01-02T15:04:05Z07:00
+	time.RFC3339Nano, // 2006-01-02T15:04:05.999999999Z07:00
+
+	// Date only
+	"2006-01-02", // 2024-06-01
+	"2006/01/02", // 2024/06/01
+
+	// Date + time (no timezone)
+	"2006-01-02 15:04",    // 2024-06-01 10:30
+	"2006-01-02 15:04:05", // 2024-06-01 10:30:45
+
+	// Human-friendly formats
+	"02-01-2006",      // 01-06-2024 (DD-MM-YYYY)
+	"02/01/2006",      // 01/06/2024
+	"02 Jan 2006",     // 01 Jun 2024
+	"02 January 2006", // 01 June 2024
+
+	// With time + words
+	"02 Jan 2006 15:04",     // 01 Jun 2024 10:30
+	"02 January 2006 15:04", // 01 June 2024 10:30
+
+	// Filename-style dates (common in SSGs)
+	"20060102", // 20240601
 }
