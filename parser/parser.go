@@ -78,29 +78,49 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 
+			isPresent, _, err := FrontMatterValidator(ctx, "", fm, model.DATE)
+			if err != nil {
+				return err
+			}
+			if !isPresent {
+				return errors.New("cannot render file without created_on data in frontmatter.file:" + path)
+			}
 			// Check if the file is in draft state. If so we can ignore the file and move forward
 			if len(fm) != 0 {
-				if v, ok := fm[strings.ToLower(model.DRAFT)].(bool); ok {
-					if v {
-						return nil // skip the file
-					}
+				isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.DRAFT)
+				if err != nil {
+					return err
+				}
+				if isPresent && val.(bool) {
+					return nil // skip the file
 				}
 			}
 			templatefm := ""
 			var tags []string
 			if len(fm) != 0 {
-				if v, ok := fm[strings.ToLower(model.TEMPLATE)].(string); ok {
-					templatefm = v
+				isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.TEMPLATE)
+				if err != nil {
+					return err
+				}
+				if isPresent {
+					templatefm = val.(string)
 				}
 
-				raw := fm[strings.ToLower(model.TAGS)].([]interface{})
-				for i, v := range raw {
-					s, ok := v.(string)
-					if !ok {
-						return fmt.Errorf("tag at index %d is not a string", i)
-					}
-					tags = append(tags, s)
+				isPresent, val, err = FrontMatterValidator(ctx, "", fm, model.TAGS)
+				if err != nil {
+					return err
 				}
+				if isPresent {
+					raw := val.([]interface{})
+					for i, v := range raw {
+						s, ok := v.(string)
+						if !ok {
+							return fmt.Errorf("tag at index %d is not a string", i)
+						}
+						tags = append(tags, s)
+					}
+				}
+
 			}
 			if templatefm == "" {
 				singleTemplate = filepath.Join(templatePath, "single.html")
@@ -184,6 +204,7 @@ func ParseFiles(ctx context.Context) error {
 		return err
 	}
 	// parse the list template
+
 	for _, lp := range ListPages {
 		if folderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
@@ -271,9 +292,6 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 		return nil, err
 	}
 	return parseMarkDownFile(ctx, sourcePath, basefileName, info, templatePath, fm)
-
-	// }
-
 }
 
 // TODO: this needs to be removed and merged into our new parser mirror tree walker as we are already walking there
@@ -332,6 +350,18 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		}
 
 		lastModfiedTime := info.ModTime()
+
+		isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.DATE)
+		if err != nil {
+			return nil, err
+		}
+		if !isPresent {
+			return nil, errors.New("Cannot render file without created_on data in frontmatter!")
+		}
+		createdOn, err := util.ParseTimeFlexible(val.(string))
+		if err != nil {
+			return nil, err
+		}
 		// Generate markdown with file links
 		generatedHtml, err := ParseMarkdownToHtml(ctx, path)
 		if err != nil {
@@ -354,7 +384,8 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			GenHtml:     generatedHtml,
 			PageName:    "",
 			PageTitle:   title,
-			Date:        lastModfiedTime,
+			CreatedDate: createdOn,
+			UpdatedDate: lastModfiedTime,
 			DestPageDir: destPath,
 			BaseFile:    baseFiledir,
 		}
