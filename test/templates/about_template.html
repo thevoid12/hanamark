@@ -10,7 +10,7 @@
 <body>
 
   <div class="blog-post-container">
-    <span class="blog-post-date">{{ .Date.Format "2 January 2006" }}</span>
+    <span class="blog-post-date">Created: {{ .CreatedDate.Format "2 January 2006" }} Updated: {{ .UpdatedDate.Format "2 January 2006" }}</span>
     <div class="blog-post-content">
       {{ .GenHtml }}
     </div>

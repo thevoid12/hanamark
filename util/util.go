@@ -2,10 +2,12 @@ package util
 
 import (
 	"fmt"
+	"hanamark/model"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func CleanSpaces(s string) string {
@@ -115,4 +117,13 @@ func copyFile(src, dst string) error {
 	}
 
 	return nil
+}
+
+func ParseTimeFlexible(s string) (time.Time, error) {
+	for _, layout := range model.TimeLayouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("invalid date format: %s", s)
 }
