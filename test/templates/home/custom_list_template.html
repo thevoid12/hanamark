@@ -3,7 +3,7 @@
   <div class="leftborder"></div>
   <title> Void</title>
   <div class="page">
-    <!--  -->
+    <!-- {{/* template "header.html" */}} -->
     <div class="cont">
       <div class="desc">
         <div class="description">
@@ -13,21 +13,15 @@
         <h1>Custom list template</h1>
         <div class="blog">
           <ol>
-            
-            <li><a href="blog_1.html">blog 1</a></li>
+            {{ range .}}
+            <li><a href="{{.DestPageDir}}">{{.PageTitle}}</a></li>
             <br>
-            
-            <li><a href="blog_2.html">blog 2</a></li>
-            <br>
-            
-            <li><a href="blog_3.html">blog 3</a></li>
-            <br>
-            
+            {{end}}
           </ol>
         </div>
       </div>
     </div>
   </div>
-  <!-- -->
+  <!-- {{/* template "footer.html" */}}-->
 
 </div>

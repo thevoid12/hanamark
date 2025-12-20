@@ -17,6 +17,14 @@
     "filepath": "hanamark.logs",
     "level": "debug"
   },
+  "rss":{
+    "isRssEnabled":true,
+    "title":"void blog",
+    "link":"https://thisisvoid.in",
+    "authorName":"void",
+    "authorEmailID":"thevoidddd1@gmail.com",
+    "rssOutputName":"feed.xml"
+  },
   "tags":true,
   "sortFilesByCreatedOn":true
 }
