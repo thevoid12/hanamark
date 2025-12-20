@@ -1,8 +1,7 @@
-
+{{ define "main" }}
 <div class="wrapper">
   <div class="topborder"></div>
   <div class="leftborder"></div>
-  <title> Void</title>
   <div class="page">
     <!-- {{/* template "header.html" */}} -->
     <div class="cont">
@@ -14,7 +13,7 @@
 
         <div class="blog">
           <ol>
-            {{ range .}}
+            {{ range .List}}
             <li><a href="{{.DestPageDir}}">{{.PageTitle}}</a></li>
             <br>
             {{end}}
@@ -26,3 +25,4 @@
   <!-- {{/* template "footer.html" */}}-->
 
 </div>
+{{ end }}

@@ -6,7 +6,8 @@
     "sourceAssetsPath": "../markdown-blog/assets/",
     "destAssetsPath": "../thisisvoid/assets/",
     "hanamarkCssPath": "./assets/css/",
-    "destCssPath": "../thisisvoid/assets/css/"
+    "destCssPath": "../thisisvoid/assets/css/",
+    "faviconPath": "/assets/images/favicon.ico"
   },
   "userMeta": {
     "by": "void",
