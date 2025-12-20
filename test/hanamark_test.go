@@ -27,7 +27,15 @@ func setTest() (context.Context, error) {
 		return ctx, err
 	}
 	ctx = logs.SetLoggerctx(ctx, l)
-	_, err = template.ParseGlob("./templates/*.html")
+	ctx = logs.SetLoggerctx(ctx, l)
+	
+	funcMap := template.FuncMap{
+		"config": func(key string) any {
+			return viper.Get(key)
+		},
+	}
+
+	_, err = template.New("").Funcs(funcMap).ParseGlob("./templates/*.html")
 	if err != nil {
 		return ctx, err
 	}

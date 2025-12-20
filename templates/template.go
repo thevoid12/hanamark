@@ -13,45 +13,66 @@ import (
 	"github.com/spf13/viper"
 )
 
+func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Template, string, error) {
+	// l := logs.GetLoggerctx(ctx)
+	templateRoot := viper.GetString("filepath.templatePath")
+	basePath := filepath.Join(templateRoot, "base.html")
+
+	funcMap := template.FuncMap{
+		"config": func(key string) any {
+			return viper.Get(key)
+		},
+	}
+
+	tmpl := template.New("").Funcs(funcMap)
+	var err error
+
+	// Check if base.html exists
+	useBase := false
+	if _, err := os.Stat(basePath); err == nil {
+		useBase = true
+	}
+
+	filesToParse := []string{}
+	// strict ordering: base first, then specific
+	if useBase {
+		filesToParse = append(filesToParse, basePath)
+	}
+	
+	// Always parse the target template
+	filesToParse = append(filesToParse, targetTemplatePath)
+	
+	// Also parse partials? For now, we only parse base and target. 
+	// If the user has separate header.html and base uses it, we should parse it too.
+	// But simply ParseFiles(base, target) is the "minimal" approach for "baseof" pattern. 
+	// We will assume header/footer logic is IN base or inlined for this task, 
+	// unless we find header.html in the dir, in which case we might want to include "shared" templates.
+	// For safety against conflicts, let's just parse base + target. 
+	
+	tmpl, err = tmpl.ParseFiles(filesToParse...)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Execution name: if using base, we usually execute "base.html" (or "base"). 
+	// If base defines 'block "main" .', and target 'define "main"', 
+	// executing "base.html" renders the shell with the target's main.
+	execName := filepath.Base(targetTemplatePath)
+	if useBase {
+		execName = "base.html"
+	}
+	return tmpl, execName, nil
+}
+
 // takes in the base template and appends the content the base template and gives us back the final html string
 func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	// templateKey := meta.BaseFile
-
-	// templateMap := viper.GetStringMapString("fileMeta.templateMap")
-	// baseTemplatehtml, ok := templateMap[templateKey]
-	// if !ok {
-	// 	// there is no templating configured, so the input generated html is the output rendered template
-	// 	return meta.GenHtml, nil
-	// }
-
-	// // path := filepath.Join(viper.GetString("filepath.templatePath"), baseTemplatehtml)
-	// // if _, err := os.Stat(path); os.IsNotExist(err) {
-	// // 	fmt.Println(err)
-	// // }
-
-	// // TODO: we got to write it to the template from templatePath
-	// // Parse all templates, but only execute the ones needed
-	// tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
-	// if err != nil {
-	// 	l.Sugar().Error("Template parsing error:", err)
-	// 	return "", err
-	// }
-
-	// var buf bytes.Buffer
-	// err = tmpl.ExecuteTemplate(&buf, baseTemplatehtml, meta) // i could have directly written it into the html but i am retarded
-	// if err != nil {
-	// 	l.Sugar().Error("Error executing template", err)
-	// 	return "", err
-	// }
-
-	tmpl, err := template.ParseFiles(templatePath)
+	tmpl, execName, err := getTemplate(ctx, templatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
-	// TODO: if there is a filemeta to change the base folder name give it more preced
 
 	opFile := meta.DestPageDir
 	f, err := os.Create(opFile)
@@ -61,7 +82,7 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath stri
 	}
 	defer f.Close()
 
-	err = tmpl.Execute(f, meta)
+	err = tmpl.ExecuteTemplate(f, execName, meta)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err
@@ -75,24 +96,9 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath stri
 func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp *model.ListPage) error {
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := lp.Base
-	// templateKey := basefileName
-
-	// templateMap := viper.GetStringMapString("fileMeta.templateMap")
-	// baseTemplatehtml, ok := templateMap[templateKey]
-	// if !ok {
-	// 	return errors.New("base template not configured")
-	// }
-
-	// Parse all templates, but only execute the ones needed
-	// tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
-	// if err != nil {
-	// 	l.Sugar().Error("Template parsing error:", err)
-	// 	return err
-	// }
 	tmptPath := lp.TempPath
 
-	// check if the indexpage exists. if so
-	tmpl, err := template.ParseFiles(tmptPath)
+	tmpl, execName, err := getTemplate(ctx, tmptPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -128,7 +134,13 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 		}
 		m.DestPageDir = dir
 	}
-	err = tmpl.Execute(f, metaList)
+	// wrap data for base template
+	data := map[string]interface{}{
+		"PageTitle": baseFolderName,
+		"List":      metaList,
+	}
+
+	err = tmpl.ExecuteTemplate(f, execName, data)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err
@@ -140,21 +152,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tmptPath string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	// templateKey := basefileName
-
-	// templateMap := viper.GetStringMapString("fileMeta.templateMap")
-	// baseTemplatehtml, ok := templateMap[templateKey]
-	// if !ok {
-	// 	return errors.New("base template not configured")
-	// }
-
-	// Parse all templates, but only execute the ones needed
-	// tmpl, err := template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
-	// if err != nil {
-	// 	l.Sugar().Error("Template parsing error:", err)
-	// 	return err
-	// }
-	tmpl, err := template.ParseFiles(tmptPath)
+	tmpl, execName, err := getTemplate(ctx, tmptPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -175,7 +173,13 @@ func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tm
 	}
 	defer f.Close()
 
-	err = tmpl.Execute(f, taglist)
+	// wrap data for base template
+	data := map[string]interface{}{
+		"PageTitle": "Tags",
+		"List":      taglist,
+	}
+
+	err = tmpl.ExecuteTemplate(f, execName, data)
 	if err != nil {
 		l.Sugar().Error("Error executing template", err)
 		return err
@@ -188,7 +192,7 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := tagMeta[0].TagDestPath
 
-	tmpl, err := template.ParseFiles(tagMeta[0].TagTemplatePath)
+	tmpl, execName, err := getTemplate(ctx, tagMeta[0].TagTemplatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -210,7 +214,13 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	}
 	defer f.Close()
 
-	err = tmpl.Execute(f, tagMeta)
+	// wrap data for base template
+	data := map[string]interface{}{
+		"PageTitle": tagName,
+		"List":      tagMeta,
+	}
+
+	err = tmpl.ExecuteTemplate(f, execName, data)
 	if err != nil {
 		l.Sugar().Error("Error executing tag meta template", err)
 		return err
