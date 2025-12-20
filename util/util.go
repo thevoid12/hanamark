@@ -1,10 +1,14 @@
 package util
 
 import (
+	"context"
 	"fmt"
+	logs "hanamark/logger"
 	"hanamark/model"
 	"io"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -97,6 +101,31 @@ func CopyAssets(sourceDir, destDir string) error {
 	return nil
 }
 
+func WriteIntoFile(ctx context.Context, content string, filePath string) error {
+	l := logs.GetLoggerctx(ctx)
+
+	dir := filepath.Dir(filePath)
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		l.Sugar().Error("failed to create directories", err)
+		return err
+	}
+	f, err := os.Create(filePath)
+	if err != nil {
+		l.Sugar().Error("file creation failed", err)
+		return err
+	}
+
+	defer f.Close()
+	_, err = f.Write([]byte(content))
+	if err != nil {
+		l.Sugar().Error("writing into the file failed", err)
+		return err
+	}
+
+	return nil
+}
+
 // copyFile copies a file from src to dst, replacing if it exists
 func copyFile(src, dst string) error {
 	srcFile, err := os.Open(src)
@@ -126,4 +155,14 @@ func ParseTimeFlexible(s string) (time.Time, error) {
 		}
 	}
 	return time.Time{}, fmt.Errorf("invalid date format: %s", s)
+}
+
+func JoinURL(baseUrl, p string) (string, error) {
+	u, err := url.Parse(baseUrl)
+	if err != nil {
+		return "", err
+	}
+
+	u.Path = path.Join(u.Path, p)
+	return u.String(), nil
 }

@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gorilla/feeds"
 	"github.com/spf13/viper"
 )
 
@@ -36,6 +37,7 @@ func ParseFiles(ctx context.Context) error {
 
 	var metaList []*model.PageMeta
 	folderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
+	indexFmMap := make(map[string]model.FrontMatter)    // front matter of _index.md page
 	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
 	tagMap := make(map[string][]*model.Tag)             // key is the tag name value is the tag property
 
@@ -69,8 +71,20 @@ func ParseFiles(ctx context.Context) error {
 		// if the path is a file then we need to get the parent directory
 		singleTemplate := ""
 		listTemplate := ""
-
-		if !d.IsDir() {
+		if !d.IsDir() && d.Name() == "_index.md" {
+			fm, err := ParseFrontMatter(ctx, path)
+			if err != nil {
+				return err
+			}
+			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), path)
+			if err != nil {
+				return err
+			}
+			folderName := filepath.Dir(relSourcePath)
+			if indexFmMap[folderName] == nil && fm != nil {
+				indexFmMap[folderName] = fm
+			}
+		} else if !d.IsDir() {
 			templatePath = filepath.Dir(templatePath)
 			// non directory will have single templates!
 			fm, err := ParseFrontMatter(ctx, path)
@@ -204,15 +218,52 @@ func ParseFiles(ctx context.Context) error {
 		return err
 	}
 	// parse the list template
-
+	rssFeedItems := []*feeds.Item{}
 	for _, lp := range ListPages {
 		if folderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
 		}
+		if indexFmMap[lp.Base] != nil {
+			// get the custom template name from the map
+			isPresent, val, err := FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
+			if err != nil {
+				return err
+			}
+			if isPresent {
+				lp.TempPath = filepath.Join(templateRootPath, val.(string)) // custom template instead of list.html
+			}
 
+			isRssEnabled := viper.GetBool("rss.isRssEnabled")
+			if isRssEnabled {
+				isPresent, _, err = FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.RSS)
+				if err != nil {
+					return err
+				}
+				if isPresent { // get rss feed items
+					items, err := GetRssFeedItems(folderMetaMap[lp.Base])
+					if err != nil {
+						return err
+					}
+					rssFeedItems = append(rssFeedItems, items...)
+				}
+			}
+		}
 		err := tmplt.RenderBaseLinkTemplate(ctx, folderMetaMap[lp.Base], lp)
 		if err != nil {
 			return err
+		}
+		// if rss is enabled in Frontmatter we got to render that
+		if len(rssFeedItems) > 0 {
+			// parse rss for the list
+			feed, err := GetRssFeed()
+			if err != nil {
+				return err
+			}
+			feed.Items = rssFeedItems
+			err = GenerateRss(ctx, feed)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
@@ -356,7 +407,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			return nil, err
 		}
 		if !isPresent {
-			return nil, errors.New("Cannot render file without created_on data in frontmatter!")
+			return nil, errors.New("cannot render file without created_on data in frontmatter")
 		}
 		createdOn, err := util.ParseTimeFlexible(val.(string))
 		if err != nil {
@@ -397,7 +448,6 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		// if err != nil {
 		// 	return nil, err
 		// }
-		meta.GenHtml = "" // there is no use of storing it in memory
 		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destMDRoot"))
 		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
