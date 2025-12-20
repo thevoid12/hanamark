@@ -23,6 +23,9 @@ type ListPage struct {
 	TempPath string
 }
 
+// after parsing the frontmatter it returns a map of this type
+type FrontMatter map[string]any
+
 // Constants for All the front matter which are supported by the system
 // FrontMatterKey represents a supported front matter field
 type FrontMatterKey string
@@ -33,6 +36,7 @@ const (
 	TAGS     FrontMatterKey = "tags"       // tag list for the document
 	DRAFT    FrontMatterKey = "draft"      // draft mode documents are not published
 	DATE     FrontMatterKey = "created_on" // date at which the md file is first created
+	RSS      FrontMatterKey = "rss"        // rss support
 )
 
 // Tags

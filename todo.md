@@ -30,3 +30,5 @@
 - [ ] we need a 404 page for every messup
 - [ ] mandate created on date from fontmatter and throw error if that is missing
 - [ ] as of now global sorting of list items but soon sorting order should be mentioned in font matter of list files
+- [ ] add a panic recover in main incase something panics!
+- [ ] remove all the creates and call util.writeinto file
