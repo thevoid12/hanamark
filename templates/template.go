@@ -89,7 +89,10 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	// 	l.Sugar().Error("Template parsing error:", err)
 	// 	return err
 	// }
-	tmpl, err := template.ParseFiles(lp.TempPath)
+	tmptPath := lp.TempPath
+
+	// check if the indexpage exists. if so
+	tmpl, err := template.ParseFiles(tmptPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -210,25 +213,6 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	err = tmpl.Execute(f, tagMeta)
 	if err != nil {
 		l.Sugar().Error("Error executing tag meta template", err)
-		return err
-	}
-
-	return nil
-}
-
-func WriteIntoFile(ctx context.Context, input string, meta *model.PageMeta) error {
-	l := logs.GetLoggerctx(ctx)
-
-	f, err := os.Create(meta.DestPageDir)
-	if err != nil {
-		l.Sugar().Error("file creation failed", err)
-		return err
-	}
-
-	defer f.Close()
-	_, err = f.Write([]byte(input))
-	if err != nil {
-		l.Sugar().Error("writing into the file failed", err)
 		return err
 	}
 
