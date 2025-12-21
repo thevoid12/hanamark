@@ -1,5 +1,5 @@
 .DS_Store
 templates/v_project_template.html
-hanamark
+/hanamark
 *.logs
 /configurables/

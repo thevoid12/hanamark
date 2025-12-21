@@ -230,3 +230,14 @@ func copyEmbedFile(efs embed.FS, src, dst string) error {
 	_, err = io.Copy(out, in)
 	return err
 }
+
+func DirExists(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err // permission / IO error
+	}
+	return fi.IsDir(), nil
+}
