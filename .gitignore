@@ -2,3 +2,4 @@
 templates/v_project_template.html
 hanamark
 *.logs
+/configurables/

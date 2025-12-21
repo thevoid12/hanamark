@@ -1,0 +1,28 @@
+{{ define "main" }}
+<div class="wrapper">
+  <div class="topborder"></div>
+  <div class="leftborder"></div>
+  <div class="page">
+    <!-- {{/* template "header.html" */}} -->
+    <div class="cont">
+      <div class="desc">
+        <div class="description">
+          <p>
+          </p>
+        </div>
+        <h1>Custom list template</h1>
+        <div class="blog">
+          <ol>
+            {{ range .List}}
+            <li><a href="{{.DestPageDir}}">{{.PageTitle}}</a></li>
+            <br>
+            {{end}}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- {{/* template "footer.html" */}}-->
+
+</div>
+{{ end }}
