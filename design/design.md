@@ -14,3 +14,20 @@
 ## v1
 - [ ] new folder structure and configuration
 - [ ] 
+
+# configurables ie outside the binary:
+    - [ ] assets
+        - [ ] css ->styles.css
+        - [ ] js
+        - [ ] images ->favicon.ico
+    - [ ] templates
+    - [ ] point_A
+    - [ ] config.json
+- so binary shouldnt have these inside it
+- if they run hanamark init we will create all these files and folders for sample
+- hanamark run ./binary
+- hanamark int ./binary
+- a man page to explain the commands
+
+
+- config always lies in /configurable

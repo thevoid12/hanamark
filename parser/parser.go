@@ -6,7 +6,7 @@ import (
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
-	tmplt "hanamark/templates"
+	tmplt "hanamark/template"
 	"hanamark/util"
 	"io/fs"
 	"os"

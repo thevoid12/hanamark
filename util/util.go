@@ -2,10 +2,12 @@ package util
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"io"
+	"io/fs"
 	"net/url"
 	"os"
 	"path"
@@ -27,7 +29,6 @@ func RemoveExtentionFromFile(path string) string {
 func RemoveRootPartOfDir(oldpath, destMDRoot string) string {
 	// Normalize destMDRoot to match the format of originalPath
 	normalizedRoot := strings.TrimPrefix(destMDRoot, "./")
-
 	res := filepath.Join(".", strings.TrimPrefix(oldpath, normalizedRoot))
 
 	return res
@@ -168,4 +169,75 @@ func JoinURL(baseUrl, p string) (string, error) {
 
 	u.Path = path.Join(u.Path, p)
 	return u.String(), nil
+}
+
+func EnsureEmptyDir(path string) error {
+	entries, err := os.ReadDir(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if len(entries) > 0 {
+		return fmt.Errorf("directory not empty: %s", path)
+	}
+	return os.MkdirAll(path, 0755)
+}
+
+func CopyEmbedDir(efs embed.FS, src, dst string) error {
+	return fs.WalkDir(efs, src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.Name() == "embed.go" {
+			return nil
+		}
+
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		if rel == "." {
+			return nil
+		}
+
+		target := filepath.Join(dst, rel)
+
+		if d.IsDir() {
+			return os.MkdirAll(target, 0755)
+		}
+
+		return copyEmbedFile(efs, path, target)
+	})
+}
+
+func copyEmbedFile(efs embed.FS, src, dst string) error {
+	in, err := efs.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	return err
+}
+
+func DirExists(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err // permission / IO error
+	}
+	return fi.IsDir(), nil
 }

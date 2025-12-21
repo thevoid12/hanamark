@@ -1,7 +1,7 @@
 build:
-	echo "building..."
+	echo "building executable..."
 	go mod tidy
-	go build -o hanamark
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hanamark
 
 run: build
 	./hanamark
