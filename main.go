@@ -9,6 +9,7 @@ import (
 	"hanamark/parser"
 	"hanamark/util"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -32,7 +33,7 @@ func main() {
 	if len(args) == 0 {
 		return
 	}
-
+	fmt.Println("hiiii homies this is hanamark")
 	command := args[0]
 	command = strings.ToLower(command)
 
@@ -43,42 +44,39 @@ func main() {
 		}
 		return
 	}
+	exists, err := util.DirExists("./configurables")
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
+	if !exists {
+		log.Println("hanamark not properly initialized run ./hanamark init")
+		return
+	}
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AddConfigPath("./configurables") // path to look for the config file in
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+			log.Println("there is a error in the path of config file", err)
+		} else {
+			// Config file was found but another error was produced
+			log.Println("error laoding config file from viper", err)
+		}
+	}
+
+	l, err := logs.InitializeLogger()
+	if err != nil {
+		log.Println("error initializing logger", err)
+	}
+
+	ctx := context.Background()
+	ctx = logs.SetLoggerctx(ctx, l)
 	if command == "build" {
-
-		fmt.Println("hiiii homies this is hanamark")
-		exists, err := util.DirExists("./configurables")
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		if !exists {
-			log.Println("hanamark not properly initialized run ./hanamark init")
-			return
-		}
-		viper.SetConfigName("config")
-		viper.SetConfigType("json")
-		viper.AddConfigPath("./configurables") // path to look for the config file in
-
-		err = viper.ReadInConfig()
-		if err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				// Config file not found; ignore error if desired
-				log.Println("there is a error in the path of config file", err)
-			} else {
-				// Config file was found but another error was produced
-				log.Println("error laoding config file from viper", err)
-			}
-		}
-
-		l, err := logs.InitializeLogger()
-		if err != nil {
-			log.Println("error initializing logger", err)
-		}
-
-		ctx := context.Background()
-		ctx = logs.SetLoggerctx(ctx, l)
 
 		// _, err = template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
 		// if err != nil {
@@ -105,6 +103,15 @@ func main() {
 		}
 		l.Info("::::::::::::::::::conversion successful:::::::::::::::::::::::::::::::::::::::")
 	}
+	if command == "serve" {
+		servePort := viper.GetString("servePort")
+		if servePort == "" {
+			servePort = "3000"
+		}
+		l.Info("::::::::::::::::::::starting local server at port localhost" + servePort + ":::::::::::::::::::::::::::")
+		dest := viper.GetString("filepath.destMDRoot")
+		serveStaticFiles(dest, servePort)
+	}
 }
 
 func Init(dst string) error {
@@ -113,4 +120,15 @@ func Init(dst string) error {
 	}
 
 	return util.CopyEmbedDir(configurables.FS, ".", dst)
+}
+
+func serveStaticFiles(dir string, port string) {
+	fs := http.FileServer(http.Dir(dir))
+	http.Handle("/", fs)
+
+	log.Print("Listening on :3000...")
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
