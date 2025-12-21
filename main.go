@@ -44,6 +44,12 @@ func main() {
 		}
 		return
 	}
+	
+	if command == "help" {
+		printHelp()
+		return
+	}
+	
 	exists, err := util.DirExists("./configurables")
 	if err != nil {
 		log.Println(err)
@@ -102,8 +108,7 @@ func main() {
 			return
 		}
 		l.Info("::::::::::::::::::conversion successful:::::::::::::::::::::::::::::::::::::::")
-	}
-	if command == "serve" {
+	} else if command == "serve" {
 		servePort := viper.GetString("servePort")
 		if servePort == "" {
 			servePort = "3000"
@@ -111,6 +116,9 @@ func main() {
 		l.Info("::::::::::::::::::::starting local server at port localhost" + servePort + ":::::::::::::::::::::::::::")
 		dest := viper.GetString("filepath.destMDRoot")
 		serveStaticFiles(dest, servePort)
+	} else {
+		fmt.Printf("Unknown command: %s\n", command)
+		fmt.Println("Run 'hanamark help' for usage information")
 	}
 }
 
@@ -120,6 +128,33 @@ func Init(dst string) error {
 	}
 
 	return util.CopyEmbedDir(configurables.FS, ".", dst)
+}
+
+func printHelp() {
+	fmt.Println("Hanamark - A static site generator")
+	fmt.Println()
+	fmt.Println("Usage:")
+	fmt.Println("  hanamark <command>")
+	fmt.Println()
+	fmt.Println("Available Commands:")
+	fmt.Println("  init     Initialize a new hanamark project in the current directory")
+	fmt.Println("           Creates a 'configurables' directory with default templates and config")
+	fmt.Println()
+	fmt.Println("  build    Build the static site from markdown files")
+	fmt.Println("           Converts markdown to HTML using templates and copies assets")
+	fmt.Println("           Requires: ./configurables directory with config.json")
+	fmt.Println()
+	fmt.Println("  serve    Start a local development server")
+	fmt.Println("           Serves the generated site from the output directory")
+	fmt.Println("           Default port: 3000 (configurable via 'servePort' in config.json)")
+	fmt.Println()
+	fmt.Println("  help     Display this help message")
+	fmt.Println()
+	fmt.Println("Examples:")
+	fmt.Println("  ./hanamark init              # Initialize new project")
+	fmt.Println("  ./hanamark build             # Build the site")
+	fmt.Println("  ./hanamark serve             # Start local server")
+	fmt.Println()
 }
 
 func serveStaticFiles(dir string, port string) {
