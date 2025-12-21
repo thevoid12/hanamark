@@ -1,13 +1,13 @@
 {
   "filepath": {
-    "sourceMDRoot": "../markdown-blog/",
-    "destMDRoot": "../thisisvoid/",
+    "sourceMDRoot": "./point_A",
+    "destMDRoot": "./point_B",
     "templatePath": "./templates",
-    "sourceAssetsPath": "../markdown-blog/assets/",
-    "destAssetsPath": "../thisisvoid/assets/",
+    "sourceAssetsPath": "./assets/",
+    "destAssetsPath": "/.point_A/assets/",
     "hanamarkCssPath": "./assets/css/",
-    "destCssPath": "../thisisvoid/assets/css/",
-    "faviconPath": "/assets/images/favicon.ico"
+    "destCssPath": "../point_B/assets/css/",
+    "faviconPath": "./assets/images/favicon.ico"
   },
   "userMeta": {
     "by": "void",

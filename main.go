@@ -10,9 +10,7 @@ import (
 	"hanamark/util"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/spf13/viper"
 )
@@ -47,12 +45,23 @@ func main() {
 	}
 
 	if command == "build" {
-		fmt.Println("hiiii bitch this is hanamark")
+
+		fmt.Println("hiiii homies this is hanamark")
+		exists, err := util.DirExists("./configurables")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		if !exists {
+			log.Println("hanamark not properly initialized run ./hanamark init")
+			return
+		}
 		viper.SetConfigName("config")
 		viper.SetConfigType("json")
 		viper.AddConfigPath("./configurables") // path to look for the config file in
 
-		err := viper.ReadInConfig()
+		err = viper.ReadInConfig()
 		if err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				// Config file not found; ignore error if desired
@@ -71,11 +80,11 @@ func main() {
 		ctx := context.Background()
 		ctx = logs.SetLoggerctx(ctx, l)
 
-		_, err = template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
-		if err != nil {
-			l.Sugar().Error("parse glob added failed", err)
-			return
-		}
+		// _, err = template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
+		// if err != nil {
+		// 	l.Sugar().Error("parse glob added failed", err)
+		// 	return
+		// }
 
 		err = parser.ParseFiles(ctx)
 		if err != nil {
@@ -94,6 +103,7 @@ func main() {
 			l.Sugar().Error("copy css files failed", err)
 			return
 		}
+		l.Info("::::::::::::::::::conversion successful:::::::::::::::::::::::::::::::::::::::")
 	}
 }
 
