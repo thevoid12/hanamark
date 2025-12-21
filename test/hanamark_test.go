@@ -1,4 +1,4 @@
-package testing
+package main_test
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
+	"log"
+	"net/http"
 	"testing"
 	"text/template"
 
@@ -28,7 +30,7 @@ func setTest() (context.Context, error) {
 	}
 	ctx = logs.SetLoggerctx(ctx, l)
 	ctx = logs.SetLoggerctx(ctx, l)
-	
+
 	funcMap := template.FuncMap{
 		"config": func(key string) any {
 			return viper.Get(key)
@@ -96,4 +98,27 @@ func TestParseFrontMatter(t *testing.T) {
 		t.Error(err.Error())
 	}
 	fmt.Println(fm)
+}
+
+func TestServeStaticFiles(t *testing.T) {
+
+	// ctx, err := setTest()
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	serveStaticFiles("./point_B")
+	//	if err != nil {
+	//		t.Error(err.Error())
+	//	}
+}
+
+func serveStaticFiles(dir string) {
+	fs := http.FileServer(http.Dir(dir))
+	http.Handle("/", fs)
+
+	log.Print("Listening on :3000...")
+	err := http.ListenAndServe(":3000", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

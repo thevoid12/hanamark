@@ -1,0 +1,32 @@
+{
+  "filepath": {
+    "sourceMDRoot": "./configurables/point_A",
+    "destMDRoot": "./point_B",
+    "templatePath": "./configurables/templates",
+    "sourceAssetsPath": "./configurables/assets/",
+    "destAssetsPath": "./configurables/.point_A/assets/",
+    "hanamarkCssPath": "./configurables/assets/css/",
+    "destCssPath": "./point_B/assets/css/",
+    "faviconPath": "./configurables/assets/images/favicon.ico"
+  },
+  "userMeta": {
+    "by": "void",
+    "email": "thisisvoiddd1@gmail.com",
+    "twitter": ""
+  },
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
+  },
+    "rss":{
+    "isRssEnabled":true,
+    "title":"void blog",
+    "link":"https://thisisvoid.in",
+    "authorName":"void",
+    "authorEmailID":"thevoidddd1@gmail.com",
+    "rssOutputName":"feed.xml"
+  },
+  "tags":true,
+  "sortFilesByCreatedOn":true,
+  "servePort":"3000"
+}

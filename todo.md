@@ -32,3 +32,260 @@
 - [ ] as of now global sorting of list items but soon sorting order should be mentioned in font matter of list files
 - [ ] add a panic recover in main incase something panics!
 - [ ] remove all the creates and call util.writeinto file
+- [ ] make base.html as base_.html so that it can be identified as special template
+
+
+# release checklist
+
+## Phase 0 — Hard invariants (lock these first)
+
+**Do once, write it down, don’t revisit casually**
+
+* [x] Binary is **fully static** (`CGO_ENABLED=0`)
+* [x] No runtime dependencies (Node, Python, Go)
+* [x] Binary never mutates user files unless explicitly asked
+* [x] Everything user-editable lives **outside** the binary
+* [x] Deterministic output for the same input
+
+**Done when:** you can explain these rules in one paragraph.
+
+---
+
+## Phase 1 — Repository & module hygiene
+
+### 1. Initialize Go module
+
+* [ ] `go mod init github.com/<you>/hanamark`
+* [ ] Remove unused deps
+* [ ] `go mod tidy`
+
+**Done when:** `go build ./...` works cleanly.
+
+---
+
+### 2. Repo layout (lock this early)
+
+```
+cmd/hanamark/
+    main.go
+internal/
+    cli/
+    config/
+    parser/
+    renderer/
+    site/
+    skeleton/
+docs/
+    man/
+        hanamark.1.md
+Makefile
+README.md
+```
+
+Rules:
+
+* `cmd/` = entrypoints only
+* `internal/` = real logic
+* `skeleton/` = init scaffolding
+
+**Done when:** no logic lives in `main.go`.
+
+---
+
+## Phase 2 — CLI foundation (don’t overengineer)
+
+### 3. Decide CLI parsing strategy
+
+Use:
+
+* standard `flag` package **or**
+* Cobra (only if you already know it well)
+
+Commands to implement **now**:
+
+* [x] `hanamark init [path]`
+* [x] `hanamark run`
+* [ ] `hanamark version`
+* [ ] `hanamark help`
+
+**Done when:** `hanamark help` prints stable output.
+
+---
+
+### 4. Version injection (do this early)
+
+* [ ] Add `var Version = "dev"`
+* [ ] Print version via `hanamark version`
+* [ ] Support `-ldflags` override
+
+**Done when:** binary prints a real version string.
+
+---
+
+## Phase 3 — Configuration loading (non-negotiable)
+
+### 5. Config schema
+
+* [x] Define a strict struct (`config.Config`)
+* [ ] Validate required fields
+* [ ] Fail fast on unknown keys
+
+Config lookup order:
+
+1. `--config`
+2. `./config.json`
+
+**Done when:** invalid config stops the build immediately.
+
+---
+
+## Phase 4 — Skeleton site & `init`
+
+### 6. Create skeleton layout (inside repo)
+
+```
+internal/skeleton/
+├── assets/
+│   ├── css/styles.css
+│   └── images/favicon.ico
+├── templates/
+│   ├── base.html
+│   ├── single.html
+│   └── list.html
+├── point_A/
+│   └── hello.md
+└── config.json
+```
+
+* [ ] Keep it minimal
+* [ ] No placeholders that break rendering
+
+---
+
+### 7. Embed skeleton
+
+* [ ] Use `embed.FS`
+* [ ] Write recursive copy logic
+* [ ] Refuse to init into non-empty dirs (unless `--force`)
+
+**Done when:** `hanamark init .` creates a usable site.
+
+---
+
+## Phase 5 — Core build pipeline (the heart)
+
+### 8. Filesystem walk (read-only)
+
+* [x] Walk content directory
+* [x] Skip assets directory
+* [x] Preserve relative paths
+* [x] Collect metadata only (no rendering yet)
+
+**Done when:** you can print a correct site tree.
+
+---
+
+
+---
+
+**Done when:** `hanamark build` creates a static site.
+
+---
+
+## Phase 6 — Assets handling
+
+### 12. Assets copy
+
+* [ ] Copy assets verbatim
+* [ ] Preserve directory structure
+* [ ] Never parse assets
+
+**Done when:** favicon + CSS load in browser.
+
+---
+
+## Phase 7 — Determinism & safety
+
+### 13. Build safety checks
+
+* [ ] Clean output dir before build
+* [ ] Atomic writes (temp → rename)
+* [ ] Stable ordering (sort paths)
+
+**Done when:** two builds produce identical output.
+
+---
+
+## Phase 8 — Documentation & UX
+
+### 14. Man page
+
+* [ ] Write `hanamark.1.md`
+* [ ] Commands
+* [ ] Directory structure
+* [ ] Examples
+
+**Done when:** man page matches `hanamark help`.
+
+---
+
+### 15. README (short, sharp)
+
+* [ ] What it is
+* [ ] Install
+* [ ] `init → build`
+* [ ] Philosophy (1 paragraph)
+
+**Done when:** someone can use it without asking you.
+
+---
+
+## Phase 9 — Distribution
+
+### 16. Cross compilation
+
+* [ ] Linux amd64 / arm64
+* [ ] macOS amd64 / arm64
+* [ ] Windows amd64
+
+**Done when:** binaries run without Go installed.
+
+---
+
+### 17. Release automation
+
+* [ ] GitHub Releases
+* [ ] Checksums
+* [ ] Versioned tags
+
+Optional:
+
+* [ ] GoReleaser
+
+**Done when:** `curl | chmod | mv` works.
+
+---
+
+## Phase 10 — Hardening (post v0.1)
+
+* [ ] Panic → error everywhere
+* [ ] Useful error messages
+* [ ] Graceful exit codes
+* [ ] No global mutable state
+
+---
+
+## Final sanity checklist (print this)
+
+Before calling it “released”:
+
+* [ ] Fresh machine, no Go installed
+* [ ] Download binary
+* [ ] `hanamark init site`
+* [ ] `cd site && hanamark build`
+* [ ] Open HTML in browser
+* [ ] Read man page
+* [ ] Delete site, repeat
+
+If all pass, you’re shipping something real.
+

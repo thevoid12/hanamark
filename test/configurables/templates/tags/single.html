@@ -1,0 +1,28 @@
+<!-- this is the main tags page and this is optional if they needed a dedicated tags page they can create one-->
+
+<div class="wrapper">
+  <div class="topborder"></div>
+  <div class="leftborder"></div>
+  <div class="page">
+    <!-- {{/* template "header.html" */}} -->
+    <div class="cont">
+      <div class="desc">
+        <div class="description">
+          <p>
+          </p>
+        </div>
+
+        <div class="blog">
+          <ol>
+            {{ range .List}}
+            <li><a href="{{.TagDestPath}}">{{.TagName}}[{{.Count}}]</a></li>
+            <br>
+            {{end}}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- {{/* template "footer.html" */}}-->
+
+</div>
