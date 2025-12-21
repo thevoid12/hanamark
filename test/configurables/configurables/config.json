@@ -27,5 +27,6 @@
     "rssOutputName": "feed.xml"
   },
   "tags": true,
-  "sortFilesByCreatedOn": true
+  "sortFilesByCreatedOn": true,
+    "servePort":"3000"
 }

@@ -1,13 +1,13 @@
 {
   "filepath": {
-    "sourceMDRoot": "./point_A",
+    "sourceMDRoot": "./configurables/point_A",
     "destMDRoot": "./point_B",
-    "templatePath": "./templates",
-    "sourceAssetsPath": "./assets/",
-    "destAssetsPath": "/.point_A/assets/",
-    "hanamarkCssPath": "./assets/css/",
-    "destCssPath": "../point_B/assets/css/",
-    "faviconPath": "./assets/images/favicon.ico"
+    "templatePath": "./configurables/templates",
+    "sourceAssetsPath": "./configurables/assets/",
+    "destAssetsPath": "./configurables/.point_A/assets/",
+    "hanamarkCssPath": "./configurables/assets/css/",
+    "destCssPath": "./point_B/assets/css/",
+    "faviconPath": "./configurables/assets/images/favicon.ico"
   },
   "userMeta": {
     "by": "void",
@@ -27,5 +27,6 @@
     "rssOutputName":"feed.xml"
   },
   "tags":true,
-  "sortFilesByCreatedOn":true
+  "sortFilesByCreatedOn":true,
+  "servePort":"3000"
 }

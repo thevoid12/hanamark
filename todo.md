@@ -32,7 +32,7 @@
 - [ ] as of now global sorting of list items but soon sorting order should be mentioned in font matter of list files
 - [ ] add a panic recover in main incase something panics!
 - [ ] remove all the creates and call util.writeinto file
-- [ ] make base.html as _base.html so that it can be identified as special template
+- [ ] make base.html as base_.html so that it can be identified as special template
 
 
 # release checklist
@@ -41,11 +41,11 @@
 
 **Do once, write it down, don’t revisit casually**
 
-* [ ] Binary is **fully static** (`CGO_ENABLED=0`)
-* [ ] No runtime dependencies (Node, Python, Go)
-* [ ] Binary never mutates user files unless explicitly asked
-* [ ] Everything user-editable lives **outside** the binary
-* [ ] Deterministic output for the same input
+* [x] Binary is **fully static** (`CGO_ENABLED=0`)
+* [x] No runtime dependencies (Node, Python, Go)
+* [x] Binary never mutates user files unless explicitly asked
+* [x] Everything user-editable lives **outside** the binary
+* [x] Deterministic output for the same input
 
 **Done when:** you can explain these rules in one paragraph.
 
@@ -103,8 +103,8 @@ Use:
 
 Commands to implement **now**:
 
-* [ ] `hanamark init [path]`
-* [ ] `hanamark build`
+* [x] `hanamark init [path]`
+* [x] `hanamark run`
 * [ ] `hanamark version`
 * [ ] `hanamark help`
 
@@ -126,7 +126,7 @@ Commands to implement **now**:
 
 ### 5. Config schema
 
-* [ ] Define a strict struct (`config.Config`)
+* [x] Define a strict struct (`config.Config`)
 * [ ] Validate required fields
 * [ ] Fail fast on unknown keys
 
@@ -176,43 +176,17 @@ internal/skeleton/
 
 ### 8. Filesystem walk (read-only)
 
-* [ ] Walk content directory
-* [ ] Skip assets directory
-* [ ] Preserve relative paths
-* [ ] Collect metadata only (no rendering yet)
+* [x] Walk content directory
+* [x] Skip assets directory
+* [x] Preserve relative paths
+* [x] Collect metadata only (no rendering yet)
 
 **Done when:** you can print a correct site tree.
 
 ---
 
-### 9. Markdown → HTML
-
-* [ ] Strip frontmatter
-* [ ] Parse dates safely
-* [ ] Convert markdown to HTML
-* [ ] Do **not** write files yet
-
-**Done when:** one markdown file produces HTML string in memory.
 
 ---
-
-### 10. Template resolution
-
-* [ ] Load templates once
-* [ ] Support single vs list templates
-* [ ] Fail if template missing
-* [ ] No silent fallbacks (yet)
-
-**Done when:** rendering fails loudly on template errors.
-
----
-
-### 11. Renderer
-
-* [ ] Inject page context
-* [ ] Render HTML
-* [ ] Decide output path
-* [ ] Write to `public/` (or `dist/`)
 
 **Done when:** `hanamark build` creates a static site.
 
