@@ -4,3 +4,5 @@ templates/v_project_template.html
 *.logs
 *.log
 /configurables/
+test/configurables
+test/point_B

@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"hanamark/internal/configurables"
+	configurables "hanamark/internal"
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
@@ -44,12 +44,12 @@ func main() {
 		}
 		return
 	}
-	
+
 	if command == "help" {
 		printHelp()
 		return
 	}
-	
+
 	exists, err := util.DirExists("./configurables")
 	if err != nil {
 		log.Println(err)
@@ -114,7 +114,7 @@ func main() {
 			servePort = "3000"
 		}
 		l.Info("::::::::::::::::::::starting local server at port localhost" + servePort + ":::::::::::::::::::::::::::")
-		dest := viper.GetString("filepath.destMDRoot")
+		dest := viper.GetString("filepath.destHtmlRoot")
 		serveStaticFiles(dest, servePort)
 	} else {
 		fmt.Printf("Unknown command: %s\n", command)
@@ -127,7 +127,7 @@ func Init(dst string) error {
 		return err
 	}
 
-	return util.CopyEmbedDir(configurables.FS, ".", dst)
+	return util.CopyEmbedDir(configurables.FS, "configurables", dst)
 }
 
 func printHelp() {
