@@ -1,10 +1,10 @@
 {
   "filepath": {
     "sourceMDRoot": "./configurables/point_A",
-    "destMDRoot": "./point_B",
+    "destHtmlRoot": "./point_B",
     "templatePath": "./configurables/templates",
     "sourceAssetsPath": "./configurables/assets/",
-    "destAssetsPath": "./configurables/.point_A/assets/",
+    "destAssetsPath": "./point_B/assets/",
     "hanamarkCssPath": "./configurables/assets/css/",
     "destCssPath": "./point_B/assets/css/",
     "faviconPath": "./configurables/assets/images/favicon.ico"

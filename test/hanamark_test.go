@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"testing"
-	"text/template"
 
 	"github.com/spf13/viper"
 )
@@ -18,7 +17,7 @@ func setTest() (context.Context, error) {
 	ctx := context.Background()
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.AddConfigPath("./") // path to look for the config file in
+	viper.AddConfigPath("./configurables") // path to look for the config file in
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -31,16 +30,16 @@ func setTest() (context.Context, error) {
 	ctx = logs.SetLoggerctx(ctx, l)
 	ctx = logs.SetLoggerctx(ctx, l)
 
-	funcMap := template.FuncMap{
-		"config": func(key string) any {
-			return viper.Get(key)
-		},
-	}
+	// funcMap := template.FuncMap{
+	// 	"config": func(key string) any {
+	// 		return viper.Get(key)
+	// 	},
+	// }
 
-	_, err = template.New("").Funcs(funcMap).ParseGlob("./templates/*.html")
-	if err != nil {
-		return ctx, err
-	}
+	// _, err = template.New("").Funcs(funcMap).ParseGlob("./templates/*.html")
+	// if err != nil {
+	// 	return ctx, err
+	// }
 	return ctx, nil
 }
 

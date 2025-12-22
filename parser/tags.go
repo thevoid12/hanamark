@@ -40,7 +40,7 @@ func ProcessTags(ctx context.Context, tag string) (tagMeta *model.Tag, err error
 		tagTemplatePath = tp
 	}
 
-	rootDestPath := viper.GetString("Filepath.destMDRoot")
+	rootDestPath := viper.GetString("Filepath.destHtmlRoot")
 	if rootDestPath == "" {
 		return nil, errors.New("root destination path is empty in config")
 	}

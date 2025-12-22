@@ -17,7 +17,7 @@ import (
 func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Template, string, error) {
 	// l := logs.GetLoggerctx(ctx)
 	templateRoot := viper.GetString("filepath.templatePath")
-	basePath := filepath.Join(templateRoot, "base_.html")
+	basePath := filepath.Join(templateRoot, "_base.html")
 
 	funcMap := template.FuncMap{
 		"config": func(key string) any {
@@ -26,14 +26,14 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 		"findAsset": func(assetPath string) string {
 			// Extract the filename from the asset path
 			filename := filepath.Base(assetPath)
-			
+
 			// Get the destination assets directory
 			destAssetsPath := viper.GetString("filepath.destAssetsPath")
 			if destAssetsPath == "" {
 				// Fallback: try to use the original path
 				return assetPath
 			}
-			
+
 			// Walk the destination assets directory to find the file
 			var foundPath string
 			err := filepath.WalkDir(destAssetsPath, func(path string, d os.DirEntry, err error) error {
@@ -41,9 +41,9 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 					return nil // Continue walking even if there's an error
 				}
 				if !d.IsDir() && filepath.Base(path) == filename {
-					// Found the file, make it relative to destMDRoot
-					destMDRoot := viper.GetString("filepath.destMDRoot")
-					relPath, err := filepath.Rel(destMDRoot, path)
+					// Found the file, make it relative to destHtmlRoot
+					destHtmlRoot := viper.GetString("filepath.destHtmlRoot")
+					relPath, err := filepath.Rel(destHtmlRoot, path)
 					if err == nil {
 						foundPath = "./" + filepath.ToSlash(relPath)
 					}
@@ -51,11 +51,11 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 				}
 				return nil
 			})
-			
+
 			if err == nil && foundPath != "" {
 				return foundPath
 			}
-			
+
 			// Fallback: return original path
 			return assetPath
 		},
@@ -64,7 +64,7 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 	tmpl := template.New("").Funcs(funcMap)
 	var err error
 
-	// Check if base_.html exists
+	// Check if _base.html exists
 	useBase := false
 	if _, err := os.Stat(basePath); err == nil {
 		useBase = true
@@ -111,12 +111,12 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 		return nil, "", err
 	}
 
-	// Execution name: if using base, we usually execute "base_.html" (or "base").
+	// Execution name: if using base, we usually execute "_base.html" (or "base").
 	// If base defines 'block "main" .', and target 'define "main"',
-	// executing "base_.html" renders the shell with the target's main.
+	// executing "_base.html" renders the shell with the target's main.
 	execName := ""
 	if useBase {
-		execName = "base_.html"
+		execName = "_base.html"
 	}
 	return tmpl, execName, nil
 }
@@ -176,7 +176,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	}
 
 	// TODO: if there is a filemeta to change the base folder name give it more preced
-	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
 	f, err := os.Create(opBaseFile)
 	if err != nil {
 		l.Sugar().Error("file creation failed", err)
@@ -216,7 +216,7 @@ func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tm
 	}
 	// TODO: if there is a filemeta to change the base folder name give it more preced
 
-	opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), "tags", "tags.html")
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), "tags", "tags.html")
 	dir := filepath.Dir(opBaseFile)
 
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -256,7 +256,7 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	}
 	// TODO: if there is a filemeta to change the base folder name give it more preced
 
-	// opBaseFile := filepath.Join(viper.GetString("filepath.destMDRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	// opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
 	opBaseFile := baseFolderName
 	dir := filepath.Dir(opBaseFile)
 

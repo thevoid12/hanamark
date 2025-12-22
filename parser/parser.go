@@ -26,7 +26,7 @@ func ParseFiles(ctx context.Context) error {
 	if sourceFilePath == "" {
 		return errors.New("sourceMDRoot is empty")
 	}
-	destRootPath := viper.GetString("filepath.destMDRoot")
+	destRootPath := viper.GetString("filepath.destHtmlRoot")
 	if destRootPath == "" {
 		return errors.New("dest root path in config is empty")
 	}
@@ -35,7 +35,6 @@ func ParseFiles(ctx context.Context) error {
 		return errors.New("templatePath is empty")
 	}
 
-	var metaList []*model.PageMeta
 	folderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 	indexFmMap := make(map[string]model.FrontMatter)    // front matter of _index.md page
 	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
@@ -48,13 +47,18 @@ func ParseFiles(ctx context.Context) error {
 		}
 
 		base := filepath.Base(path)
-
-		// Print full path
-		fmt.Println(path+":::::::::::::::", base)
 		l.Info(path)
 		relSource, err := filepath.Rel(sourceFilePath, path)
 		if err != nil {
 			return err
+		}
+
+		// Skip hidden files and directories (starting with '.')
+		if strings.HasPrefix(base, ".") {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil // skip hidden files
 		}
 
 		// continue or ignore if we see assest folder. assets folder has noting to do with parsing
@@ -63,15 +67,19 @@ func ParseFiles(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() && relSource == assetsRel {
+		// Skip assets directory by checking both the config path and the directory name
+		if d.IsDir() && (relSource == assetsRel) {
 			return filepath.SkipDir
 		}
+
 		// Corresponding path in template
 		templatePath := filepath.Join(templateRootPath, relSource)
 		// if the path is a file then we need to get the parent directory
 		singleTemplate := ""
 		listTemplate := ""
 		if !d.IsDir() && d.Name() == "_index.md" {
+			dirRel := filepath.Dir(relSource)
+			templatePath = filepath.Join(templateRootPath, dirRel)
 			fm, err := ParseFrontMatter(ctx, path)
 			if err != nil {
 				return err
@@ -84,7 +92,29 @@ func ParseFiles(ctx context.Context) error {
 			if indexFmMap[folderName] == nil && fm != nil {
 				indexFmMap[folderName] = fm
 			}
+			templatefm := "list.html"
+			isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
+			if err != nil {
+				return err
+			}
+			if isPresent {
+				templatefm = val.(string)
+			}
+
+			listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, templatefm)
+			if err != nil {
+				return fmt.Errorf("failed to find %s template for directory %s: %w", templatefm, templatePath, err)
+			}
+			fmt.Println("B:", listTemplate)
+			l.Info("B:" + listTemplate)
+
+			ListPages = append(ListPages, &model.ListPage{Base: folderName, TempPath: listTemplate})
+			return nil
 		} else if !d.IsDir() {
+			// Skip non-markdown files
+			if !strings.HasSuffix(base, ".md") {
+				return nil
+			}
 			templatePath = filepath.Dir(templatePath)
 			// non directory will have single templates!
 			fm, err := ParseFrontMatter(ctx, path)
@@ -92,7 +122,7 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 
-			isPresent, _, err := FrontMatterValidator(ctx, "", fm, model.DATE)
+			isPresent, _, err := FrontMatterValidator(ctx, path, fm, model.DATE)
 			if err != nil {
 				return err
 			}
@@ -101,7 +131,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// Check if the file is in draft state. If so we can ignore the file and move forward
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.DRAFT)
+				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.DRAFT)
 				if err != nil {
 					return err
 				}
@@ -112,7 +142,7 @@ func ParseFiles(ctx context.Context) error {
 			templatefm := ""
 			var tags []string
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.TEMPLATE)
+				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
 				if err != nil {
 					return err
 				}
@@ -120,7 +150,7 @@ func ParseFiles(ctx context.Context) error {
 					templatefm = val.(string)
 				}
 
-				isPresent, val, err = FrontMatterValidator(ctx, "", fm, model.TAGS)
+				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.TAGS)
 				if err != nil {
 					return err
 				}
@@ -137,17 +167,23 @@ func ParseFiles(ctx context.Context) error {
 
 			}
 			if templatefm == "" {
-				singleTemplate = filepath.Join(templatePath, "single.html")
+				// Search for single.html starting from templatePath and going upward to templateRootPath
+				var err error
+				singleTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "single.html")
+				if err != nil {
+					return fmt.Errorf("failed to find single.html template for directory %s: %w", templatePath, err)
+				}
 			} else {
 				singleTemplate = filepath.Join(templateRootPath, templatefm)
+				// Verify custom template exists
+				if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() {
+					return fmt.Errorf("custom template %s is missing or is a directory", singleTemplate)
+				} else if err != nil {
+					return err
+				}
 			}
 			fmt.Println("A:", singleTemplate)
 			l.Info("A:" + singleTemplate)
-			if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() { // TODO: an updated feature of this is we also need to check fontmatter coz at times they can only add a fontmatter
-				return errors.New("template " + singleTemplate + " is missing for the directory:" + templatePath)
-			} else if err != nil {
-				return err
-			}
 
 			meta, err := processFile(ctx, path, singleTemplate, fm)
 			if err != nil {
@@ -184,33 +220,32 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			folderName := filepath.Dir(relSourcePath)
-			metaList = append(metaList, meta) // TODO: this needs to be a map of foldername and the list of files in the folder
 			if folderMetaMap[folderName] == nil {
 				folderMetaMap[folderName] = make([]*model.PageMeta, 0)
 			}
 			folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
-		} else {
-			// only if all the files in the folders are traversed and we have the metaList we can process the list template coz list is a collection of links to the files in the folder
-
-			// in root directory we dont need list.html as if there is any list definitely there will be a subfolder
-			if relSource != "." {
-				listTemplate = filepath.Join(templatePath, "list.html") // TODO: this needs to go to enums as well as we need to check for front matter instead as front matter is the topmost priority
-				fmt.Println("B:", listTemplate)
-				l.Info("B:" + listTemplate)
-
-				if info, err := os.Stat(listTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() {
-					return errors.New("list.html template is missing" + templatePath)
-				} else if err != nil {
-					return err
-				}
-				ListPages = append(ListPages, &model.ListPage{Base: base, TempPath: listTemplate})
-				// if metaMap[base] != nil { // TODO: but what if we reach here before processing the files?
-
-				// } else {
-				// 	return errors.New("no files found in the directory" + templatePath)
-				// }
-			}
 		}
+		// } else {
+		// 	// only if all the files in the folders are traversed and we have the metaList we can process the list template coz list is a collection of links to the files in the folder
+
+		// 	// in root directory we dont need list.html as if there is any list definitely there will be a subfolder
+		// 	if relSource != "." {
+		// 		// Search for list.html starting from templatePath and going upward to templateRootPath
+		// 		var err error
+		// 		listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "list.html")
+		// 		if err != nil {
+		// 			return fmt.Errorf("failed to find list.html template for directory %s: %w", templatePath, err)
+		// 		}
+		// 		fmt.Println("B:", listTemplate)
+		// 		l.Info("B:" + listTemplate)
+		// 		ListPages = append(ListPages, &model.ListPage{Base: base, TempPath: listTemplate})
+		// 		// if metaMap[base] != nil { // TODO: but what if we reach here before processing the files?
+
+		// 		// } else {
+		// 		// 	return errors.New("no files found in the directory" + templatePath)
+		// 		// }
+		// 	}
+		// }
 		return nil
 	})
 
@@ -252,18 +287,19 @@ func ParseFiles(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		// if rss is enabled in Frontmatter we got to render that
-		if len(rssFeedItems) > 0 {
-			// parse rss for the list
-			feed, err := GetRssFeed()
-			if err != nil {
-				return err
-			}
-			feed.Items = rssFeedItems
-			err = GenerateRss(ctx, feed)
-			if err != nil {
-				return err
-			}
+
+	}
+	// if rss is enabled in Frontmatter we got to render that
+	if len(rssFeedItems) > 0 {
+		// parse rss for the list
+		feed, err := GetRssFeed()
+		if err != nil {
+			return err
+		}
+		feed.Items = rssFeedItems
+		err = GenerateRss(ctx, feed)
+		if err != nil {
+			return err
 		}
 	}
 	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
@@ -302,7 +338,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 	// ext := filepath.Ext(sourcePath)
 	// check if the parent folders exists. if not create the parent folders
 	basefileName := filepath.Base(sourcePath) //TODO: this doesnt work as base includes just the last file name but we want everything other than the root to mirror destination
-	rootDestDir := viper.GetString("filepath.destMDRoot")
+	rootDestDir := viper.GetString("filepath.destHtmlRoot")
 	if rootDestDir == "" {
 		return nil, errors.New("destination root directory is not set")
 	}
@@ -379,7 +415,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 	l := logs.GetLoggerctx(ctx)
 
 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
-	rootDestDir := viper.GetString("filepath.destMDRoot")
+	rootDestDir := viper.GetString("filepath.destHtmlRoot")
 
 	if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
 		// Determine relative path from source root
@@ -402,7 +438,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 		lastModfiedTime := info.ModTime()
 
-		isPresent, val, err := FrontMatterValidator(ctx, "", fm, model.DATE)
+		isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.DATE)
 		if err != nil {
 			return nil, err
 		}
@@ -448,7 +484,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		// if err != nil {
 		// 	return nil, err
 		// }
-		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destMDRoot"))
+		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlRoot"))
 		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
 
