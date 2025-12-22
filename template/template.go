@@ -163,7 +163,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 
 	if len(metaList) > 1 {
 		// Sorting based on Date field in desc order so that latest record is always at the top
-		isSortFileByCreatedOn := viper.GetBool("sortFileByCreatedOn")
+		isSortFileByCreatedOn := viper.GetBool("sortFilesByCreatedOn")
 		if isSortFileByCreatedOn {
 			sort.SliceStable(metaList, func(i, j int) bool {
 				return metaList[i].CreatedDate.After(metaList[j].CreatedDate)
