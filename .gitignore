@@ -5,3 +5,4 @@ templates/v_project_template.html
 *.log
 /configurables/
 test/configurables
+test/point_B

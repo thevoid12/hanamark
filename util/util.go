@@ -286,3 +286,22 @@ func FindTemplateUpward(startDir, rootPath, fileName string) (string, error) {
 		currentDir = parentDir
 	}
 }
+
+// see if parent directory is actually the parent dir of the child directory
+// child dir: blogs/jan/blog1.html
+// parent dir: blogs/
+// isDirUnder is true
+func IsDirUnder(parent, child string) bool {
+	parent = filepath.Clean(parent)
+	child = filepath.Clean(child)
+
+	if parent == "." {
+		return true
+	}
+	if child == parent {
+		return true
+	}
+
+	sep := string(os.PathSeparator)
+	return strings.HasPrefix(child, parent+sep)
+}

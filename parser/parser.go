@@ -89,7 +89,7 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			folderName := filepath.Dir(relSourcePath)
-			if indexFmMap[folderName] == nil && fm != nil {
+			if _, ok := indexFmMap[folderName]; !ok && len(fm) > 0 {
 				indexFmMap[folderName] = fm
 			}
 			templatefm := "list.html"
@@ -254,11 +254,25 @@ func ParseFiles(ctx context.Context) error {
 	}
 	// parse the list template
 	rssFeedItems := []*feeds.Item{}
+	newfolderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
+
 	for _, lp := range ListPages {
-		if folderMetaMap[lp.Base] == nil {
+		for base, value := range folderMetaMap {
+			if util.IsDirUnder(lp.Base, base) {
+				if newfolderMetaMap[lp.Base] == nil {
+					newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
+				}
+				newfolderMetaMap[lp.Base] = append(newfolderMetaMap[lp.Base], value...)
+			}
+		}
+	}
+
+	for _, lp := range ListPages {
+		if newfolderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
 		}
-		if indexFmMap[lp.Base] != nil {
+		_, ok := indexFmMap[lp.Base]
+		if ok {
 			// get the custom template name from the map
 			isPresent, val, err := FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
 			if err != nil {
@@ -275,7 +289,7 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent { // get rss feed items
-					items, err := GetRssFeedItems(folderMetaMap[lp.Base])
+					items, err := GetRssFeedItems(newfolderMetaMap[lp.Base])
 					if err != nil {
 						return err
 					}
@@ -283,7 +297,7 @@ func ParseFiles(ctx context.Context) error {
 				}
 			}
 		}
-		err := tmplt.RenderBaseLinkTemplate(ctx, folderMetaMap[lp.Base], lp)
+		err := tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], lp)
 		if err != nil {
 			return err
 		}
