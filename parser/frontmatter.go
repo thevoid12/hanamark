@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"context"
+	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
 	"os"
@@ -23,10 +24,13 @@ import (
 // ---
 // able to add font matter makes the parser more powerful and dynamic
 func ParseFrontMatter(ctx context.Context, FilePath string) (fm map[string]any, err error) {
+	if FilePath == "" {
+		return nil, fmt.Errorf("failed to parse frontmatter: file path is empty")
+	}
 
 	f, err := os.Open(FilePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file %s for frontmatter parsing: %w", FilePath, err)
 	}
 	fm = map[string]any{} // dynamic key/value map
 
@@ -94,9 +98,12 @@ func StripFrontMatter(ctx context.Context, data []byte) []byte {
 // you can either provide the filepath or if you have the frontmatter if you have it already
 func FrontMatterValidator(ctx context.Context, FilePath string, fm map[string]any, fmKey model.FrontMatterKey) (isPresent bool, value any, err error) {
 	if len(fm) == 0 {
+		if FilePath == "" {
+			return false, nil, fmt.Errorf("cannot validate frontmatter key %s: both frontmatter map and file path are empty", fmKey)
+		}
 		fm, err = ParseFrontMatter(ctx, FilePath)
 		if err != nil {
-			return false, nil, err
+			return false, nil, fmt.Errorf("failed to validate frontmatter: %w", err)
 		}
 	}
 	v, ok := fm[strings.ToLower(string(fmKey))]
