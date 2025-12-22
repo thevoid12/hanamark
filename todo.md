@@ -32,7 +32,9 @@
 - [ ] as of now global sorting of list items but soon sorting order should be mentioned in font matter of list files
 - [ ] add a panic recover in main incase something panics!
 - [ ] remove all the creates and call util.writeinto file
-- [ ] make base.html as base_.html so that it can be identified as special template
+- [ ] make base.html as _base.html so that it can be identified as special template
+- [ ] dynamically add css link to the _base.html
+- [ ] rename _base.html to _base.html change in embed
 
 
 # release checklist

@@ -107,7 +107,7 @@ Here's a breakdown of the config sections:
 ```json
 "filepath": {
   "sourceMDRoot": "../markdown-blog/",
-  "destMDRoot": "../personal-site/",
+  "destHtmlRoot": "../personal-site/",
   "templatePath": "./templates",
   "sourceAssetsPath": "../markdown-blog/assets/",
   "destAssetsPath": "../personal-site/assets/",

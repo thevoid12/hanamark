@@ -26,9 +26,9 @@ func RemoveExtentionFromFile(path string) string {
 	return path
 }
 
-func RemoveRootPartOfDir(oldpath, destMDRoot string) string {
-	// Normalize destMDRoot to match the format of originalPath
-	normalizedRoot := strings.TrimPrefix(destMDRoot, "./")
+func RemoveRootPartOfDir(oldpath, destHtmlRoot string) string {
+	// Normalize destHtmlRoot to match the format of originalPath
+	normalizedRoot := strings.TrimPrefix(destHtmlRoot, "./")
 	res := filepath.Join(".", strings.TrimPrefix(oldpath, normalizedRoot))
 
 	return res
@@ -240,4 +240,68 @@ func DirExists(path string) (bool, error) {
 		return false, err // permission / IO error
 	}
 	return fi.IsDir(), nil
+}
+
+// FindTemplateUpward searches for a template file by traversing upward through directories
+// starting from startDir until it finds the file or reaches the rootPath boundary.
+// rootPath is the root template directory boundary (e.g., "./configurables/templates")
+// fileName is the name of the template file to search for (e.g., "single.html", "list.html")
+// Returns the full path to the template file if found, or an error if not found.
+func FindTemplateUpward(startDir, rootPath, fileName string) (string, error) {
+	// Clean the paths to ensure consistent handling
+	currentDir := filepath.Clean(startDir)
+	rootPath = filepath.Clean(rootPath)
+
+	// Ensure startDir is within or equal to rootPath
+	relPath, err := filepath.Rel(rootPath, currentDir)
+	if err != nil || strings.HasPrefix(relPath, "..") {
+		return "", fmt.Errorf("start directory '%s' is not within root path '%s'", startDir, rootPath)
+	}
+
+	for {
+		// Construct the potential template path
+		templatePath := filepath.Join(currentDir, fileName)
+
+		// Check if the file exists and is not a directory
+		info, err := os.Stat(templatePath)
+		if err == nil && !info.IsDir() {
+			// File found!
+			return templatePath, nil
+		}
+
+		// Check if we've reached the root boundary
+		if currentDir == rootPath {
+			// We've reached the root template path without finding the file
+			return "", fmt.Errorf("template file '%s' not found in '%s' or any parent directories up to root '%s'", fileName, startDir, rootPath)
+		}
+
+		// Move to parent directory
+		parentDir := filepath.Dir(currentDir)
+
+		// Safety check: ensure we don't go beyond root (shouldn't happen with above check)
+		if parentDir == currentDir {
+			return "", fmt.Errorf("reached filesystem root while searching for '%s'", fileName)
+		}
+
+		currentDir = parentDir
+	}
+}
+
+// see if parent directory is actually the parent dir of the child directory
+// child dir: blogs/jan/blog1.html
+// parent dir: blogs/
+// isDirUnder is true
+func IsDirUnder(parent, child string) bool {
+	parent = filepath.Clean(parent)
+	child = filepath.Clean(child)
+
+	if parent == "." {
+		return true
+	}
+	if child == parent {
+		return true
+	}
+
+	sep := string(os.PathSeparator)
+	return strings.HasPrefix(child, parent+sep)
 }
