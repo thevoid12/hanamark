@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -89,20 +90,19 @@ func main() {
 		// 	l.Sugar().Error("parse glob added failed", err)
 		// 	return
 		// }
-
+		err = util.CopyAssets(viper.GetString("filepath.mdAssetsSourcePath"), viper.GetString("filepath.mdAssetsDestPath"))
+		if err != nil {
+			l.Sugar().Error("copy assets files failed", err)
+			return
+		}
 		err = parser.ParseFiles(ctx)
 		if err != nil {
 			l.Sugar().Error("error parsing files", err)
 			return
 		}
-		err = util.CopyAssets(viper.GetString("filepath.sourceAssetsPath"), viper.GetString("filepath.destAssetsPath"))
-		if err != nil {
-			l.Sugar().Error("copy assets files failed", err)
-			return
-		}
 
-		// copy css from hanamark template to dest output css template
-		err = util.CopyAssets(viper.GetString("filepath.hanamarkCssPath"), viper.GetString("filepath.destCssPath"))
+		// copy css from source static file to the static file of destination
+		err = util.CopyAssets(viper.GetString("filepath.sourceStaticFiles"), filepath.Join(viper.GetString("filepath.destHtmlDir"), "static"))
 		if err != nil {
 			l.Sugar().Error("copy css files failed", err)
 			return
@@ -114,7 +114,7 @@ func main() {
 			servePort = "3000"
 		}
 		l.Info("::::::::::::::::::::starting local server at port localhost" + servePort + ":::::::::::::::::::::::::::")
-		dest := viper.GetString("filepath.destHtmlRoot")
+		dest := viper.GetString("filepath.destHtmlDir")
 		serveStaticFiles(dest, servePort)
 	} else {
 		fmt.Printf("Unknown command: %s\n", command)
