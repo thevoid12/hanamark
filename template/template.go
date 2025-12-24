@@ -142,9 +142,9 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := lp.Base
 	tmptPath := lp.TempPath
+	base := filepath.Base(baseFolderName)
 
-	// TODO: if there is a filemeta to change the base folder name give it more preced
-	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, base+".html")
 
 	if len(metaList) > 1 {
 		// Sorting based on Date field in desc order so that latest record is always at the top

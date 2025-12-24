@@ -171,6 +171,19 @@ func TestServeStaticFiles(t *testing.T) {
 // 	}
 // }
 
+func TestServeGeneratedFiles(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	handler := http.FileServer(http.Dir("/home/void/Voidzone/hanamark/test/test_output/point_B_01"))
+	handler.ServeHTTP(w, req)
+	// python3 -m http.server 3333
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+}
+
 func TestBuildFileFlag(t *testing.T) {
 
 	tests := []struct {
@@ -181,13 +194,14 @@ func TestBuildFileFlag(t *testing.T) {
 			name:      "basic site",
 			configDir: "./test_data/01/configurables/",
 		},
-		// {
-		// 	name:      "nested folders",
-		// 	configDir: "./testdata/nested",
-		// },
 		{
 			name:      "markdown-blog",
 			configDir: "./test_data/02/configurables/",
+		},
+
+		{
+			name:      "nested list basic site",
+			configDir: "./test_data/03/configurables/",
 		},
 	}
 
@@ -196,6 +210,7 @@ func TestBuildFileFlag(t *testing.T) {
 			env := setTest(t, tt.configDir)
 
 			sourceStatic := viper.GetString("filepath.sourceStaticFiles")
+
 			if sourceStatic != "" {
 				err := util.CopyAssets(sourceStatic, filepath.Join(viper.GetString("filepath.destHtmlDir"), "static"))
 				if err != nil {
