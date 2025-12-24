@@ -84,7 +84,7 @@ func GenerateRss(ctx context.Context, feed *feeds.Feed) error {
 		return err
 	}
 	// TODO: get the rss path from the config and save the file
-	destRootPath := viper.GetString("filepath.destHtmlRoot")
+	destRootPath := viper.GetString("filepath.destHtmlDir")
 	if destRootPath == "" {
 		return errors.New("dest root path in config is empty")
 	}

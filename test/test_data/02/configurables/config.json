@@ -1,12 +1,13 @@
 {
   "filepath": {
-    "sourceMDDir": "./configurables/source_md",
-    "destHtmlDir": "./output_html",
-    "templatePath": "./configurables/templates",
-    "sourceStaticFiles": "./configurables/static",
-    "mdAssetsSourcePath": "./configurables/source_md/assets/",
-    "mdAssetsDestPath": "./output_html/assets/"
-  },
+    "sourceMDDir": "./test_data/02/configurables/markdown-blog",
+    "destHtmlDir": "./test_output/point_B_02",
+    "templatePath": "./test_data/02/configurables/templates",
+        "sourceStaticFiles": "./test_data/02/configurables/static",
+
+    "mdAssetsSourcePath": "./test_data/02/configurables/markdown-blog/assets/",
+    "mdAssetsDestPath": "./test_output/point_B_02/assets/"
+ },
   "userMeta": {
     "by": "void",
     "email": "thisisvoiddd1@gmail.com",

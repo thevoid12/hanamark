@@ -26,9 +26,9 @@ func RemoveExtentionFromFile(path string) string {
 	return path
 }
 
-func RemoveRootPartOfDir(oldpath, destHtmlRoot string) string {
-	// Normalize destHtmlRoot to match the format of originalPath
-	normalizedRoot := strings.TrimPrefix(destHtmlRoot, "./")
+func RemoveRootPartOfDir(oldpath, destHtmlDir string) string {
+	// Normalize destHtmlDir to match the format of originalPath
+	normalizedRoot := strings.TrimPrefix(destHtmlDir, "./")
 	res := filepath.Join(".", strings.TrimPrefix(oldpath, normalizedRoot))
 
 	return res
@@ -63,6 +63,13 @@ func RelURL(fromFile, toFile string) (string, error) {
 
 // CopyAssets copies images from sourceDir to destDir, preserving the directory structure
 func CopyAssets(sourceDir, destDir string) error {
+	if sourceDir == "" {
+		return nil // skip if no source assets
+	}
+	// Check if source directory exists
+	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
+		return nil // skip if source does not exist
+	}
 	// Ensure the destination directory exists
 	err := os.MkdirAll(destDir, os.ModePerm)
 	if err != nil {

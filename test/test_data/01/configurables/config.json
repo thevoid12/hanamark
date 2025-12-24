@@ -1,11 +1,12 @@
+
 {
   "filepath": {
-    "sourceMDDir": "./configurables/source_md",
-    "destHtmlDir": "./output_html",
-    "templatePath": "./configurables/templates",
-    "sourceStaticFiles": "./configurables/static",
-    "mdAssetsSourcePath": "./configurables/source_md/assets/",
-    "mdAssetsDestPath": "./output_html/assets/"
+   "sourceMDDir": "./test_data/01/configurables/point_A",
+    "destHtmlDir": "./test_output/point_B_01",
+    "templatePath": "./test_data/01/configurables/templates",
+    "sourceStaticFiles": "./test_data/01/configurables/static",
+    "mdAssetsSourcePath": "",
+    "mdAssetsDestPath":""
   },
   "userMeta": {
     "by": "void",
