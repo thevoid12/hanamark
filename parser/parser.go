@@ -256,14 +256,35 @@ func ParseFiles(ctx context.Context) error {
 	rssFeedItems := []*feeds.Item{}
 	newfolderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 
+	// distribute files and sub-list-pages to their closest parent list page
 	for _, lp := range ListPages {
-		for base, value := range folderMetaMap {
-			if util.IsDirUnder(lp.Base, base) {
-				if newfolderMetaMap[lp.Base] == nil {
-					newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
-				}
-				newfolderMetaMap[lp.Base] = append(newfolderMetaMap[lp.Base], value...)
+		newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
+	}
+
+	//  Distribute files to their closest parent list page
+	for folderPath, files := range folderMetaMap {
+		closestLP := getClosestListPage(folderPath, ListPages)
+		if closestLP != nil {
+			newfolderMetaMap[closestLP.Base] = append(newfolderMetaMap[closestLP.Base], files...)
+		}
+	}
+
+	//  Add sub-list-pages to their parent list pages as entries
+	for _, lp := range ListPages {
+		if lp.Base == "." || lp.Base == "" {
+			continue
+		}
+		parentDir := filepath.Dir(lp.Base)
+		parentLP := getClosestListPage(parentDir, ListPages)
+		if parentLP != nil && parentLP.Base != lp.Base {
+			childBase := filepath.Base(lp.Base)
+			destPath := filepath.Join(lp.Base, childBase+".html")
+
+			lpMeta := &model.PageMeta{
+				PageTitle:   lp.Base,
+				DestPageDir: destPath,
 			}
+			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)
 		}
 	}
 
@@ -503,4 +524,16 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 	}
 
 	return meta, nil
+}
+
+func getClosestListPage(targetPath string, listPages []*model.ListPage) *model.ListPage {
+	var closest *model.ListPage
+	for _, lp := range listPages {
+		if util.IsDirUnder(lp.Base, targetPath) {
+			if closest == nil || len(lp.Base) > len(closest.Base) {
+				closest = lp
+			}
+		}
+	}
+	return closest
 }
