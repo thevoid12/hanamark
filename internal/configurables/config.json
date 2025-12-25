@@ -1,18 +1,11 @@
 {
   "filepath": {
-    "sourceMDRoot": "./configurables/point_A",
-    "destHtmlRoot": "./point_B",
+    "sourceMDDir": "./configurables/source_md",
+    "destHtmlDir": "./output_html",
     "templatePath": "./configurables/templates",
-    "sourceAssetsPath": "./configurables/assets/",
-    "destAssetsPath": "./point_B/assets/",
-    "hanamarkCssPath": "./configurables/assets/css/",
-    "destCssPath": "./point_B/assets/css/",
-    "faviconPath": "./configurables/assets/images/favicon.ico"
-  },
-  "userMeta": {
-    "by": "void",
-    "email": "thisisvoiddd1@gmail.com",
-    "twitter": ""
+    "sourceStaticFiles": "./configurables/static",
+    "mdAssetsSourcePath": "./configurables/source_md/assets/",
+    "mdAssetsDestPath": "./output_html/assets/"
   },
   "logger": {
     "filepath": "hanamark.logs",

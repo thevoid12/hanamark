@@ -1,6 +1,9 @@
+VERSION := 0.9.0
+
 build:
-	echo "building executable..."
+	echo "building executable version $(VERSION)..."
 	go mod tidy
+	@echo "package constants\n\nconst Version = \"$(VERSION)\"" > constant/version.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hanamark
 
 run: build

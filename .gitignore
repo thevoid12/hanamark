@@ -6,3 +6,4 @@ templates/v_project_template.html
 /configurables/
 test/configurables
 test/point_B
+test/test_output

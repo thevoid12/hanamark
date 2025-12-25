@@ -14,54 +14,53 @@ import (
 	"github.com/spf13/viper"
 )
 
-func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Template, string, error) {
+func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath string) (*template.Template, string, error) {
 	// l := logs.GetLoggerctx(ctx)
 	templateRoot := viper.GetString("filepath.templatePath")
 	basePath := filepath.Join(templateRoot, "_base.html")
 
-	funcMap := template.FuncMap{
-		"config": func(key string) any {
-			return viper.Get(key)
-		},
-		"findAsset": func(assetPath string) string {
-			// Extract the filename from the asset path
-			filename := filepath.Base(assetPath)
+	// funcMap := template.FuncMap{
+	// 	"config": func(key string) any {
+	// 		return viper.Get(key)
+	// 	},
+	// 	"findAsset": func(assetPath string) string {
+	// 		// Extract the filename from the asset path
+	// 		filename := filepath.Base(assetPath)
 
-			// Get the destination assets directory
-			destAssetsPath := viper.GetString("filepath.destAssetsPath")
-			if destAssetsPath == "" {
-				// Fallback: try to use the original path
-				return assetPath
-			}
+	// 		// Get the destination assets directory
+	// 		mdAssetsDestPath := viper.GetString("filepath.mdAssetsDestPath")
+	// 		if mdAssetsDestPath == "" {
+	// 			// Fallback: try to use the original path
+	// 			return assetPath
+	// 		}
 
-			// Walk the destination assets directory to find the file
-			var foundPath string
-			err := filepath.WalkDir(destAssetsPath, func(path string, d os.DirEntry, err error) error {
-				if err != nil {
-					return nil // Continue walking even if there's an error
-				}
-				if !d.IsDir() && filepath.Base(path) == filename {
-					// Found the file, make it relative to destHtmlRoot
-					destHtmlRoot := viper.GetString("filepath.destHtmlRoot")
-					relPath, err := filepath.Rel(destHtmlRoot, path)
-					if err == nil {
-						foundPath = "./" + filepath.ToSlash(relPath)
-					}
-					return filepath.SkipAll // Stop walking once found
-				}
-				return nil
-			})
+	// 		// Walk the destination assets directory to find the file
+	// 		var foundPath string
+	// 		err := filepath.WalkDir(mdAssetsDestPath, func(path string, d os.DirEntry, err error) error {
+	// 			if err != nil {
+	// 				return nil // Continue walking even if there's an error
+	// 			}
+	// 			if !d.IsDir() && filepath.Base(path) == filename {
+	// 				// Found the file, make it relative to the directory of the page being rendered
+	// 				destPageDir := filepath.Dir(destPagePath)
+	// 				relPath, err := filepath.Rel(destPageDir, path)
+	// 				if err == nil {
+	// 					foundPath = filepath.ToSlash(relPath)
+	// 				}
+	// 				return filepath.SkipAll // Stop walking once found
+	// 			}
+	// 			return nil
+	// 		})
 
-			if err == nil && foundPath != "" {
-				return foundPath
-			}
+	// 		if err == nil && foundPath != "" {
+	// 			return foundPath
+	// 		}
 
-			// Fallback: return original path
-			return assetPath
-		},
-	}
+	// 		// Fallback: return original path
+	// 		return assetPath
+	// 	},
+	// }
 
-	tmpl := template.New("").Funcs(funcMap)
 	var err error
 
 	// Check if _base.html exists
@@ -70,16 +69,8 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 		useBase = true
 	}
 
-	filesToParse := []string{}
-	// strict ordering: base first, then specific
-	if useBase {
-		filesToParse = append(filesToParse, basePath)
-	}
-
-	// Always parse the target template
-	// filesToParse = append(filesToParse, targetTemplatePath)
-
-	// manually reading the file to append {{ define "main" }}
+	// Always parse the target template content first (with define "main")
+	// because we want to define the "main" block for the base template to use.
 	content, err := os.ReadFile(targetTemplatePath)
 	if err != nil {
 		return nil, "", err
@@ -92,23 +83,40 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 		}
 	}
 
-	// Also parse partials? For now, we only parse base and target.
-	// If the user has separate header.html and base uses it, we should parse it too.
-	// But simply ParseFiles(base, target) is the "minimal" approach for "baseof" pattern.
-	// We will assume header/footer logic is IN base or inlined for this task,
-	// unless we find header.html in the dir, in which case we might want to include "shared" templates.
-	// For safety against conflicts, let's just parse base + target.
-
-	if len(filesToParse) > 0 {
-		tmpl, err = tmpl.ParseFiles(filesToParse...)
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
+	// Parse the target content first
+	tmpl := template.New("")
 	tmpl, err = tmpl.Parse(finalContent)
 	if err != nil {
 		return nil, "", err
+	}
+
+	// Then parse all templates from the root directory to support partials
+	if entries, err := os.ReadDir(templateRoot); err == nil {
+		var templateFiles []string
+		for _, entry := range entries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
+				path := filepath.Join(templateRoot, entry.Name())
+				// Avoid adding _base.html and target template again
+				if path != basePath && path != targetTemplatePath {
+					templateFiles = append(templateFiles, path)
+				}
+			}
+		}
+		if len(templateFiles) > 0 {
+			tmpl, err = tmpl.ParseFiles(templateFiles...)
+			if err != nil {
+				return nil, "", err
+			}
+		}
+	}
+
+	// Then parse base template if it exists
+	if useBase {
+		// We use ParseFiles on the existing tmpl to add the base template
+		tmpl, err = tmpl.ParseFiles(basePath)
+		if err != nil {
+			return nil, "", err
+		}
 	}
 
 	// Execution name: if using base, we usually execute "_base.html" (or "base").
@@ -125,13 +133,12 @@ func getTemplate(ctx context.Context, targetTemplatePath string) (*template.Temp
 func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	tmpl, execName, err := getTemplate(ctx, templatePath)
+	opFile := meta.DestPageDir
+	tmpl, execName, err := getTemplate(ctx, templatePath, opFile)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
-
-	opFile := meta.DestPageDir
 	f, err := os.Create(opFile)
 	if err != nil {
 		l.Sugar().Error("file creation failed", err)
@@ -154,12 +161,9 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := lp.Base
 	tmptPath := lp.TempPath
+	base := filepath.Base(baseFolderName)
 
-	tmpl, execName, err := getTemplate(ctx, tmptPath)
-	if err != nil {
-		l.Sugar().Error("Template parsing error:", err)
-		return err
-	}
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, "index.html")
 
 	if len(metaList) > 1 {
 		// Sorting based on Date field in desc order so that latest record is always at the top
@@ -175,8 +179,11 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 		}
 	}
 
-	// TODO: if there is a filemeta to change the base folder name give it more preced
-	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	tmpl, execName, err := getTemplate(ctx, tmptPath, opBaseFile)
+	if err != nil {
+		l.Sugar().Error("Template parsing error:", err)
+		return err
+	}
 	f, err := os.Create(opBaseFile)
 	if err != nil {
 		l.Sugar().Error("file creation failed", err)
@@ -193,7 +200,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	}
 	// wrap data for base template
 	data := map[string]interface{}{
-		"PageTitle": baseFolderName,
+		"PageTitle": base,
 		"List":      metaList,
 	}
 
@@ -209,14 +216,15 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tmptPath string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	tmpl, execName, err := getTemplate(ctx, tmptPath)
+	// TODO: if there is a filemeta to change the base folder name give it more preced
+
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), "tags", "tags.html")
+
+	tmpl, execName, err := getTemplate(ctx, tmptPath, opBaseFile)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
-	// TODO: if there is a filemeta to change the base folder name give it more preced
-
-	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), "tags", "tags.html")
 	dir := filepath.Dir(opBaseFile)
 
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -249,15 +257,16 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	l := logs.GetLoggerctx(ctx)
 	baseFolderName := tagMeta[0].TagDestPath
 
-	tmpl, execName, err := getTemplate(ctx, tagMeta[0].TagTemplatePath)
+	// TODO: if there is a filemeta to change the base folder name give it more preced
+
+	// opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
+	opBaseFile := baseFolderName
+
+	tmpl, execName, err := getTemplate(ctx, tagMeta[0].TagTemplatePath, opBaseFile)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
 	}
-	// TODO: if there is a filemeta to change the base folder name give it more preced
-
-	// opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlRoot"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
-	opBaseFile := baseFolderName
 	dir := filepath.Dir(opBaseFile)
 
 	if err := os.MkdirAll(dir, 0o755); err != nil {
