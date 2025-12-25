@@ -56,6 +56,12 @@ type TagList struct {
 	Count       int    // the number of records with the tag name
 }
 
+// IndexHomepageHtml type constants for config
+const (
+	IndexTypeSection = "section"
+	IndexTypePage    = "page"
+)
+
 var TimeLayouts = []string{
 	time.RFC3339,     // 2006-01-02T15:04:05Z07:00
 	time.RFC3339Nano, // 2006-01-02T15:04:05.999999999Z07:00

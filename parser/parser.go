@@ -39,6 +39,7 @@ func ParseFiles(ctx context.Context) error {
 	indexFmMap := make(map[string]model.FrontMatter)    // front matter of _index.md page
 	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
 	tagMap := make(map[string][]*model.Tag)             // key is the tag name value is the tag property
+	indexMdExists := false                              // track if index.md exists in root
 
 	// trying to implement a mirror tree walker
 	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, err error) error {
@@ -77,6 +78,12 @@ func ParseFiles(ctx context.Context) error {
 		// if the path is a file then we need to get the parent directory
 		singleTemplate := ""
 		listTemplate := ""
+
+		// Check if index.md exists in root
+		if !d.IsDir() && d.Name() == "index.md" && relSource == "index.md" {
+			indexMdExists = true
+		}
+
 		if !d.IsDir() && d.Name() == "_index.md" {
 			dirRel := filepath.Dir(relSource)
 			templatePath = filepath.Join(templateRootPath, dirRel)
@@ -279,14 +286,17 @@ func ParseFiles(ctx context.Context) error {
 		if parentLP != nil && parentLP.Base != lp.Base {
 			childBase := filepath.Base(lp.Base)
 			destPath := filepath.Join(lp.Base, "index.html")
- 
- 			lpMeta := &model.PageMeta{
- 				PageTitle:   childBase,
- 				DestPageDir: destPath,
- 			}
+
+			lpMeta := &model.PageMeta{
+				PageTitle:   childBase,
+				DestPageDir: destPath,
+			}
 			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)
 		}
 	}
+
+	indexHomepageType := strings.ToLower(strings.TrimSpace(viper.GetString("indexHomepageHtml.type")))
+	indexHomepageName := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(viper.GetString("indexHomepageHtml.name")), "/"))
 
 	for _, lp := range ListPages {
 		if newfolderMetaMap[lp.Base] == nil {
@@ -323,6 +333,47 @@ func ParseFiles(ctx context.Context) error {
 			return err
 		}
 
+		// If no index.md exists and indexHomepageHtml type is section and matches this section, render to root index.html
+		if !indexMdExists && indexHomepageType == model.IndexTypeSection && indexHomepageName != "" && strings.ToLower(strings.TrimSuffix(lp.Base, "/")) == indexHomepageName {
+			// Create a copy of lp for root index.html
+			rootLp := &model.ListPage{
+				Base:     ".",
+				TempPath: lp.TempPath,
+			}
+			// Use _index.html template if exists, otherwise use the section's template
+			indexTemplate, err := util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
+			if err == nil {
+				rootLp.TempPath = indexTemplate
+			}
+			rootPageMeta := make([]*model.PageMeta, len(newfolderMetaMap[lp.Base]))
+			for i, pm := range newfolderMetaMap[lp.Base] {
+				adjustedPm := *pm
+				adjustedPm.DestPageDir = filepath.Join(lp.Base, pm.DestPageDir)
+				rootPageMeta[i] = &adjustedPm
+			}
+			err = tmplt.RenderBaseLinkTemplate(ctx, rootPageMeta, rootLp)
+			if err != nil {
+				return err
+			}
+			l.Info("index.html generated from indexHomepageHtml section: " + indexHomepageName)
+		}
+	}
+
+	// If no index.md and indexHomepageHtml type is page, copy that page to index.html
+	if !indexMdExists && indexHomepageType == model.IndexTypePage && indexHomepageName != "" {
+		// Normalize to .html if needed
+		pageName := indexHomepageName
+		if !strings.HasSuffix(pageName, ".html") {
+			pageName = pageName + ".html"
+		}
+		// Copy the rendered page to index.html
+		srcPath := filepath.Join(destRootPath, pageName)
+		destPath := filepath.Join(destRootPath, "index.html")
+		if err := util.CopyFile(srcPath, destPath); err != nil {
+			l.Sugar().Warn("indexHomepageHtml page not found, skipping: " + pageName)
+		} else {
+			l.Info("index.html generated from indexHomepageHtml page: " + pageName)
+		}
 	}
 	// if rss is enabled in Frontmatter we got to render that
 	if len(rssFeedItems) > 0 {

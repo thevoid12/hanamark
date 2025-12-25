@@ -7,6 +7,10 @@
     "mdAssetsSourcePath": "./configurables/source_md/assets/",
     "mdAssetsDestPath": "./output_html/assets/"
   },
+  "indexHomepageHtml": {
+    "type": "section",
+    "name": "blog"
+  },
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
