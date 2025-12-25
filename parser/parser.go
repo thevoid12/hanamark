@@ -278,12 +278,12 @@ func ParseFiles(ctx context.Context) error {
 		parentLP := getClosestListPage(parentDir, ListPages)
 		if parentLP != nil && parentLP.Base != lp.Base {
 			childBase := filepath.Base(lp.Base)
-			destPath := filepath.Join(lp.Base, childBase+".html")
-
-			lpMeta := &model.PageMeta{
-				PageTitle:   childBase,
-				DestPageDir: destPath,
-			}
+			destPath := filepath.Join(lp.Base, "index.html")
+ 
+ 			lpMeta := &model.PageMeta{
+ 				PageTitle:   childBase,
+ 				DestPageDir: destPath,
+ 			}
 			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)
 		}
 	}

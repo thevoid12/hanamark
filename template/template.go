@@ -163,7 +163,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	tmptPath := lp.TempPath
 	base := filepath.Base(baseFolderName)
 
-	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, base+".html")
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, "index.html")
 
 	if len(metaList) > 1 {
 		// Sorting based on Date field in desc order so that latest record is always at the top
