@@ -137,6 +137,11 @@ func WriteIntoFile(ctx context.Context, content string, filePath string) error {
 	return nil
 }
 
+// CopyFile copies a file from src to dst, replacing if it exists (exported version)
+func CopyFile(src, dst string) error {
+	return copyFile(src, dst)
+}
+
 // copyFile copies a file from src to dst, replacing if it exists
 func copyFile(src, dst string) error {
 	srcFile, err := os.Open(src)

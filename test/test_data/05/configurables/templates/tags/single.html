@@ -1,0 +1,8 @@
+<div class="tags-container">
+  <h1>{{ .PageTitle }}</h1>
+  <ul>
+    {{ range .List }}
+    <li><a href="{{ .TagDestPath }}">{{ .TagName }}</a> ({{ .Count }})</li>
+    {{ end }}
+  </ul>
+</div>
