@@ -203,6 +203,14 @@ func TestBuildFileFlag(t *testing.T) {
 			name:      "nested list basic site",
 			configDir: "./test_data/03/configurables/",
 		},
+		{
+			name:      "indexContent config - home section as index.html",
+			configDir: "./test_data/04/configurables/",
+		},
+		{
+			name:      "indexContent config - single page (about) as index.html",
+			configDir: "./test_data/05/configurables/",
+		},
 	}
 
 	for _, tt := range tests {

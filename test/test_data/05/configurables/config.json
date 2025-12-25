@@ -1,0 +1,19 @@
+{
+  "filepath": {
+    "sourceMDDir": "./test_data/05/configurables/point_A",
+    "destHtmlDir": "./test_output/point_B_05",
+    "templatePath": "./test_data/05/configurables/templates",
+    "sourceStaticFiles": "",
+    "mdAssetsSourcePath": "",
+    "mdAssetsDestPath": ""
+  },
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
+  },
+  "sortFilesByCreatedOn": true,
+  "indexHomepageHtml": {
+    "type": "page",
+    "name": "about.html"
+  }
+}
