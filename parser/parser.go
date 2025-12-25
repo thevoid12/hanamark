@@ -281,7 +281,7 @@ func ParseFiles(ctx context.Context) error {
 			destPath := filepath.Join(lp.Base, childBase+".html")
 
 			lpMeta := &model.PageMeta{
-				PageTitle:   lp.Base,
+				PageTitle:   childBase,
 				DestPageDir: destPath,
 			}
 			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)

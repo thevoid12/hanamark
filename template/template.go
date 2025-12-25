@@ -200,7 +200,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	}
 	// wrap data for base template
 	data := map[string]interface{}{
-		"PageTitle": baseFolderName,
+		"PageTitle": base,
 		"List":      metaList,
 	}
 
