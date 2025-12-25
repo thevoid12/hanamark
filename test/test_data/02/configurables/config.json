@@ -8,11 +8,7 @@
     "mdAssetsSourcePath": "./test_data/02/configurables/markdown-blog/assets/",
     "mdAssetsDestPath": "./test_output/point_B_02/assets/"
  },
-  "userMeta": {
-    "by": "void",
-    "email": "thisisvoiddd1@gmail.com",
-    "twitter": ""
-  },
+  
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
