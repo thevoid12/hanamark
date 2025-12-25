@@ -34,6 +34,8 @@ func main() {
 
 	args := flag.Args()
 	if len(args) == 0 {
+		fmt.Println("No command specified.")
+		fmt.Println("Run './hanamark help' for usage information")
 		return
 	}
 	fmt.Println("hiiii homies this is hanamark")
