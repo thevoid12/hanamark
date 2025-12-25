@@ -3,12 +3,10 @@
     "sourceMDDir": "./test_data/02/configurables/markdown-blog",
     "destHtmlDir": "./test_output/point_B_02",
     "templatePath": "./test_data/02/configurables/templates",
-        "sourceStaticFiles": "./test_data/02/configurables/static",
-
+    "sourceStaticFiles": "./test_data/02/configurables/static",
     "mdAssetsSourcePath": "./test_data/02/configurables/markdown-blog/assets/",
     "mdAssetsDestPath": "./test_output/point_B_02/assets/"
- },
-  
+  },
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
