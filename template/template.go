@@ -84,11 +84,30 @@ func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath st
 	}
 
 	// Parse the target content first
-
 	tmpl := template.New("")
 	tmpl, err = tmpl.Parse(finalContent)
 	if err != nil {
 		return nil, "", err
+	}
+
+	// Then parse all templates from the root directory to support partials
+	if entries, err := os.ReadDir(templateRoot); err == nil {
+		var templateFiles []string
+		for _, entry := range entries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
+				path := filepath.Join(templateRoot, entry.Name())
+				// Avoid adding _base.html and target template again
+				if path != basePath && path != targetTemplatePath {
+					templateFiles = append(templateFiles, path)
+				}
+			}
+		}
+		if len(templateFiles) > 0 {
+			tmpl, err = tmpl.ParseFiles(templateFiles...)
+			if err != nil {
+				return nil, "", err
+			}
+		}
 	}
 
 	// Then parse base template if it exists

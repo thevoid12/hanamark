@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	configurables "hanamark/internal"
@@ -15,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -38,58 +40,24 @@ func main() {
 	command := args[0]
 	command = strings.ToLower(command)
 
-	if command == "init" {
+	switch command {
+	case "init":
 		err := Init("configurables")
 		if err != nil {
 			log.Println("unable to init new project", err)
 		}
+		fmt.Println("project initialized successfully")
+		fmt.Println("run ./hanamark help to learn more....")
 		return
-	}
 
-	if command == "help" {
+	case "help":
 		printHelp()
 		return
-	}
-
-	exists, err := util.DirExists("./configurables")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if !exists {
-		log.Println("hanamark not properly initialized run ./hanamark init")
-		return
-	}
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath("./configurables") // path to look for the config file in
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found; ignore error if desired
-			log.Println("there is a error in the path of config file", err)
-		} else {
-			// Config file was found but another error was produced
-			log.Println("error laoding config file from viper", err)
+	case "build":
+		l, ctx, err := setupConfig()
+		if err != nil {
+			return
 		}
-	}
-
-	l, err := logs.InitializeLogger()
-	if err != nil {
-		log.Println("error initializing logger", err)
-	}
-
-	ctx := context.Background()
-	ctx = logs.SetLoggerctx(ctx, l)
-	if command == "build" {
-
-		// _, err = template.ParseGlob(filepath.Join(viper.GetString("filepath.templatePath"), "*.html"))
-		// if err != nil {
-		// 	l.Sugar().Error("parse glob added failed", err)
-		// 	return
-		// }
 		err = util.CopyAssets(viper.GetString("filepath.mdAssetsSourcePath"), viper.GetString("filepath.mdAssetsDestPath"))
 		if err != nil {
 			l.Sugar().Error("copy assets files failed", err)
@@ -108,7 +76,11 @@ func main() {
 			return
 		}
 		l.Info("::::::::::::::::::conversion successful:::::::::::::::::::::::::::::::::::::::")
-	} else if command == "serve" {
+	case "serve":
+		l, _, err := setupConfig()
+		if err != nil {
+			return
+		}
 		servePort := viper.GetString("servePort")
 		if servePort == "" {
 			servePort = "3000"
@@ -116,9 +88,9 @@ func main() {
 		l.Info("::::::::::::::::::::starting local server at port localhost" + servePort + ":::::::::::::::::::::::::::")
 		dest := viper.GetString("filepath.destHtmlDir")
 		serveStaticFiles(dest, servePort)
-	} else {
+	default:
 		fmt.Printf("Unknown command: %s\n", command)
-		fmt.Println("Run 'hanamark help' for usage information")
+		fmt.Println("Run './hanamark help' for usage information")
 	}
 }
 
@@ -166,4 +138,44 @@ func serveStaticFiles(dir string, port string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func setupConfig() (l *zap.Logger, ctx context.Context, err error) {
+	exists, err := util.DirExists("./configurables")
+	if err != nil {
+		log.Println(err)
+		return nil, nil, err
+	}
+
+	if !exists {
+		err = errors.New("hanamark not properly initialized run ./hanamark init")
+		log.Println(err)
+		return nil, nil, err
+	}
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AddConfigPath("./configurables") // path to look for the config file in
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+			log.Println("there is a error in the path of config file", err)
+			return nil, nil, err
+		} else {
+			// Config file was found but another error was produced
+			log.Println("error laoding config file from viper", err)
+			return nil, nil, err
+		}
+	}
+
+	l, err = logs.InitializeLogger()
+	if err != nil {
+		log.Println("error initializing logger", err)
+		return nil, nil, err
+	}
+
+	ctx = context.Background()
+	ctx = logs.SetLoggerctx(ctx, l)
+	return l, ctx, nil
 }

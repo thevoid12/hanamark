@@ -8,6 +8,9 @@
   <title>{{ .PageTitle }}</title>
 </head>
 <body>
+  {{ template "_header.html" }}
   {{ block "main" . }}{{ end }}
+
+  {{ template "_footer.html" }}
 </body>
 </html>
