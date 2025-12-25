@@ -7,11 +7,6 @@
     "mdAssetsSourcePath": "./configurables/source_md/assets/",
     "mdAssetsDestPath": "./output_html/assets/"
   },
-  "userMeta": {
-    "by": "void",
-    "email": "thisisvoiddd1@gmail.com",
-    "twitter": ""
-  },
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
