@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	configurables "hanamark/internal"
+	constants "hanamark/constant"
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
@@ -21,11 +22,19 @@ import (
 
 func main() {
 	var showHelp bool
+	var showVersion bool
 	flag.BoolVar(&showHelp, "help", false, "Show help message")
+	flag.BoolVar(&showVersion, "version", false, "Show version information")
 	flag.Usage = func() {
-		fmt.Println("hello world")
+		fmt.Println("hanamark version", constants.Version)
+		fmt.Println("Run 'hanamark help' for usage.")
 	}
 	flag.Parse()
+
+	if showVersion {
+		fmt.Println("hanamark version", constants.Version)
+		os.Exit(0)
+	}
 
 	if showHelp {
 		flag.Usage()
@@ -123,6 +132,8 @@ func printHelp() {
 	fmt.Println("           Default port: 3000 (configurable via 'servePort' in config.json)")
 	fmt.Println()
 	fmt.Println("  help     Display this help message")
+	fmt.Println()
+	fmt.Println("  -version  Display version information")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  ./hanamark init              # Initialize new project")
