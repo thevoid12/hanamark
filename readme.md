@@ -106,11 +106,11 @@ Here's a breakdown of the config sections:
 
 ```json
 "filepath": {
-  "sourceMDRoot": "../markdown-blog/",
-  "destHtmlRoot": "../personal-site/",
+  "sourceMDDir": "../markdown-blog/",
+  "destHtmlDir": "../personal-site/",
   "templatePath": "./templates",
-  "sourceAssetsPath": "../markdown-blog/assets/",
-  "destAssetsPath": "../personal-site/assets/",
+  "mdAssetsSourcePath": "../markdown-blog/assets/",
+  "mdAssetsDestPath": "../personal-site/assets/",
   "hanamarkCssPath": "./assets/css/",
   "destCssPath": "../personal-site/assets/css/"
 }

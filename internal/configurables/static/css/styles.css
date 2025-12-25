@@ -1,0 +1,144 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  line-height: 1.7;
+  margin: 0 auto;
+  padding: .5rem 1rem;
+  max-width: 40.625em;
+  box-sizing: border-box;
+  color: #222;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 1.25em 0 0.5em 0;
+  line-height: 1.2;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+pre,
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 85%;
+}
+
+pre {
+  padding: 1em;
+  overflow: auto;
+  line-height: 1.45;
+}
+
+blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+  font-style: italic;
+}
+
+/* Navbar */
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 2rem;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #222;
+}
+
+.navbar-favicon {
+  width: 24px;
+  height: 24px;
+}
+
+.navbar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.navbar-menu a {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.navbar-menu a:hover {
+  color: #007bff;
+}
+
+.rss-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+/* Post List */
+.blog-post-list {
+  list-style: none;
+  padding: 0;
+}
+
+.blog-post-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.5rem 0;
+}
+
+.blog-post-date {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.blog-post-container {
+  margin-top: 2rem;
+}
+
+.blog-post-content {
+  margin-top: 1rem;
+}
+
+/* Footer */
+footer,
+.footer-container {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #888;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

@@ -22,15 +22,15 @@ func ParseFiles(ctx context.Context) error {
 
 	l := logs.GetLoggerctx(ctx)
 
-	sourceFilePath := viper.GetString("filepath.sourceMDRoot")
+	sourceFilePath := viper.GetString("filepath.sourceMDDir")
 	if sourceFilePath == "" {
-		return errors.New("sourceMDRoot is empty")
+		return errors.New("sourceMDDir is empty")
 	}
-	destRootPath := viper.GetString("filepath.destHtmlRoot")
+	destRootPath := viper.GetString("filepath.destHtmlDir")
 	if destRootPath == "" {
 		return errors.New("dest root path in config is empty")
 	}
-	templateRootPath := viper.GetString("Filepath.templatePath")
+	templateRootPath := viper.GetString("filepath.templatePath")
 	if templateRootPath == "" {
 		return errors.New("templatePath is empty")
 	}
@@ -63,7 +63,7 @@ func ParseFiles(ctx context.Context) error {
 
 		// continue or ignore if we see assest folder. assets folder has noting to do with parsing
 		// fetching the relative path for assets
-		assetsRel, err := filepath.Rel(sourceFilePath, viper.GetString("filepath.sourceAssetsPath"))
+		assetsRel, err := filepath.Rel(sourceFilePath, viper.GetString("filepath.mdAssetsSourcePath"))
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func ParseFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), path)
+			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDDir"), path)
 			if err != nil {
 				return err
 			}
@@ -215,7 +215,7 @@ func ParseFiles(ctx context.Context) error {
 
 			meta.FrontMatterMap = fm
 
-			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), path)
+			relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDDir"), path)
 			if err != nil {
 				return err
 			}
@@ -256,14 +256,35 @@ func ParseFiles(ctx context.Context) error {
 	rssFeedItems := []*feeds.Item{}
 	newfolderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 
+	// distribute files and sub-list-pages to their closest parent list page
 	for _, lp := range ListPages {
-		for base, value := range folderMetaMap {
-			if util.IsDirUnder(lp.Base, base) {
-				if newfolderMetaMap[lp.Base] == nil {
-					newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
-				}
-				newfolderMetaMap[lp.Base] = append(newfolderMetaMap[lp.Base], value...)
-			}
+		newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
+	}
+
+	//  Distribute files to their closest parent list page
+	for folderPath, files := range folderMetaMap {
+		closestLP := getClosestListPage(folderPath, ListPages)
+		if closestLP != nil {
+			newfolderMetaMap[closestLP.Base] = append(newfolderMetaMap[closestLP.Base], files...)
+		}
+	}
+
+	//  Add sub-list-pages to their parent list pages as entries
+	for _, lp := range ListPages {
+		if lp.Base == "." || lp.Base == "" {
+			continue
+		}
+		parentDir := filepath.Dir(lp.Base)
+		parentLP := getClosestListPage(parentDir, ListPages)
+		if parentLP != nil && parentLP.Base != lp.Base {
+			childBase := filepath.Base(lp.Base)
+			destPath := filepath.Join(lp.Base, "index.html")
+ 
+ 			lpMeta := &model.PageMeta{
+ 				PageTitle:   childBase,
+ 				DestPageDir: destPath,
+ 			}
+			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)
 		}
 	}
 
@@ -352,11 +373,11 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 	// ext := filepath.Ext(sourcePath)
 	// check if the parent folders exists. if not create the parent folders
 	basefileName := filepath.Base(sourcePath) //TODO: this doesnt work as base includes just the last file name but we want everything other than the root to mirror destination
-	rootDestDir := viper.GetString("filepath.destHtmlRoot")
+	rootDestDir := viper.GetString("filepath.destHtmlDir")
 	if rootDestDir == "" {
 		return nil, errors.New("destination root directory is not set")
 	}
-	relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDRoot"), sourcePath)
+	relSourcePath, err := filepath.Rel(viper.GetString("filepath.sourceMDDir"), sourcePath)
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +406,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 
 	// } else {
 	// process pure base files(which has no subdirectory)
-	// rootSrcDir := viper.GetString("filepath.sourceMDRoot")
+	// rootSrcDir := viper.GetString("filepath.sourceMDDir")
 	// fp := filepath.Join(rootSrcDir, bfdir)
 	info, err := os.Stat(sourcePath)
 	if err != nil {
@@ -397,7 +418,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 
 // TODO: this needs to be removed and merged into our new parser mirror tree walker as we are already walking there
 // func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaList []*model.PageMeta, err error) {
-// 	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
+// 	rootSrcDir := viper.GetString("filepath.sourceMDDir")
 
 // 	// traverse through the sub directory of src  and create links to the base file in destination
 // 	err = filepath.Walk(filepath.Join(rootSrcDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
@@ -428,8 +449,8 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.FileInfo, templatePath string, fm map[string]any) (meta *model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
 
-	rootSrcDir := viper.GetString("filepath.sourceMDRoot")
-	rootDestDir := viper.GetString("filepath.destHtmlRoot")
+	rootSrcDir := viper.GetString("filepath.sourceMDDir")
+	rootDestDir := viper.GetString("filepath.destHtmlDir")
 
 	if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
 		// Determine relative path from source root
@@ -498,9 +519,21 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		// if err != nil {
 		// 	return nil, err
 		// }
-		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlRoot"))
+		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlDir"))
 		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
 
 	return meta, nil
+}
+
+func getClosestListPage(targetPath string, listPages []*model.ListPage) *model.ListPage {
+	var closest *model.ListPage
+	for _, lp := range listPages {
+		if util.IsDirUnder(lp.Base, targetPath) {
+			if closest == nil || len(lp.Base) > len(closest.Base) {
+				closest = lp
+			}
+		}
+	}
+	return closest
 }
