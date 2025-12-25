@@ -286,16 +286,15 @@ func ParseFiles(ctx context.Context) error {
 		if parentLP != nil && parentLP.Base != lp.Base {
 			childBase := filepath.Base(lp.Base)
 			destPath := filepath.Join(lp.Base, "index.html")
- 
- 			lpMeta := &model.PageMeta{
- 				PageTitle:   childBase,
- 				DestPageDir: destPath,
- 			}
+
+			lpMeta := &model.PageMeta{
+				PageTitle:   childBase,
+				DestPageDir: destPath,
+			}
 			newfolderMetaMap[parentLP.Base] = append(newfolderMetaMap[parentLP.Base], lpMeta)
 		}
 	}
 
-	
 	indexHomepageType := strings.ToLower(strings.TrimSpace(viper.GetString("indexHomepageHtml.type")))
 	indexHomepageName := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(viper.GetString("indexHomepageHtml.name")), "/"))
 
@@ -346,7 +345,13 @@ func ParseFiles(ctx context.Context) error {
 			if err == nil {
 				rootLp.TempPath = indexTemplate
 			}
-			err = tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], rootLp)
+			rootPageMeta := make([]*model.PageMeta, len(newfolderMetaMap[lp.Base]))
+			for i, pm := range newfolderMetaMap[lp.Base] {
+				adjustedPm := *pm
+				adjustedPm.DestPageDir = filepath.Join(lp.Base, pm.DestPageDir)
+				rootPageMeta[i] = &adjustedPm
+			}
+			err = tmplt.RenderBaseLinkTemplate(ctx, rootPageMeta, rootLp)
 			if err != nil {
 				return err
 			}
