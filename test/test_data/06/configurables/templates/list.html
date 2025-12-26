@@ -1,0 +1,11 @@
+<div class="list-container">
+  <h1>{{ .PageTitle }}</h1>
+  <ul class="post-list">
+    {{ range .List }}
+    <li>
+      <a href="{{ .DestPageDir }}">{{ .PageTitle }}</a>
+      <span>{{ .CreatedDate.Format "2 January 2006" }}</span>
+    </li>
+    {{ end }}
+  </ul>
+</div>
