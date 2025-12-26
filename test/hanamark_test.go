@@ -211,6 +211,10 @@ func TestBuildFileFlag(t *testing.T) {
 			name:      "indexContent config - single page (about) as index.html",
 			configDir: "./test_data/05/configurables/",
 		},
+		{
+			name:      "indexContent config - nested folder1 section as index.html",
+			configDir: "./test_data/06/configurables/",
+		},
 	}
 
 	for _, tt := range tests {
