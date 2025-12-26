@@ -340,11 +340,23 @@ func ParseFiles(ctx context.Context) error {
 				Base:     ".",
 				TempPath: lp.TempPath,
 			}
-			// Use _index.html template if exists, otherwise use the section's template
-			indexTemplate, err := util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
-			if err == nil {
-				rootLp.TempPath = indexTemplate
+
+			// check if _index.html exists
+			_, err := os.Stat("_index.html")
+			if err != nil && os.IsNotExist(err) {
+				// there is no custom index template so
+				// we will use the reference of the referenced template section
+				rootLp.TempPath = lp.TempPath
+			} else if err != nil {
+				return err
+			} else {
+				// Use _index.html template if exists, otherwise use the section's template
+				indexTemplate, err := util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
+				if err == nil {
+					rootLp.TempPath = indexTemplate
+				}
 			}
+
 			rootPageMeta := make([]*model.PageMeta, len(newfolderMetaMap[lp.Base]))
 			for i, pm := range newfolderMetaMap[lp.Base] {
 				adjustedPm := *pm

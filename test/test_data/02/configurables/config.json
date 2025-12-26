@@ -7,6 +7,10 @@
     "mdAssetsSourcePath": "./test_data/02/configurables/markdown-blog/assets/",
     "mdAssetsDestPath": "./test_output/point_B_02/assets/"
   },
+    "indexHomepageHtml": {
+    "type": "section",
+    "name": "blogs"
+  },
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
