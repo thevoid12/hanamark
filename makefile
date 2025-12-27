@@ -35,3 +35,36 @@ makehanamark:
 	git commit -m "personal site_$(DATE)" &&\
 	git push && \
 	@echo "deployed hanamark parsed blog successfully..."
+
+# ---- Config ----
+GOLANGCI_LINT := golangci-lint
+GO := go
+
+# ---- Targets ----
+.PHONY: help lint lint-fix lint-install test vet tidy check
+
+help:
+	@echo "Available targets:"
+	@echo "  make lint        Run golangci-lint"
+	@echo "  make lint-fix    Run golangci-lint with autofix"
+	@echo "  make test        Run go tests"
+	@echo "  make vet         Run go vet"
+	@echo "  make tidy        Run go mod tidy"
+	@echo "  make check       Run all checks"
+
+lint:
+	$(GOLANGCI_LINT) run
+
+lint-fix:
+	$(GOLANGCI_LINT) run --fix
+
+test:
+	$(GO) test ./...
+
+vet:
+	$(GO) vet ./...
+
+tidy:
+	$(GO) mod tidy
+
+check: tidy vet test lint

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	configurables "hanamark/internal"
 	constants "hanamark/constant"
+	configurables "hanamark/internal"
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
@@ -15,12 +15,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Panic recovered:", r)
+			os.Exit(1)
+		}
+	}()
 	var showHelp bool
 	var showVersion bool
 	flag.BoolVar(&showHelp, "help", false, "Show help message")
@@ -33,12 +40,12 @@ func main() {
 
 	if showVersion {
 		fmt.Println("hanamark version", constants.Version)
-		os.Exit(0)
+		return
 	}
 
 	if showHelp {
 		flag.Usage()
-		os.Exit(0)
+		return
 	}
 
 	args := flag.Args()
@@ -147,7 +154,14 @@ func serveStaticFiles(dir string, port string) {
 	http.Handle("/", fs)
 
 	log.Print("Listening on :3000...")
-	err := http.ListenAndServe(":"+port, nil)
+	server := &http.Server{
+		Addr:    ":" + port,
+		Handler: nil,
+		// ReadTimeout:  15 * time.Second,
+		// WriteTimeout: 15 * time.Second,
+		IdleTimeout: 60 * time.Minute,
+	}
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -171,7 +185,8 @@ func setupConfig() (l *zap.Logger, ctx context.Context, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configNotFoundErr viper.ConfigFileNotFoundError
+		if errors.As(err, &configNotFoundErr) {
 			// Config file not found; ignore error if desired
 			log.Println("there is a error in the path of config file", err)
 			return nil, nil, err

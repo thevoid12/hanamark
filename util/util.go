@@ -39,17 +39,18 @@ func RelURL(fromFile, toFile string) (string, error) {
 	// if it is a directory then we are already good to go
 	info, err := os.Stat(fromFile)
 	var fromDir string
-	if err == nil {
+	switch {
+	case err == nil:
 		if info.IsDir() {
 			fromDir = fromFile
 		} else {
 			fromDir = filepath.Dir(fromFile)
 		}
-	} else if os.IsNotExist(err) {
+	case os.IsNotExist(err):
 		// If file doesn't exist, assume it's a file path and get its directory
 		// This is necessary for generating links from pages that haven't been created yet
 		fromDir = filepath.Dir(fromFile)
-	} else {
+	default:
 		return "", err // permission error or other
 	}
 
@@ -128,7 +129,7 @@ func WriteIntoFile(ctx context.Context, content string, filePath string) error {
 	}
 
 	defer f.Close()
-	_, err = f.Write([]byte(content))
+	_, err = f.WriteString(content)
 	if err != nil {
 		l.Sugar().Error("writing into the file failed", err)
 		return err
@@ -275,8 +276,8 @@ func FindTemplateUpward(startDir, rootPath, fileName string) (string, error) {
 		templatePath := filepath.Join(currentDir, fileName)
 
 		// Check if the file exists and is not a directory
-		info, err := os.Stat(templatePath)
-		if err == nil && !info.IsDir() {
+		info, statErr := os.Stat(templatePath)
+		if statErr == nil && !info.IsDir() {
 			// File found!
 			return templatePath, nil
 		}
