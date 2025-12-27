@@ -1,6 +1,6 @@
 # .goreleaser.yaml
 version: 2
-project_name: myapp
+project_name: hanamark
 
 before:
   hooks:

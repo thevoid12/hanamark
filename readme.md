@@ -8,36 +8,76 @@
 
 ## Table of Contents
 
-- [Features](#features)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Project Structure](#project-structure)
-- [Mandatory Requirements](#mandatory-requirements)
-- [Rules and Constraints](#rules-and-constraints)
-- [Configuration](#configuration)
-  - [File Paths](#file-paths)
-  - [Index Homepage](#index-homepage)
-  - [RSS Feed](#rss-feed)
-  - [Logger](#logger)
-  - [Other Options](#other-options)
-- [Content Organization](#content-organization)
-  - [Directory Structure](#directory-structure)
-  - [Single Pages](#single-pages)
-  - [List Pages (Sections)](#list-pages-sections)
-- [Front Matter](#front-matter)
-  - [Supported Fields](#supported-fields)
-  - [Date Formats](#date-formats)
-- [Templating](#templating)
-  - [Template Types](#template-types)
-  - [Template Inheritance](#template-inheritance)
-  - [Template Variables](#template-variables)
-  - [Custom Templates](#custom-templates)
-- [Tags](#tags)
-- [Assets and Static Files](#assets-and-static-files)
-- [RSS Feed Generation](#rss-feed-generation)
-- [Commands](#commands)
-- [Examples](#examples)
-- [Building from Source](#building-from-source)
+- [Hanamark](#hanamark)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Quick Start](#quick-start)
+  - [Installation](#installation)
+    - [Download Binary (Recommended)](#download-binary-recommended)
+    - [From Source (Optional)](#from-source-optional)
+  - [Project Structure](#project-structure)
+  - [Mandatory Requirements](#mandatory-requirements)
+    - [Required Directory Structure](#required-directory-structure)
+    - [Required Files](#required-files)
+    - [Required Paths (Cannot Be Changed)](#required-paths-cannot-be-changed)
+    - [System Files (Underscore Prefix)](#system-files-underscore-prefix)
+  - [Rules and Constraints](#rules-and-constraints)
+    - [What You CAN Do](#what-you-can-do)
+    - [What You CANNOT Do](#what-you-cannot-do)
+    - [Template Rules](#template-rules)
+    - [Content Rules](#content-rules)
+  - [Configuration](#configuration)
+    - [Complete Configuration Example](#complete-configuration-example)
+    - [File Paths](#file-paths)
+    - [Index Homepage](#index-homepage)
+    - [RSS Feed](#rss-feed)
+    - [Logger](#logger)
+    - [Other Options](#other-options)
+  - [Content Organization](#content-organization)
+    - [Directory Structure](#directory-structure)
+    - [Single Pages](#single-pages)
+    - [List Pages (Sections)](#list-pages-sections)
+  - [Front Matter](#front-matter)
+    - [Supported Fields](#supported-fields)
+    - [Date Formats](#date-formats)
+  - [Templating](#templating)
+    - [Understanding single.html vs list.html](#understanding-singlehtml-vs-listhtml)
+    - [System Files (Underscore-Prefixed Files)](#system-files-underscore-prefixed-files)
+    - [Template Types](#template-types)
+    - [The \_base.html Template (Global Layout)](#the-_basehtml-template-global-layout)
+    - [Content Templates](#content-templates)
+    - [Template Variables](#template-variables)
+      - [Single Page Variables (`.PageMeta`)](#single-page-variables-pagemeta)
+      - [List Page Variables](#list-page-variables)
+      - [Tag List Variables](#tag-list-variables)
+    - [Custom Templates](#custom-templates)
+    - [Template Lookup Order](#template-lookup-order)
+  - [Tags](#tags)
+    - [Tag Templates](#tag-templates)
+  - [Assets and Static Files](#assets-and-static-files)
+    - [Static Files](#static-files)
+    - [Markdown Assets](#markdown-assets)
+  - [RSS Feed Generation](#rss-feed-generation)
+    - [Setup Steps](#setup-steps)
+  - [Commands](#commands)
+    - [`hanamark init`](#hanamark-init)
+    - [`hanamark build`](#hanamark-build)
+    - [`hanamark serve`](#hanamark-serve)
+    - [`hanamark help`](#hanamark-help)
+    - [`hanamark -version`](#hanamark--version)
+  - [Examples](#examples)
+    - [Basic Blog Post](#basic-blog-post)
+    - [Draft Post](#draft-post)
+    - [Custom Template Post](#custom-template-post)
+    - [Section Configuration](#section-configuration)
+    - [Complete Template Example](#complete-template-example)
+    - [Adding JavaScript to Templates](#adding-javascript-to-templates)
+  - [Building from Source](#building-from-source)
+    - [Prerequisites](#prerequisites)
+    - [Build](#build)
+    - [Development](#development)
+  - [License](#license)
+  - [Contributing](#contributing)
 
 ---
 
@@ -88,11 +128,15 @@ By default (can be configured in config.json) if served,
 Download the pre-built binary for your platform from the [GitHub Releases](https://github.com/thevoid12/hanamark/releases) page.
 
 | Platform | Download |
-|----------|----------|
-| macOS (Intel) | `hanamark-darwin-amd64` |
-| macOS (Apple Silicon) | `hanamark-darwin-arm64` |
-| Linux (64-bit) | `hanamark-linux-amd64` |
-| Windows (64-bit) | `hanamark-windows-amd64.exe` |
+| --- | --- |
+| macOS (Intel) | `hanamark_Darwin_x86_64.tar.gz` |
+| macOS (Apple Silicon) | `hanamark_Darwin_arm64.tar.gz` |
+| Linux (64-bit) | `hanamark_Linux_x86_64.tar.gz` |
+| Linux (ARM 64-bit) | `hanamark_Linux_arm64.tar.gz` |
+| Windows (64-bit) | `hanamark_Windows_x86_64.zip` |
+| Windows (ARM 64-bit) | `hanamark_Windows_arm64.zip` |
+
+download the binary and use gunzip to extract the tarball and then get the executable
 
 ```bash
 # Example: Download and make executable (macOS/Linux)
