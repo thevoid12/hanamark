@@ -4,7 +4,15 @@ build:
 	echo "building executable version $(VERSION)..."
 	go mod tidy
 	@echo "package constants\n\nconst Version = \"$(VERSION)\"" > constant/version.go
+	# build for linux
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hanamark
+# 	# build for intel mac
+# 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o hanamark
+# 	# build for apple silicon mac
+# 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o hanamark
+# 	# build for windows
+# 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o hanamark.exe
+
 
 run: build
 	./hanamark
