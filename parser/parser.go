@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gorilla/feeds"
 	"github.com/spf13/viper"
@@ -37,14 +38,14 @@ func ParseFiles(ctx context.Context) error {
 
 	folderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 	indexFmMap := make(map[string]model.FrontMatter)    // front matter of _index.md page
-	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
+	var listPages []*model.ListPage                     // this has the base file names (folder names) of the pages
 	tagMap := make(map[string][]*model.Tag)             // key is the tag name value is the tag property
 	indexMdExists := false                              // track if index.md exists in root
 
 	// trying to implement a mirror tree walker
-	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err // handle permission errors etc.
+	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr // handle permission errors etc.
 		}
 
 		base := filepath.Base(path)
@@ -105,7 +106,11 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			if isPresent {
-				templatefm = val.(string)
+				if s, ok := val.(string); ok {
+					templatefm = s
+				} else {
+					l.Sugar().Errorf("template value in frontmatter is not a string for path: %s", path)
+				}
 			}
 
 			listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, templatefm)
@@ -115,7 +120,7 @@ func ParseFiles(ctx context.Context) error {
 			fmt.Println("B:", listTemplate)
 			l.Info("B:" + listTemplate)
 
-			ListPages = append(ListPages, &model.ListPage{Base: folderName, TempPath: listTemplate})
+			listPages = append(listPages, &model.ListPage{Base: folderName, TempPath: listTemplate})
 			return nil
 		} else if !d.IsDir() {
 			// Skip non-markdown files
@@ -138,23 +143,33 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// Check if the file is in draft state. If so we can ignore the file and move forward
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.DRAFT)
+				var val interface{}
+				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.DRAFT)
 				if err != nil {
 					return err
 				}
-				if isPresent && val.(bool) {
-					return nil // skip the file
+				if isPresent {
+					if isDraft, ok := val.(bool); ok && isDraft {
+						return nil // skip the file
+					} else if !ok {
+						l.Sugar().Errorf("draft value in frontmatter is not a boolean for path: %s", path)
+					}
 				}
 			}
 			templatefm := ""
 			var tags []string
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
+				var val interface{}
+				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
 				if err != nil {
 					return err
 				}
 				if isPresent {
-					templatefm = val.(string)
+					if s, ok := val.(string); ok {
+						templatefm = s
+					} else {
+						l.Sugar().Errorf("template value in frontmatter is not a string for path: %s", path)
+					}
 				}
 
 				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.TAGS)
@@ -162,20 +177,22 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent {
-					raw := val.([]interface{})
-					for i, v := range raw {
-						s, ok := v.(string)
-						if !ok {
-							return fmt.Errorf("tag at index %d is not a string", i)
+					raw, ok := val.([]interface{})
+					if !ok {
+						l.Sugar().Errorf("tags value in frontmatter is not an array for path: %s", path)
+					} else {
+						for i, v := range raw {
+							s, typeOk := v.(string)
+							if !typeOk {
+								return fmt.Errorf("tag at index %d is not a string", i)
+							}
+							tags = append(tags, s)
 						}
-						tags = append(tags, s)
 					}
 				}
-
 			}
 			if templatefm == "" {
 				// Search for single.html starting from templatePath and going upward to templateRootPath
-				var err error
 				singleTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "single.html")
 				if err != nil {
 					return fmt.Errorf("failed to find single.html template for directory %s: %w", templatePath, err)
@@ -183,7 +200,7 @@ func ParseFiles(ctx context.Context) error {
 			} else {
 				singleTemplate = filepath.Join(templateRootPath, templatefm)
 				// Verify custom template exists
-				if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() {
+				if info, statErr := os.Stat(singleTemplate); errors.Is(statErr, os.ErrNotExist) || info.IsDir() {
 					return fmt.Errorf("custom template %s is missing or is a directory", singleTemplate)
 				} else if err != nil {
 					return err
@@ -200,9 +217,9 @@ func ParseFiles(ctx context.Context) error {
 			// process tag
 			if len(tags) > 0 {
 				for _, tag := range tags {
-					tagMeta, err := ProcessTags(ctx, tag)
-					if err != nil {
-						return err
+					tagMeta, tagErr := ProcessTags(ctx, tag)
+					if tagErr != nil {
+						return tagErr
 					}
 
 					if tagMap[tag] == nil {
@@ -232,27 +249,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 			folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
 		}
-		// } else {
-		// 	// only if all the files in the folders are traversed and we have the metaList we can process the list template coz list is a collection of links to the files in the folder
 
-		// 	// in root directory we dont need list.html as if there is any list definitely there will be a subfolder
-		// 	if relSource != "." {
-		// 		// Search for list.html starting from templatePath and going upward to templateRootPath
-		// 		var err error
-		// 		listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "list.html")
-		// 		if err != nil {
-		// 			return fmt.Errorf("failed to find list.html template for directory %s: %w", templatePath, err)
-		// 		}
-		// 		fmt.Println("B:", listTemplate)
-		// 		l.Info("B:" + listTemplate)
-		// 		ListPages = append(ListPages, &model.ListPage{Base: base, TempPath: listTemplate})
-		// 		// if metaMap[base] != nil { // TODO: but what if we reach here before processing the files?
-
-		// 		// } else {
-		// 		// 	return errors.New("no files found in the directory" + templatePath)
-		// 		// }
-		// 	}
-		// }
 		return nil
 	})
 
@@ -264,25 +261,25 @@ func ParseFiles(ctx context.Context) error {
 	newfolderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 
 	// distribute files and sub-list-pages to their closest parent list page
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
 	}
 
 	//  Distribute files to their closest parent list page
 	for folderPath, files := range folderMetaMap {
-		closestLP := getClosestListPage(folderPath, ListPages)
+		closestLP := getClosestListPage(folderPath, listPages)
 		if closestLP != nil {
 			newfolderMetaMap[closestLP.Base] = append(newfolderMetaMap[closestLP.Base], files...)
 		}
 	}
 
 	//  Add sub-list-pages to their parent list pages as entries
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		if lp.Base == "." || lp.Base == "" {
 			continue
 		}
 		parentDir := filepath.Dir(lp.Base)
-		parentLP := getClosestListPage(parentDir, ListPages)
+		parentLP := getClosestListPage(parentDir, listPages)
 		if parentLP != nil && parentLP.Base != lp.Base {
 			childBase := filepath.Base(lp.Base)
 			destPath := filepath.Join(lp.Base, "index.html")
@@ -298,19 +295,25 @@ func ParseFiles(ctx context.Context) error {
 	indexHomepageType := strings.ToLower(strings.TrimSpace(viper.GetString("indexHomepageHtml.type")))
 	indexHomepageName := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(viper.GetString("indexHomepageHtml.name")), "/"))
 
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		if newfolderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
 		}
 		_, ok := indexFmMap[lp.Base]
 		if ok {
 			// get the custom template name from the map
-			isPresent, val, err := FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
+			var isPresent bool
+			var val interface{}
+			isPresent, val, err = FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
 			if err != nil {
 				return err
 			}
 			if isPresent {
-				lp.TempPath = filepath.Join(templateRootPath, val.(string)) // custom template instead of list.html
+				if s, castOk := val.(string); castOk {
+					lp.TempPath = filepath.Join(templateRootPath, s) // custom template instead of list.html
+				} else {
+					l.Sugar().Errorf("template value in _index.md frontmatter is not a string for list page: %s", lp.Base)
+				}
 			}
 
 			isRssEnabled := viper.GetBool("rss.isRssEnabled")
@@ -320,15 +323,15 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent { // get rss feed items
-					items, err := GetRssFeedItems(newfolderMetaMap[lp.Base])
-					if err != nil {
-						return err
+					items, rssErr := GetRssFeedItems(newfolderMetaMap[lp.Base])
+					if rssErr != nil {
+						return rssErr
 					}
 					rssFeedItems = append(rssFeedItems, items...)
 				}
 			}
 		}
-		err := tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], lp)
+		err = tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], lp)
 		if err != nil {
 			return err
 		}
@@ -342,7 +345,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 
 			// check if _index.html exists
-			_, err := os.Stat("_index.html")
+			_, err = os.Stat("_index.html")
 			if err != nil && os.IsNotExist(err) {
 				// there is no custom index template so
 				// we will use the reference of the referenced template section
@@ -351,7 +354,8 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			} else {
 				// Use _index.html template if exists, otherwise use the section's template
-				indexTemplate, err := util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
+				var indexTemplate string
+				indexTemplate, err = util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
 				if err == nil {
 					rootLp.TempPath = indexTemplate
 				}
@@ -376,12 +380,12 @@ func ParseFiles(ctx context.Context) error {
 		// Normalize to .html if needed
 		pageName := indexHomepageName
 		if !strings.HasSuffix(pageName, ".html") {
-			pageName = pageName + ".html"
+			pageName += ".html"
 		}
 		// Copy the rendered page to index.html
 		srcPath := filepath.Join(destRootPath, pageName)
 		destPath := filepath.Join(destRootPath, "index.html")
-		if err := util.CopyFile(srcPath, destPath); err != nil {
+		if copyErr := util.CopyFile(srcPath, destPath); copyErr != nil {
 			l.Sugar().Warn("indexHomepageHtml page not found, skipping: " + pageName)
 		} else {
 			l.Info("index.html generated from indexHomepageHtml page: " + pageName)
@@ -390,7 +394,8 @@ func ParseFiles(ctx context.Context) error {
 	// if rss is enabled in Frontmatter we got to render that
 	if len(rssFeedItems) > 0 {
 		// parse rss for the list
-		feed, err := GetRssFeed()
+		var feed *feeds.Feed
+		feed, err = GetRssFeed()
 		if err != nil {
 			return err
 		}
@@ -403,7 +408,7 @@ func ParseFiles(ctx context.Context) error {
 	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
 	var tagList []*model.TagList // tag list is the data needed to create the tags page which will have the list of tags
 	for tagName, tagMeta := range tagMap {
-		err := tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
+		err = tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
 		if err != nil {
 			return err
 		}
@@ -419,21 +424,15 @@ func ParseFiles(ctx context.Context) error {
 	}
 	// render tag list page (TODO: you should do all of these only if config is set true)
 	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
-	tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt)
+	if tagErr := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); tagErr != nil {
+		l.Sugar().Errorf("failed to render tag list template: %v", tagErr)
+	}
 	return nil
 }
 
 func processFile(ctx context.Context, sourcePath string, templatePath string, fm map[string]any) (*model.PageMeta, error) {
-	// sp: ./pointA/about.md
-	//tp: ./templates/single.html
-	// result: ./pointB/about.html
-	// config: ./pointB
-	//  ./pointB/about.html
-	//  sp: ./pointA/home/blog1.md
-	//  tp: ./templaates/home/single.html
-	//  result: ./pointB/home/blog1.html
+
 	l := logs.GetLoggerctx(ctx)
-	// ext := filepath.Ext(sourcePath)
 	// check if the parent folders exists. if not create the parent folders
 	basefileName := filepath.Base(sourcePath) //TODO: this doesnt work as base includes just the last file name but we want everything other than the root to mirror destination
 	rootDestDir := viper.GetString("filepath.destHtmlDir")
@@ -453,24 +452,8 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 			l.Sugar().Error("create file failed", err)
 			return nil, err
 		}
-
 	}
-	// metaList, err = parseSubFolderFilesToHtml(ctx, bfdir)
-	// if err != nil {
-	// 	l.Sugar().Error("parse subfolder files to html failed", err)
-	// 	return err
-	// }
-	// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
-	// of if there are no sub folder the base file md is directly converted to html
-	// err = tmplt.RenderBaseLinkTemplate(ctx, metaList, basefileName)
-	// if err != nil {
-	// 	return err
-	// }
 
-	// } else {
-	// process pure base files(which has no subdirectory)
-	// rootSrcDir := viper.GetString("filepath.sourceMDDir")
-	// fp := filepath.Join(rootSrcDir, bfdir)
 	info, err := os.Stat(sourcePath)
 	if err != nil {
 		l.Sugar().Error("src file not found", err)
@@ -478,36 +461,6 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 	}
 	return parseMarkDownFile(ctx, sourcePath, basefileName, info, templatePath, fm)
 }
-
-// TODO: this needs to be removed and merged into our new parser mirror tree walker as we are already walking there
-// func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaList []*model.PageMeta, err error) {
-// 	rootSrcDir := viper.GetString("filepath.sourceMDDir")
-
-// 	// traverse through the sub directory of src  and create links to the base file in destination
-// 	err = filepath.Walk(filepath.Join(rootSrcDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		// Process only Markdown files
-// 		meta, err := parseMarkDownFile(ctx, path, baseFiledir, info)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if meta != nil {
-// 			metaList = append(metaList, meta)
-// 		}
-// 		return nil
-// 	})
-
-// 	if len(metaList) > 1 {
-// 		// Sorting based on Date field in desc order so that latest record is always at the top
-// 		sort.SliceStable(metaList, func(i, j int) bool {
-// 			return metaList[i].Date.After(metaList[j].Date)
-// 		})
-// 	}
-// 	return metaList, err
-// }
 
 func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.FileInfo, templatePath string, fm map[string]any) (meta *model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
@@ -517,7 +470,8 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 	if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
 		// Determine relative path from source root
-		relPath, err := filepath.Rel(rootSrcDir, path) // TODO: repeating twice
+		var relPath string
+		relPath, err = filepath.Rel(rootSrcDir, path) // TODO: repeating twice
 		if err != nil {
 			return nil, err
 		}
@@ -543,9 +497,14 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		if !isPresent {
 			return nil, errors.New("cannot render file without created_on data in frontmatter")
 		}
-		createdOn, err := util.ParseTimeFlexible(val.(string))
-		if err != nil {
-			return nil, err
+		var createdOn time.Time
+		if s, ok := val.(string); ok {
+			createdOn, err = util.ParseTimeFlexible(s)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, fmt.Errorf("created_on value in frontmatter is not a string for path: %s", path)
 		}
 		// Generate markdown with file links
 		generatedHtml, err := ParseMarkdownToHtml(ctx, path)
@@ -578,10 +537,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		if err != nil {
 			return nil, err
 		}
-		// err = tmplt.WriteIntoFile(ctx, outputHtml, meta)
-		// if err != nil {
-		// 	return nil, err
-		// }
+
 		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlDir"))
 		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}

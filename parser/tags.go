@@ -33,7 +33,7 @@ func ProcessTags(ctx context.Context, tag string) (tagMeta *model.Tag, err error
 	}
 	if err != nil && os.IsNotExist(err) {
 		tp = filepath.Join(tagPath, "list.html")
-		_, err := os.Stat(tp) // defult list template for all the tags
+		_, err = os.Stat(tp) // defult list template for all the tags
 		if err != nil {
 			return nil, err
 		}
