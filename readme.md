@@ -1281,24 +1281,3 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 
 ---
-go to /docs I am generating docs for this using hanamark
-in the generated docs I have some problems fix these
-Zero JavaScript
-Pure static HTML output. Fast, accessible, and works everywhere. this is wrong because you can anyways add js script in templates and use them .... add these details as part of example
-and you havent mentined about files starting with _ are system files and which of all system files are required or mandatory and you havent added a mandatory section to mandate things in app like markdown assets has to be in one single folder, it should always be static/ , css file is styles.css inside /css and check the code for all other mandatory and add them there
-add in Use blog section as homepage:
-
-"indexHomepageHtml": {
-  "type": "section",
-  "name": "blog"
-}
-for nested folder ie floder1 inside blog (show the tree) you can use blog/folder1
-or folder1 from root
--> Uses list.html   -> blog/index.html if there is no _index.md then list wont be genrated and the engine will consider as individual files
-expaind on base template,what all can be done with it why it is manadatory
-
-add one spearate tab to give them proper instruction on what can be done and wehat cannot be done
-update in readme.md also (and llm readme.md)if these are missing
-in llm friendly docuemntation ordering is write but at start there has to be aa Full Documentation copy button as well
-Complete README with all details:
-make all the changes
