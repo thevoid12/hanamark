@@ -9,3 +9,6 @@ test/point_B
 test/test_output
 docs/
 hanamark
+# Added by goreleaser init:
+dist/
+.env
