@@ -54,14 +54,14 @@ func GetRssFeedItems(metaList []*model.PageMeta) ([]*feeds.Item, error) {
 	}
 
 	for _, meta := range metaList {
-		link, err := util.JoinURL(link, meta.DestPageDir)
+		joinedLink, err := util.JoinURL(link, meta.DestPageDir)
 		if err != nil {
 			return nil, err
 		}
 		items = append(items, &feeds.Item{
 			Title: meta.PageTitle,
 			Link: &feeds.Link{
-				Href: link,
+				Href: joinedLink,
 				// Rel:    "",
 				// Type:   "",
 				// Length: "",

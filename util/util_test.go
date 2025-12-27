@@ -101,7 +101,7 @@ func TestCopyEmbedDir(t *testing.T) {
 
 	// Check if _base.html exists in the destination
 	basePath := filepath.Join(tmpDir, "templates", "_base.html")
-	if _, err := os.Stat(basePath); os.IsNotExist(err) {
+	if _, statErr := os.Stat(basePath); os.IsNotExist(statErr) {
 		t.Errorf("Expected _base.html to exist at %s, but it was not found", basePath)
 	}
 }

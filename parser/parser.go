@@ -43,9 +43,9 @@ func ParseFiles(ctx context.Context) error {
 	indexMdExists := false                              // track if index.md exists in root
 
 	// trying to implement a mirror tree walker
-	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err // handle permission errors etc.
+	err := filepath.WalkDir(sourceFilePath, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr // handle permission errors etc.
 		}
 
 		base := filepath.Base(path)
@@ -143,7 +143,8 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// Check if the file is in draft state. If so we can ignore the file and move forward
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.DRAFT)
+				var val interface{}
+				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.DRAFT)
 				if err != nil {
 					return err
 				}
@@ -158,7 +159,8 @@ func ParseFiles(ctx context.Context) error {
 			templatefm := ""
 			var tags []string
 			if len(fm) != 0 {
-				isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
+				var val interface{}
+				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.TEMPLATE)
 				if err != nil {
 					return err
 				}
@@ -180,19 +182,17 @@ func ParseFiles(ctx context.Context) error {
 						l.Sugar().Errorf("tags value in frontmatter is not an array for path: %s", path)
 					} else {
 						for i, v := range raw {
-							s, ok := v.(string)
-							if !ok {
+							s, typeOk := v.(string)
+							if !typeOk {
 								return fmt.Errorf("tag at index %d is not a string", i)
 							}
 							tags = append(tags, s)
 						}
 					}
 				}
-
 			}
 			if templatefm == "" {
 				// Search for single.html starting from templatePath and going upward to templateRootPath
-				var err error
 				singleTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "single.html")
 				if err != nil {
 					return fmt.Errorf("failed to find single.html template for directory %s: %w", templatePath, err)
@@ -200,7 +200,7 @@ func ParseFiles(ctx context.Context) error {
 			} else {
 				singleTemplate = filepath.Join(templateRootPath, templatefm)
 				// Verify custom template exists
-				if info, err := os.Stat(singleTemplate); errors.Is(err, os.ErrNotExist) || info.IsDir() {
+				if info, statErr := os.Stat(singleTemplate); errors.Is(statErr, os.ErrNotExist) || info.IsDir() {
 					return fmt.Errorf("custom template %s is missing or is a directory", singleTemplate)
 				} else if err != nil {
 					return err
@@ -217,9 +217,9 @@ func ParseFiles(ctx context.Context) error {
 			// process tag
 			if len(tags) > 0 {
 				for _, tag := range tags {
-					tagMeta, err := ProcessTags(ctx, tag)
-					if err != nil {
-						return err
+					tagMeta, tagErr := ProcessTags(ctx, tag)
+					if tagErr != nil {
+						return tagErr
 					}
 
 					if tagMap[tag] == nil {
@@ -302,12 +302,14 @@ func ParseFiles(ctx context.Context) error {
 		_, ok := indexFmMap[lp.Base]
 		if ok {
 			// get the custom template name from the map
-			isPresent, val, err := FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
+			var isPresent bool
+			var val interface{}
+			isPresent, val, err = FrontMatterValidator(ctx, "", indexFmMap[lp.Base], model.TEMPLATE)
 			if err != nil {
 				return err
 			}
 			if isPresent {
-				if s, ok := val.(string); ok {
+				if s, castOk := val.(string); castOk {
 					lp.TempPath = filepath.Join(templateRootPath, s) // custom template instead of list.html
 				} else {
 					l.Sugar().Errorf("template value in _index.md frontmatter is not a string for list page: %s", lp.Base)
@@ -321,15 +323,15 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent { // get rss feed items
-					items, err := GetRssFeedItems(newfolderMetaMap[lp.Base])
-					if err != nil {
-						return err
+					items, rssErr := GetRssFeedItems(newfolderMetaMap[lp.Base])
+					if rssErr != nil {
+						return rssErr
 					}
 					rssFeedItems = append(rssFeedItems, items...)
 				}
 			}
 		}
-		err := tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], lp)
+		err = tmplt.RenderBaseLinkTemplate(ctx, newfolderMetaMap[lp.Base], lp)
 		if err != nil {
 			return err
 		}
@@ -343,7 +345,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 
 			// check if _index.html exists
-			_, err := os.Stat("_index.html")
+			_, err = os.Stat("_index.html")
 			if err != nil && os.IsNotExist(err) {
 				// there is no custom index template so
 				// we will use the reference of the referenced template section
@@ -352,7 +354,8 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			} else {
 				// Use _index.html template if exists, otherwise use the section's template
-				indexTemplate, err := util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
+				var indexTemplate string
+				indexTemplate, err = util.FindTemplateUpward(templateRootPath, templateRootPath, "_index.html")
 				if err == nil {
 					rootLp.TempPath = indexTemplate
 				}
@@ -382,7 +385,7 @@ func ParseFiles(ctx context.Context) error {
 		// Copy the rendered page to index.html
 		srcPath := filepath.Join(destRootPath, pageName)
 		destPath := filepath.Join(destRootPath, "index.html")
-		if err := util.CopyFile(srcPath, destPath); err != nil {
+		if copyErr := util.CopyFile(srcPath, destPath); copyErr != nil {
 			l.Sugar().Warn("indexHomepageHtml page not found, skipping: " + pageName)
 		} else {
 			l.Info("index.html generated from indexHomepageHtml page: " + pageName)
@@ -391,7 +394,8 @@ func ParseFiles(ctx context.Context) error {
 	// if rss is enabled in Frontmatter we got to render that
 	if len(rssFeedItems) > 0 {
 		// parse rss for the list
-		feed, err := GetRssFeed()
+		var feed *feeds.Feed
+		feed, err = GetRssFeed()
 		if err != nil {
 			return err
 		}
@@ -404,7 +408,7 @@ func ParseFiles(ctx context.Context) error {
 	// parse the tag list pages (1 html page for each tag which has the list of stuff thats been tagged)
 	var tagList []*model.TagList // tag list is the data needed to create the tags page which will have the list of tags
 	for tagName, tagMeta := range tagMap {
-		err := tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
+		err = tmplt.RenderTagLinkTemplate(ctx, tagMeta, tagName)
 		if err != nil {
 			return err
 		}
@@ -420,8 +424,8 @@ func ParseFiles(ctx context.Context) error {
 	}
 	// render tag list page (TODO: you should do all of these only if config is set true)
 	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
-	if err := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); err != nil {
-		l.Sugar().Errorf("failed to render tag list template: %v", err)
+	if tagErr := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); tagErr != nil {
+		l.Sugar().Errorf("failed to render tag list template: %v", tagErr)
 	}
 	return nil
 }
@@ -448,7 +452,6 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 			l.Sugar().Error("create file failed", err)
 			return nil, err
 		}
-
 	}
 
 	info, err := os.Stat(sourcePath)
@@ -467,7 +470,8 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 
 	if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
 		// Determine relative path from source root
-		relPath, err := filepath.Rel(rootSrcDir, path) // TODO: repeating twice
+		var relPath string
+		relPath, err = filepath.Rel(rootSrcDir, path) // TODO: repeating twice
 		if err != nil {
 			return nil, err
 		}
@@ -495,7 +499,6 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		}
 		var createdOn time.Time
 		if s, ok := val.(string); ok {
-			var err error
 			createdOn, err = util.ParseTimeFlexible(s)
 			if err != nil {
 				return nil, err

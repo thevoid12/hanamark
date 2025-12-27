@@ -129,7 +129,7 @@ func WriteIntoFile(ctx context.Context, content string, filePath string) error {
 	}
 
 	defer f.Close()
-	_, err = f.Write([]byte(content))
+	_, err = f.WriteString(content)
 	if err != nil {
 		l.Sugar().Error("writing into the file failed", err)
 		return err
@@ -276,8 +276,8 @@ func FindTemplateUpward(startDir, rootPath, fileName string) (string, error) {
 		templatePath := filepath.Join(currentDir, fileName)
 
 		// Check if the file exists and is not a directory
-		info, err := os.Stat(templatePath)
-		if err == nil && !info.IsDir() {
+		info, statErr := os.Stat(templatePath)
+		if statErr == nil && !info.IsDir() {
 			// File found!
 			return templatePath, nil
 		}
