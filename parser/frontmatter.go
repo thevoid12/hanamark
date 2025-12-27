@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
@@ -25,7 +26,7 @@ import (
 // able to add font matter makes the parser more powerful and dynamic
 func ParseFrontMatter(ctx context.Context, FilePath string) (fm map[string]any, err error) {
 	if FilePath == "" {
-		return nil, fmt.Errorf("failed to parse frontmatter: file path is empty")
+		return nil, errors.New("failed to parse frontmatter: file path is empty")
 	}
 
 	f, err := os.Open(FilePath)

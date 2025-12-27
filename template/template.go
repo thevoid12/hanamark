@@ -23,7 +23,7 @@ func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath st
 
 	// Check if _base.html exists
 	useBase := false
-	if _, err := os.Stat(basePath); err == nil {
+	if _, statErr := os.Stat(basePath); statErr == nil {
 		useBase = true
 	}
 
@@ -49,7 +49,7 @@ func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath st
 	}
 
 	// Then parse all templates from the root directory to support partials
-	if entries, err := os.ReadDir(templateRoot); err == nil {
+	if entries, readErr := os.ReadDir(templateRoot); readErr == nil {
 		var templateFiles []string
 		for _, entry := range entries {
 			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
@@ -149,10 +149,10 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 	}
 	defer f.Close()
 	for _, m := range metaList {
-		dir, err := filepath.Rel(baseFolderName, m.DestPageDir)
-		if err != nil {
-			l.Sugar().Error("error in getting relative path", err)
-			return err
+		dir, relErr := filepath.Rel(baseFolderName, m.DestPageDir)
+		if relErr != nil {
+			l.Sugar().Error("error in getting relative path", relErr)
+			return relErr
 		}
 		m.DestPageDir = dir
 	}
