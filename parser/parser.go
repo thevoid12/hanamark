@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gorilla/feeds"
 	"github.com/spf13/viper"
@@ -105,7 +106,11 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			if isPresent {
-				templatefm = val.(string)
+				if s, ok := val.(string); ok {
+					templatefm = s
+				} else {
+					l.Sugar().Errorf("template value in frontmatter is not a string for path: %s", path)
+				}
 			}
 
 			listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, templatefm)
@@ -154,7 +159,11 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent {
-					templatefm = val.(string)
+					if s, ok := val.(string); ok {
+						templatefm = s
+					} else {
+						l.Sugar().Errorf("template value in frontmatter is not a string for path: %s", path)
+					}
 				}
 
 				isPresent, val, err = FrontMatterValidator(ctx, path, fm, model.TAGS)
@@ -162,13 +171,17 @@ func ParseFiles(ctx context.Context) error {
 					return err
 				}
 				if isPresent {
-					raw := val.([]interface{})
-					for i, v := range raw {
-						s, ok := v.(string)
-						if !ok {
-							return fmt.Errorf("tag at index %d is not a string", i)
+					raw, ok := val.([]interface{})
+					if !ok {
+						l.Sugar().Errorf("tags value in frontmatter is not an array for path: %s", path)
+					} else {
+						for i, v := range raw {
+							s, ok := v.(string)
+							if !ok {
+								return fmt.Errorf("tag at index %d is not a string", i)
+							}
+							tags = append(tags, s)
 						}
-						tags = append(tags, s)
 					}
 				}
 
@@ -290,7 +303,11 @@ func ParseFiles(ctx context.Context) error {
 				return err
 			}
 			if isPresent {
-				lp.TempPath = filepath.Join(templateRootPath, val.(string)) // custom template instead of list.html
+				if s, ok := val.(string); ok {
+					lp.TempPath = filepath.Join(templateRootPath, s) // custom template instead of list.html
+				} else {
+					l.Sugar().Errorf("template value in _index.md frontmatter is not a string for list page: %s", lp.Base)
+				}
 			}
 
 			isRssEnabled := viper.GetBool("rss.isRssEnabled")
@@ -399,7 +416,9 @@ func ParseFiles(ctx context.Context) error {
 	}
 	// render tag list page (TODO: you should do all of these only if config is set true)
 	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
-	tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt)
+	if err := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); err != nil {
+		l.Sugar().Errorf("failed to render tag list template: %v", err)
+	}
 	return nil
 }
 
@@ -470,9 +489,15 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		if !isPresent {
 			return nil, errors.New("cannot render file without created_on data in frontmatter")
 		}
-		createdOn, err := util.ParseTimeFlexible(val.(string))
-		if err != nil {
-			return nil, err
+		var createdOn time.Time
+		if s, ok := val.(string); ok {
+			var err error
+			createdOn, err = util.ParseTimeFlexible(s)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, fmt.Errorf("created_on value in frontmatter is not a string for path: %s", path)
 		}
 		// Generate markdown with file links
 		generatedHtml, err := ParseMarkdownToHtml(ctx, path)

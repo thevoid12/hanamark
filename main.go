@@ -177,7 +177,8 @@ func setupConfig() (l *zap.Logger, ctx context.Context, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configNotFoundErr viper.ConfigFileNotFoundError
+		if errors.As(err, &configNotFoundErr) {
 			// Config file not found; ignore error if desired
 			log.Println("there is a error in the path of config file", err)
 			return nil, nil, err
