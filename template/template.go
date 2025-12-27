@@ -19,48 +19,6 @@ func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath st
 	templateRoot := viper.GetString("filepath.templatePath")
 	basePath := filepath.Join(templateRoot, "_base.html")
 
-	// funcMap := template.FuncMap{
-	// 	"config": func(key string) any {
-	// 		return viper.Get(key)
-	// 	},
-	// 	"findAsset": func(assetPath string) string {
-	// 		// Extract the filename from the asset path
-	// 		filename := filepath.Base(assetPath)
-
-	// 		// Get the destination assets directory
-	// 		mdAssetsDestPath := viper.GetString("filepath.mdAssetsDestPath")
-	// 		if mdAssetsDestPath == "" {
-	// 			// Fallback: try to use the original path
-	// 			return assetPath
-	// 		}
-
-	// 		// Walk the destination assets directory to find the file
-	// 		var foundPath string
-	// 		err := filepath.WalkDir(mdAssetsDestPath, func(path string, d os.DirEntry, err error) error {
-	// 			if err != nil {
-	// 				return nil // Continue walking even if there's an error
-	// 			}
-	// 			if !d.IsDir() && filepath.Base(path) == filename {
-	// 				// Found the file, make it relative to the directory of the page being rendered
-	// 				destPageDir := filepath.Dir(destPagePath)
-	// 				relPath, err := filepath.Rel(destPageDir, path)
-	// 				if err == nil {
-	// 					foundPath = filepath.ToSlash(relPath)
-	// 				}
-	// 				return filepath.SkipAll // Stop walking once found
-	// 			}
-	// 			return nil
-	// 		})
-
-	// 		if err == nil && foundPath != "" {
-	// 			return foundPath
-	// 		}
-
-	// 		// Fallback: return original path
-	// 		return assetPath
-	// 	},
-	// }
-
 	var err error
 
 	// Check if _base.html exists

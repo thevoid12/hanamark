@@ -232,27 +232,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 			folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
 		}
-		// } else {
-		// 	// only if all the files in the folders are traversed and we have the metaList we can process the list template coz list is a collection of links to the files in the folder
 
-		// 	// in root directory we dont need list.html as if there is any list definitely there will be a subfolder
-		// 	if relSource != "." {
-		// 		// Search for list.html starting from templatePath and going upward to templateRootPath
-		// 		var err error
-		// 		listTemplate, err = util.FindTemplateUpward(templatePath, templateRootPath, "list.html")
-		// 		if err != nil {
-		// 			return fmt.Errorf("failed to find list.html template for directory %s: %w", templatePath, err)
-		// 		}
-		// 		fmt.Println("B:", listTemplate)
-		// 		l.Info("B:" + listTemplate)
-		// 		ListPages = append(ListPages, &model.ListPage{Base: base, TempPath: listTemplate})
-		// 		// if metaMap[base] != nil { // TODO: but what if we reach here before processing the files?
-
-		// 		// } else {
-		// 		// 	return errors.New("no files found in the directory" + templatePath)
-		// 		// }
-		// 	}
-		// }
 		return nil
 	})
 
@@ -424,16 +404,8 @@ func ParseFiles(ctx context.Context) error {
 }
 
 func processFile(ctx context.Context, sourcePath string, templatePath string, fm map[string]any) (*model.PageMeta, error) {
-	// sp: ./pointA/about.md
-	//tp: ./templates/single.html
-	// result: ./pointB/about.html
-	// config: ./pointB
-	//  ./pointB/about.html
-	//  sp: ./pointA/home/blog1.md
-	//  tp: ./templaates/home/single.html
-	//  result: ./pointB/home/blog1.html
+
 	l := logs.GetLoggerctx(ctx)
-	// ext := filepath.Ext(sourcePath)
 	// check if the parent folders exists. if not create the parent folders
 	basefileName := filepath.Base(sourcePath) //TODO: this doesnt work as base includes just the last file name but we want everything other than the root to mirror destination
 	rootDestDir := viper.GetString("filepath.destHtmlDir")
@@ -455,22 +427,7 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 		}
 
 	}
-	// metaList, err = parseSubFolderFilesToHtml(ctx, bfdir)
-	// if err != nil {
-	// 	l.Sugar().Error("parse subfolder files to html failed", err)
-	// 	return err
-	// }
-	// since all the files in the subfolder is parsed we will now process the index page for these subfolder(base file)
-	// of if there are no sub folder the base file md is directly converted to html
-	// err = tmplt.RenderBaseLinkTemplate(ctx, metaList, basefileName)
-	// if err != nil {
-	// 	return err
-	// }
 
-	// } else {
-	// process pure base files(which has no subdirectory)
-	// rootSrcDir := viper.GetString("filepath.sourceMDDir")
-	// fp := filepath.Join(rootSrcDir, bfdir)
 	info, err := os.Stat(sourcePath)
 	if err != nil {
 		l.Sugar().Error("src file not found", err)
@@ -478,36 +435,6 @@ func processFile(ctx context.Context, sourcePath string, templatePath string, fm
 	}
 	return parseMarkDownFile(ctx, sourcePath, basefileName, info, templatePath, fm)
 }
-
-// TODO: this needs to be removed and merged into our new parser mirror tree walker as we are already walking there
-// func parseSubFolderFilesToHtml(ctx context.Context, baseFiledir string) (metaList []*model.PageMeta, err error) {
-// 	rootSrcDir := viper.GetString("filepath.sourceMDDir")
-
-// 	// traverse through the sub directory of src  and create links to the base file in destination
-// 	err = filepath.Walk(filepath.Join(rootSrcDir, baseFiledir), func(path string, info os.FileInfo, err error) error {
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		// Process only Markdown files
-// 		meta, err := parseMarkDownFile(ctx, path, baseFiledir, info)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if meta != nil {
-// 			metaList = append(metaList, meta)
-// 		}
-// 		return nil
-// 	})
-
-// 	if len(metaList) > 1 {
-// 		// Sorting based on Date field in desc order so that latest record is always at the top
-// 		sort.SliceStable(metaList, func(i, j int) bool {
-// 			return metaList[i].Date.After(metaList[j].Date)
-// 		})
-// 	}
-// 	return metaList, err
-// }
 
 func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.FileInfo, templatePath string, fm map[string]any) (meta *model.PageMeta, err error) {
 	l := logs.GetLoggerctx(ctx)
@@ -578,10 +505,7 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		if err != nil {
 			return nil, err
 		}
-		// err = tmplt.WriteIntoFile(ctx, outputHtml, meta)
-		// if err != nil {
-		// 	return nil, err
-		// }
+
 		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlDir"))
 		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
