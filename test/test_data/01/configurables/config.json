@@ -1,0 +1,27 @@
+
+{
+  "filepath": {
+   "sourceMDDir": "./test_data/01/configurables/point_A",
+    "destHtmlDir": "./test_output/point_B_01",
+    "templatePath": "./test_data/01/configurables/templates",
+    "sourceStaticFiles": "./test_data/01/configurables/static",
+    "mdAssetsSourcePath": "",
+    "mdAssetsDestPath":""
+  },
+  
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
+  },
+    "rss":{
+    "isRssEnabled":true,
+    "title":"void blog",
+    "link":"https://thisisvoid.in",
+    "authorName":"void",
+    "authorEmailID":"thevoidddd1@gmail.com",
+    "rssOutputName":"feed.xml"
+  },
+  "tags":true,
+  "sortFilesByCreatedOn":true,
+  "servePort":"3000"
+}
