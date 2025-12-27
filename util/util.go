@@ -39,17 +39,18 @@ func RelURL(fromFile, toFile string) (string, error) {
 	// if it is a directory then we are already good to go
 	info, err := os.Stat(fromFile)
 	var fromDir string
-	if err == nil {
+	switch {
+	case err == nil:
 		if info.IsDir() {
 			fromDir = fromFile
 		} else {
 			fromDir = filepath.Dir(fromFile)
 		}
-	} else if os.IsNotExist(err) {
+	case os.IsNotExist(err):
 		// If file doesn't exist, assume it's a file path and get its directory
 		// This is necessary for generating links from pages that haven't been created yet
 		fromDir = filepath.Dir(fromFile)
-	} else {
+	default:
 		return "", err // permission error or other
 	}
 

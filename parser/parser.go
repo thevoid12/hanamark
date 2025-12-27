@@ -38,7 +38,7 @@ func ParseFiles(ctx context.Context) error {
 
 	folderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 	indexFmMap := make(map[string]model.FrontMatter)    // front matter of _index.md page
-	var ListPages []*model.ListPage                     // this has the base file names (folder names) of the pages
+	var listPages []*model.ListPage                     // this has the base file names (folder names) of the pages
 	tagMap := make(map[string][]*model.Tag)             // key is the tag name value is the tag property
 	indexMdExists := false                              // track if index.md exists in root
 
@@ -120,7 +120,7 @@ func ParseFiles(ctx context.Context) error {
 			fmt.Println("B:", listTemplate)
 			l.Info("B:" + listTemplate)
 
-			ListPages = append(ListPages, &model.ListPage{Base: folderName, TempPath: listTemplate})
+			listPages = append(listPages, &model.ListPage{Base: folderName, TempPath: listTemplate})
 			return nil
 		} else if !d.IsDir() {
 			// Skip non-markdown files
@@ -147,8 +147,12 @@ func ParseFiles(ctx context.Context) error {
 				if err != nil {
 					return err
 				}
-				if isPresent && val.(bool) {
-					return nil // skip the file
+				if isPresent {
+					if isDraft, ok := val.(bool); ok && isDraft {
+						return nil // skip the file
+					} else if !ok {
+						l.Sugar().Errorf("draft value in frontmatter is not a boolean for path: %s", path)
+					}
 				}
 			}
 			templatefm := ""
@@ -257,25 +261,25 @@ func ParseFiles(ctx context.Context) error {
 	newfolderMetaMap := make(map[string][]*model.PageMeta) // key is the folder
 
 	// distribute files and sub-list-pages to their closest parent list page
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		newfolderMetaMap[lp.Base] = make([]*model.PageMeta, 0)
 	}
 
 	//  Distribute files to their closest parent list page
 	for folderPath, files := range folderMetaMap {
-		closestLP := getClosestListPage(folderPath, ListPages)
+		closestLP := getClosestListPage(folderPath, listPages)
 		if closestLP != nil {
 			newfolderMetaMap[closestLP.Base] = append(newfolderMetaMap[closestLP.Base], files...)
 		}
 	}
 
 	//  Add sub-list-pages to their parent list pages as entries
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		if lp.Base == "." || lp.Base == "" {
 			continue
 		}
 		parentDir := filepath.Dir(lp.Base)
-		parentLP := getClosestListPage(parentDir, ListPages)
+		parentLP := getClosestListPage(parentDir, listPages)
 		if parentLP != nil && parentLP.Base != lp.Base {
 			childBase := filepath.Base(lp.Base)
 			destPath := filepath.Join(lp.Base, "index.html")
@@ -291,7 +295,7 @@ func ParseFiles(ctx context.Context) error {
 	indexHomepageType := strings.ToLower(strings.TrimSpace(viper.GetString("indexHomepageHtml.type")))
 	indexHomepageName := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(viper.GetString("indexHomepageHtml.name")), "/"))
 
-	for _, lp := range ListPages {
+	for _, lp := range listPages {
 		if newfolderMetaMap[lp.Base] == nil {
 			return errors.New("no files found in the directory:" + lp.Base)
 		}
@@ -373,7 +377,7 @@ func ParseFiles(ctx context.Context) error {
 		// Normalize to .html if needed
 		pageName := indexHomepageName
 		if !strings.HasSuffix(pageName, ".html") {
-			pageName = pageName + ".html"
+			pageName += ".html"
 		}
 		// Copy the rendered page to index.html
 		srcPath := filepath.Join(destRootPath, pageName)
