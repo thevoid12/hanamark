@@ -1,2 +1,14 @@
 .DS_Store
 templates/v_project_template.html
+/hanamark
+*.logs
+*.log
+/configurables/
+test/configurables
+test/point_B
+test/test_output
+docs/
+hanamark
+# Added by goreleaser init:
+dist/
+.env

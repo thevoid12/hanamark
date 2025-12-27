@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.PageTitle}}</title>
+</head>
+<body>
+    <h1>{{.PageTitle}}</h1>
+    <p>This is the nested folder template</p>
+    <ul>
+    {{range .PageMeta}}
+        <li><a href="{{.DestPageDir}}">{{.PageTitle}}</a></li>
+    {{end}}
+    </ul>
+</body>
+</html>
