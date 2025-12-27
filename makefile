@@ -18,29 +18,6 @@ build:
 # 	# build for windows
 # 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o hanamark.exe
 
-
-run: build
-	./hanamark
-
-init: 
-	go mod init hanamark
-	$(MAKE) run
-
-
-# running files in hanamark and committing the code in repo 
-# (add this make file in your markdown block or modify paths accordingly)
-DATE := $(shell date '+%Y-%m-%d_%H-%M-%S')
-makehanamark:
-	cd .. && \
-	cd hanamark && \
-	make run && \
-	cd .. && \
-	cd thisisvoid/ && \
-	git add . && \
-	git commit -m "personal site_$(DATE)" &&\
-	git push && \
-	@echo "deployed hanamark parsed blog successfully..."
-
 # ---- Config ----
 GOLANGCI_LINT := golangci-lint
 GO := go
@@ -101,9 +78,13 @@ full-release: release-check build-dist push-codeberg
 	# 2. Reminder for Codeberg
 	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
+.PHONY: add-tag 
+add-tag:
+	git tag -a v$(VERSION) -m "v$(VERSION)"
+	git push origin v$(VERSION)
 
 .PHONY: full-release-draft
-full-release-draft: release-check build-dist 
+full-release-draft:add-tag release-check build-dist 
 	# 1. Run goreleaser for GitHub (using your .goreleaser.yaml)
 	goreleaser release --clean --draft
 	@echo "manually check the changes in github and click publish"
@@ -111,7 +92,3 @@ full-release-draft: release-check build-dist
 	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
 
-.PHONY: add-tag 
-add-tag:
-	git tag -a v$(VERSION) -m "v$(VERSION)"
-	git push origin v$(VERSION)
