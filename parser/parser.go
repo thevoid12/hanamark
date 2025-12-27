@@ -422,10 +422,12 @@ func ParseFiles(ctx context.Context) error {
 			Count:       len(tagMeta),
 		})
 	}
-	// render tag list page (TODO: you should do all of these only if config is set true)
-	tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
-	if tagErr := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); tagErr != nil {
-		l.Sugar().Errorf("failed to render tag list template: %v", tagErr)
+	isTagsEnabled := viper.GetBool("tags")
+	if isTagsEnabled {
+		tagListTmpt := filepath.Join(templateRootPath, "tags", "single.html")
+		if tagErr := tmplt.RenderBaseTagListTemplate(ctx, tagList, tagListTmpt); tagErr != nil {
+			l.Sugar().Errorf("failed to render tag list template: %v", tagErr)
+		}
 	}
 	return nil
 }
