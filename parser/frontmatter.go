@@ -68,7 +68,8 @@ func StripFrontMatter(ctx context.Context, data []byte) []byte {
 	}
 
 	// check if first non-empty line is ---
-	if !bytes.Equal(bytes.TrimSpace(rest[:bytes.Index(rest, []byte("\n"))]), []byte("---")) {
+	newlineIdx := bytes.Index(rest, []byte("\n"))
+	if newlineIdx == -1 || !bytes.Equal(bytes.TrimSpace(rest[:newlineIdx]), []byte("---")) {
 		return data
 	}
 
@@ -96,12 +97,12 @@ func StripFrontMatter(ctx context.Context, data []byte) []byte {
 // check for a paticular font matter type exist in fontmatter
 // add the check into this whenever a new fontmatter key is added
 // you can either provide the filepath or if you have the frontmatter if you have it already
-func FrontMatterValidator(ctx context.Context, FilePath string, fm map[string]any, fmKey model.FrontMatterKey) (isPresent bool, value any, err error) {
+func FrontMatterValidator(ctx context.Context, filePath string, fm map[string]any, fmKey model.FrontMatterKey) (isPresent bool, value any, err error) {
 	if len(fm) == 0 {
-		if FilePath == "" {
+		if filePath == "" {
 			return false, nil, fmt.Errorf("cannot validate frontmatter key %s: both frontmatter map and file path are empty", fmKey)
 		}
-		fm, err = ParseFrontMatter(ctx, FilePath)
+		fm, err = ParseFrontMatter(ctx, filePath)
 		if err != nil {
 			return false, nil, fmt.Errorf("failed to validate frontmatter: %w", err)
 		}

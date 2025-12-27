@@ -47,8 +47,6 @@ type Tag struct {
 	FileDestPath    string // the path of the md->html comverted file which has the tag
 }
 
-var TagMap map[string]Tag // key is the tag name value is the tag property
-
 type TagList struct {
 	TagName     string
 	TagDestPath string // the path that leads us to the individual tag list

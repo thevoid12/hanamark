@@ -10,7 +10,7 @@
 
 # Based on https://github.com/maratori/golangci-lint-config
 
-# version: "2"  # Commented out due to config parsing issues
+version: "2"  
 
 issues:
   # Maximum count of issues with the same text.

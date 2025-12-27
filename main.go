@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -39,12 +40,12 @@ func main() {
 
 	if showVersion {
 		fmt.Println("hanamark version", constants.Version)
-		os.Exit(0)
+		return
 	}
 
 	if showHelp {
 		flag.Usage()
-		os.Exit(0)
+		return
 	}
 
 	args := flag.Args()
@@ -153,7 +154,14 @@ func serveStaticFiles(dir string, port string) {
 	http.Handle("/", fs)
 
 	log.Print("Listening on :3000...")
-	err := http.ListenAndServe(":"+port, nil)
+	server := &http.Server{
+		Addr:    ":" + port,
+		Handler: nil,
+		// ReadTimeout:  15 * time.Second,
+		// WriteTimeout: 15 * time.Second,
+		IdleTimeout: 60 * time.Minute,
+	}
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
