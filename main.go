@@ -5,8 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	configurables "hanamark/internal"
 	constants "hanamark/constant"
+	configurables "hanamark/internal"
 	logs "hanamark/logger"
 	"hanamark/parser"
 	"hanamark/util"
@@ -21,6 +21,12 @@ import (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Panic recovered:", r)
+			os.Exit(1)
+		}
+	}()
 	var showHelp bool
 	var showVersion bool
 	flag.BoolVar(&showHelp, "help", false, "Show help message")
