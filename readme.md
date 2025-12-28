@@ -3,7 +3,10 @@
 **Hanamark** is a fast, minimal, and flexible static site generator written in Go. I wrote this engine for my personal blog [thisisvoid.in](https://www.thisisvoid.in) and now putting it out so that anyone can quickly build and maintain their static sites.
 
 > Write in Markdown. Style with templates. Deploy anywhere.
-
+---
+- contributions are highly welcomed. If you find any issue please report the issues I will resolve it quickly.
+- for a quick setup video demo: https://drive.google.com/file/d/1tQX_J_ieNC1rQxcFhsn7sqlQlyvOfdbE/view?usp=sharing
+- llm friendly doc (click the copy button,paste it in your fav llm to ease setup): https://hanamark.thisisvoid.in/llm-docs 
 ---
 
 ## Table of Contents
