@@ -514,15 +514,26 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			l.Sugar().Error("Error parsing markdown to html", err)
 			return nil, err
 		}
+		isPresent, value, err := FrontMatterValidator(ctx, "", fm, model.TITLE)
+		if err != nil {
+			return nil, err
+		}
 		title := ""
+		if isPresent {
+			if s, ok := value.(string); ok {
+				title = s
+			}
+		}
 		if generatedHtml != "" {
 			if len(fm) > 0 {
 				// we have to remove the frontmatter from the md else it will also be displayed along the html
 				generatedHtml = string(StripFrontMatter(ctx, []byte(generatedHtml)))
 			}
-			title, err = ExtractHeadingInMarkdown(ctx, path)
-			if err != nil {
-				return nil, err
+			if !isPresent {
+				title, err = ExtractHeadingInMarkdown(ctx, path)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 

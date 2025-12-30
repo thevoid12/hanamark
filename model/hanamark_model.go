@@ -36,6 +36,7 @@ const (
 	DRAFT    FrontMatterKey = "draft"      // draft mode documents are not published
 	DATE     FrontMatterKey = "created_on" // date at which the md file is first created
 	RSS      FrontMatterKey = "rss"        // rss support
+	TITLE    FrontMatterKey = "title"      // custom title for blogs (using this title overwrites the actual generated title in list pages of blogs)
 )
 
 // Tags
