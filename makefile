@@ -92,3 +92,16 @@ full-release-draft:add-tag release-check build-dist
 	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
 
+
+###################################################
+
+generate-docs:
+	@echo "syncing newly added md docs with the docs template for docs generation...."
+	rsync -av --delete ./docs-md/ ../hanamark-doc-template/configurables/source_md/
+	cd ../hanamark-doc-template && \
+		pwd && \
+		echo "building the newer docs............." && \
+		./hanamark build && \
+		echo "syncing the newer docs with the deployment repo.........." && \
+		rsync -av --delete ./hanamark_docs/ ../hanamark_docs
+
