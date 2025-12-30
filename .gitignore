@@ -12,3 +12,4 @@ hanamark
 # Added by goreleaser init:
 dist/
 .env
+docs-md/
