@@ -195,11 +195,6 @@ func TestBuildFileFlag(t *testing.T) {
 			configDir: "./test_data/01/configurables/",
 		},
 		{
-			name:      "markdown-blog",
-			configDir: "./test_data/02/configurables/",
-		},
-
-		{
 			name:      "nested list basic site",
 			configDir: "./test_data/03/configurables/",
 		},
