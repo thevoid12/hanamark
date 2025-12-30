@@ -210,6 +210,10 @@ func TestBuildFileFlag(t *testing.T) {
 			name:      "indexContent config - nested folder1 section as index.html",
 			configDir: "./test_data/06/configurables/",
 		},
+		{
+			name:      "opengraph meta tags feature",
+			configDir: "./test_data/07/configurables/",
+		},
 	}
 
 	for _, tt := range tests {

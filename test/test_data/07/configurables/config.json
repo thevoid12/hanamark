@@ -1,0 +1,35 @@
+{
+    "filepath": {
+        "sourceMDDir": "./test_data/07/configurables/point_A",
+        "destHtmlDir": "./test_output/point_B_07",
+        "templatePath": "./test_data/07/configurables/templates",
+        "sourceStaticFiles": "./test_data/07/configurables/static",
+        "mdAssetsSourcePath": "",
+        "mdAssetsDestPath": ""
+    },
+    "logger": {
+        "filepath": "hanamark.logs",
+        "level": "debug"
+    },
+    "rss": {
+        "isRssEnabled": false,
+        "title": "Test Blog",
+        "link": "https://testsite.com",
+        "authorName": "Test Author",
+        "authorEmailID": "test@example.com",
+        "rssOutputName": "feed.xml"
+    },
+    "opengraph": {
+    "enabled": true,
+    "siteName": "Test Site",
+    "baseUrl": "https://testsite.com",
+    "defaultImage": "/static/images/og-default.png",
+    "imageWidth": "1200",
+    "imageHeight": "630",
+    "twitterCard": "summary_large_image"
+    },
+    "tags": false,
+    "sortFilesByCreatedOn": true,
+    "servePort": "3000"
+
+}
