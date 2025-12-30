@@ -103,5 +103,5 @@ generate-docs:
 		echo "building the newer docs............." && \
 		./hanamark build && \
 		echo "syncing the newer docs with the deployment repo.........." && \
-		rsync -av --delete ./hanamark_docs/ ../hanamark_docs
+		rsync -av --delete ./hanamark_docs/ ../hanamark_docs/
 

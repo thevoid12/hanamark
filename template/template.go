@@ -5,6 +5,7 @@ import (
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -14,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath string) (*template.Template, string, error) {
+func getTemplate(targetTemplatePath string) (*template.Template, string, error) {
 	// l := logs.GetLoggerctx(ctx)
 	templateRoot := viper.GetString("filepath.templatePath")
 	basePath := filepath.Join(templateRoot, "_base.html")
@@ -41,8 +42,25 @@ func getTemplate(ctx context.Context, targetTemplatePath string, destPagePath st
 		}
 	}
 
-	// Parse the target content first
-	tmpl := template.New("")
+	//  custom template functions
+	funcMap := template.FuncMap{
+		"config": func(key string) any {
+			return viper.Get(key)
+		},
+		"hasPrefix": func(s, prefix string) bool {
+			return strings.HasPrefix(s, prefix)
+		},
+		"urlJoin": func(base string, elem ...string) string {
+			result, err := url.JoinPath(base, elem...)
+			if err != nil {
+				return base // fallback or panic, but fallback safer for template
+			}
+			return result
+		},
+	}
+
+	// Parse the target content first with custom functions
+	tmpl := template.New("").Funcs(funcMap)
 	tmpl, err = tmpl.Parse(finalContent)
 	if err != nil {
 		return nil, "", err
@@ -92,7 +110,7 @@ func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath stri
 	l := logs.GetLoggerctx(ctx)
 
 	opFile := meta.DestPageDir
-	tmpl, execName, err := getTemplate(ctx, templatePath, opFile)
+	tmpl, execName, err := getTemplate(templatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -137,7 +155,7 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 		}
 	}
 
-	tmpl, execName, err := getTemplate(ctx, tmptPath, opBaseFile)
+	tmpl, execName, err := getTemplate(tmptPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -178,7 +196,7 @@ func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tm
 
 	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), "tags", "tags.html")
 
-	tmpl, execName, err := getTemplate(ctx, tmptPath, opBaseFile)
+	tmpl, execName, err := getTemplate(tmptPath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err
@@ -220,7 +238,7 @@ func RenderTagLinkTemplate(ctx context.Context, tagMeta []*model.Tag, tagName st
 	// opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), baseFolderName, strings.TrimSuffix(baseFolderName, filepath.Ext(baseFolderName))+".html")
 	opBaseFile := baseFolderName
 
-	tmpl, execName, err := getTemplate(ctx, tagMeta[0].TagTemplatePath, opBaseFile)
+	tmpl, execName, err := getTemplate(tagMeta[0].TagTemplatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
 		return err

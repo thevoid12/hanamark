@@ -1,0 +1,60 @@
+{{- if config "opengraph.enabled" -}}
+{{- $ogTitle := .PageTitle -}}
+{{- $siteName := config "opengraph.sitename" -}}
+{{- $baseUrl := config "opengraph.baseurl" -}}
+{{- $defaultImage := config "opengraph.defaultimage" -}}
+{{- $imageWidth := config "opengraph.imagewidth" -}}
+{{- $imageHeight := config "opengraph.imageheight" -}}
+{{- $twitterCard := config "opengraph.twittercard" -}}
+
+{{- $ogDescription := "" -}}
+{{- $ogImage := $defaultImage -}}
+{{- $ogUrl := "" -}}
+
+{{- if .FrontMatterMap -}}
+{{- if .FrontMatterMap.description -}}
+{{- $ogDescription = .FrontMatterMap.description -}}
+{{- end -}}
+{{- if .FrontMatterMap.ogimage -}}
+{{- $ogImage = .FrontMatterMap.ogimage -}}
+{{- end -}}
+{{- end -}}
+
+{{- if and $baseUrl .DestPageDir -}}
+{{- $ogUrl = urlJoin $baseUrl .DestPageDir -}}
+{{- end -}}
+
+<meta property="og:title" content="{{ $ogTitle }}">
+<meta property="og:type" content="article">
+{{- if $ogUrl }}
+<meta property="og:url" content="{{ $ogUrl }}">
+<link rel="canonical" href="{{ $ogUrl }}">
+{{- end }}
+{{- if $ogDescription }}
+<meta property="og:description" content="{{ $ogDescription }}">
+{{- end }}
+{{- if $ogImage }}
+<meta property="og:image" content="{{ if hasPrefix $ogImage " http" }}{{ $ogImage }}{{ else }}{{ urlJoin $baseUrl
+    $ogImage }}{{ end }}">
+{{- end }}
+{{- if $siteName }}
+<meta property="og:site_name" content="{{ $siteName }}">
+{{- end }}
+{{- if $imageWidth }}
+<meta property="og:image:width" content="{{ $imageWidth }}">
+{{- end }}
+{{- if $imageHeight }}
+<meta property="og:image:height" content="{{ $imageHeight }}">
+{{- end }}
+{{- if $twitterCard }}
+<meta name="twitter:card" content="{{ $twitterCard }}">
+{{- end }}
+<meta name="twitter:title" content="{{ $ogTitle }}">
+{{- if $ogDescription }}
+<meta name="twitter:description" content="{{ $ogDescription }}">
+{{- end }}
+{{- if $ogImage }}
+<meta name="twitter:image" content="{{ if hasPrefix $ogImage " http" }}{{ $ogImage }}{{ else }}{{ urlJoin $baseUrl
+    $ogImage }}{{ end }}">
+{{- end }}
+{{- end -}}

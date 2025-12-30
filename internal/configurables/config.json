@@ -15,15 +15,24 @@
     "filepath": "hanamark.logs",
     "level": "debug"
   },
-    "rss":{
-    "isRssEnabled":true,
-    "title":"void blog",
-    "link":"https://thisisvoid.in",
-    "authorName":"void",
-    "authorEmailID":"thevoidddd1@gmail.com",
-    "rssOutputName":"feed.xml"
+  "rss": {
+    "isRssEnabled": true,
+    "title": "void blog",
+    "link": "https://thisisvoid.in",
+    "authorName": "void",
+    "authorEmailID": "youremailID@gmail.com",
+    "rssOutputName": "feed.xml"
   },
-  "tags":true,
-  "sortFilesByCreatedOn":true,
-  "servePort":"3000"
+  "tags": false,
+  "sortFilesByCreatedOn": true,
+  "servePort": "3000",
+  "opengraph": {
+    "enabled": false,
+    "siteName": "My Site",
+    "baseUrl": "https://example.com",
+    "defaultImage": "/static/images/og-default.png",
+    "imageWidth": "1200",
+    "imageHeight": "630",
+    "twitterCard": "summary_large_image"
+  }
 }

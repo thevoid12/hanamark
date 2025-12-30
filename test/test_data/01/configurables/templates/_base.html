@@ -6,6 +6,7 @@
   <link rel="icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/css/styles.css">
   <title>{{ .PageTitle }}</title>
+  {{ template "_opengraph.html" . }}
 </head>
 <body>
   {{ template "_header.html" }}

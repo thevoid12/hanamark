@@ -473,6 +473,47 @@ templates/
 | `authorEmailID` | Author email | No |
 | `rssOutputName` | Output filename (default: `feed.xml`) | No |
 
+### OpenGraph Support (Social Media Metadata)
+
+Hanamark supports OpenGraph and Twitter Card metadata generation. This allows your pages to look great when shared on social media.
+
+**Configuration:**
+
+```json
+"opengraph": {
+  "enabled": true,
+  "siteName": "My Awesome Blog",
+  "baseUrl": "https://example.com",
+  "defaultImage": "/static/images/og-default.png",
+  "imageWidth": "1200",
+  "imageHeight": "630",
+  "twitterCard": "summary_large_image"
+}
+```
+
+| Key | Description | Required |
+|-----|-------------|----------|
+| `enabled` | Enable/disable generation | Yes |
+| `siteName` | Site name for `og:site_name` | No |
+| `baseUrl` | Base URL (essential for valid absolute URLs) | **Yes** |
+| `defaultImage` | Default fallback image if page has no image | No |
+| `twitterCard` | Twitter card type (usually `summary_large_image`) | No |
+
+**Front Matter Overrides:**
+
+You can override OpenGraph data per page using standard front matter fields:
+
+```markdown
+---
+title: "My Special Post"
+description: "Custom description for social previews"
+ogImage: "/static/images/special-cover.png"
+---
+```
+
+- `description`: Used for `og:description` and `twitter:description`
+- `ogImage`: Used for `og:image` and `twitter:image` (overrides `defaultImage`)
+
 ### Logger
 
 ```json

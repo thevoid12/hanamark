@@ -538,13 +538,14 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		}
 
 		meta = &model.PageMeta{
-			GenHtml:     generatedHtml,
-			PageName:    "",
-			PageTitle:   title,
-			CreatedDate: createdOn,
-			UpdatedDate: lastModfiedTime,
-			DestPageDir: destPath,
-			BaseFile:    baseFiledir,
+			GenHtml:        generatedHtml,
+			PageName:       "",
+			PageTitle:      title,
+			CreatedDate:    createdOn,
+			UpdatedDate:    lastModfiedTime,
+			DestPageDir:    destPath,
+			BaseFile:       baseFiledir,
+			FrontMatterMap: fm,
 		}
 		err = tmplt.RenderTemplate(ctx, meta, templatePath)
 		if err != nil {
