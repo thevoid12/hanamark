@@ -63,6 +63,7 @@ func main() {
 		err := Init("configurables")
 		if err != nil {
 			log.Println("unable to init new project", err)
+			return
 		}
 		fmt.Println("project initialized successfully")
 		fmt.Println("run ./hanamark help to learn more....")
