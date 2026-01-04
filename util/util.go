@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func CleanSpaces(s string) string {
@@ -317,4 +318,35 @@ func IsDirUnder(parent, child string) bool {
 
 	sep := string(os.PathSeparator)
 	return strings.HasPrefix(child, parent+sep)
+}
+
+// CountWords counts the number of words in a text string
+func CountWords(text string) int {
+	words := 0
+	inWord := false
+
+	for _, char := range text {
+		if unicode.IsSpace(char) {
+			inWord = false
+		} else if !inWord {
+			inWord = true
+			words++
+		}
+	}
+
+	return words
+}
+
+// CalculateReadTime calculates reading time in minutes based on word count
+// Uses average reading speed of 200 words per minute
+func CalculateReadTime(text string) int {
+	wordCount := CountWords(text)
+	readTime := wordCount / 200
+
+	// Minimum 1 minute read time for any content
+	if readTime < 1 && wordCount > 0 {
+		return 1
+	}
+
+	return readTime
 }

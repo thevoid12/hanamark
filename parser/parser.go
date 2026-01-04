@@ -537,8 +537,20 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			}
 		}
 
+		// Calculate read time from markdown content
+		mdContent, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		// Strip frontmatter before calculating read time
+		if len(fm) > 0 {
+			mdContent = StripFrontMatter(ctx, mdContent)
+		}
+		readTime := util.CalculateReadTime(string(mdContent))
+
 		meta = &model.PageMeta{
 			GenHtml:        generatedHtml,
+			ReadTime:       readTime,
 			PageName:       "",
 			PageTitle:      title,
 			CreatedDate:    createdOn,
