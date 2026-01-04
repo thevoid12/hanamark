@@ -946,7 +946,8 @@ tags: ["go", "tutorial", "beginner"]
 
 Hanamark generates:
 
-- `output_html/tags/tags.html` - List of all tags
+- `output_html/tags/index.html
+` - List of all tags
 - `output_html/tags/go.html` - Posts tagged "go"
 - `output_html/tags/tutorial.html` - Posts tagged "tutorial"
 

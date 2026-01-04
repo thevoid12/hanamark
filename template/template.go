@@ -194,7 +194,7 @@ func RenderBaseTagListTemplate(ctx context.Context, taglist []*model.TagList, tm
 
 	// TODO: if there is a filemeta to change the base folder name give it more preced
 
-	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), "tags", "tags.html")
+	opBaseFile := filepath.Join(viper.GetString("filepath.destHtmlDir"), "tags", "index.html")
 
 	tmpl, execName, err := getTemplate(tmptPath)
 	if err != nil {
