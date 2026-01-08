@@ -79,10 +79,14 @@ full-release: release-check build-dist push-codeberg
 	# 2. Reminder for Codeberg
 	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
-.PHONY: add-tag 
+.PHONY: add-tag
 add-tag:
-	git tag -a v$(VERSION) -m "v$(VERSION)"
-	git push origin v$(VERSION)
+	@if git rev-parse "v$(VERSION)" >/dev/null 2>&1; then \
+		echo "Tag v$(VERSION) already exists"; \
+	else \
+		git tag -a v$(VERSION) -m "v$(VERSION)" && \
+		git push origin v$(VERSION); \
+	fi
 
 .PHONY: full-release-draft
 full-release-draft:add-tag release-check build-dist 
@@ -98,7 +102,10 @@ full-release-draft:add-tag release-check build-dist
 .PHONY: generate-docs
 generate-docs:
 	@echo "syncing newly added md docs with the docs template for docs generation...."
-	rsync -av --delete ./docs-md/ ../hanamark-doc-template/configurables/source_md/
+	rsync -av --delete --exclude='.git' ./docs-md/ ../hanamark-doc-template/configurables/source_md/
+	@echo "building the latest executable from local hanamark..."
+	make build 
+	cp ./hanamark ../hanamark-doc-template
 	cd ../hanamark-doc-template && \
 		pwd && \
 		echo "building the newer docs............." && \
@@ -108,7 +115,7 @@ generate-docs:
 
 .PHONY: commit-docs
 commit-docs:generate-docs
-	@echo "committing docs....." \
+	@echo "committing docs....." && \
 	cd ../hanamark-doc-template && \
 	git add . && \
 	git commit -m "documentation_template_updated_$(DATE)" && \
