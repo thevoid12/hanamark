@@ -166,8 +166,22 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 		return err
 	}
 	defer f.Close()
+
+	// Get the directory where the list page (index.html) will be created
+	listPageDir := filepath.Dir(opBaseFile)
+
 	for _, m := range metaList {
-		dir, relErr := filepath.Rel(baseFolderName, m.DestPageDir)
+		// DestPageDir at this point is like "./blogs/2026_01/updates_01.html"
+		// We need to calculate the relative path from the list page directory to the target file
+
+		// First, strip the leading "./" to get an absolute path relative to destHtmlDir
+		destPath := strings.TrimPrefix(m.DestPageDir, "./")
+
+		// Build the full path
+		fullDestPath := filepath.Join(viper.GetString("filepath.destHtmlDir"), destPath)
+
+		// Calculate relative path from list page directory to the target file
+		dir, relErr := filepath.Rel(listPageDir, fullDestPath)
 		if relErr != nil {
 			l.Sugar().Error("error in getting relative path", relErr)
 			return relErr
