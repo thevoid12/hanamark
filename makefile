@@ -1,4 +1,5 @@
 VERSION := $(shell grep -oE '[0-9]+\.[0-9]+\.[0-9]+' constant/version.go)
+DATE := $(shell date '+%Y-%m-%d_%H-%M-%S')
 
 ifneq ("$(wildcard .env)","")
     include .env
@@ -94,7 +95,7 @@ full-release-draft:add-tag release-check build-dist
 
 
 ###################################################
-
+.PHONY: generate-docs
 generate-docs:
 	@echo "syncing newly added md docs with the docs template for docs generation...."
 	rsync -av --delete ./docs-md/ ../hanamark-doc-template/configurables/source_md/
@@ -105,3 +106,14 @@ generate-docs:
 		echo "syncing the newer docs with the deployment repo.........." && \
 		rsync -av --delete --exclude='.git' ./hanamark_docs/ ../hanamark-docs/
 
+.PHONY: commit-docs
+commit-docs:generate-docs
+	@echo "committing docs....." \
+	cd ../hanamark-doc-template && \
+	git add . && \
+	git commit -m "documentation_template_updated_$(DATE)" && \
+	git push && \
+	cd ../hanamark-docs/ && \
+	git add . && \
+	git commit -m "documentation_updated_$(DATE)" && \
+	git push 

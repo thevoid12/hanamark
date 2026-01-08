@@ -67,9 +67,16 @@ Controls what content appears on the root `index.html`:
 ```json
 "indexHomepageHtml": {
   "type": "section",
-  "name": "blog"
+  "name": "blog",
+  "titletag": "My Custom Site Title"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Either `section` or `page` |
+| `name` | string | Name of the section or page to use |
+| `titletag` | string (optional) | Custom text for the `<title>` tag of the root index.html. If not provided, defaults to the section/folder name |
 
 | Type | Behavior |
 |------|----------|
@@ -91,6 +98,18 @@ This configuration:
 - Uses `list.html` template
 - Generates `blog/index.html` with list of all posts
 - Copies that as the root `index.html`
+
+**With custom title tag:**
+
+```json
+"indexHomepageHtml": {
+  "type": "section",
+  "name": "blog",
+  "titletag": "My Awesome Blog - Home"
+}
+```
+
+This will use "My Awesome Blog - Home" in the `<title>` tag of the root index.html instead of the default "blog"
 
 **Use about.html as homepage:**
 

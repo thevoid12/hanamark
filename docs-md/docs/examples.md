@@ -155,7 +155,8 @@ This section will be included in RSS and uses a custom list template.
   },
   "indexHomepageHtml": {
     "type": "section",
-    "name": "blog"
+    "name": "blog",
+    "titletag": "My Blog - Welcome"
   },
   "logger": {
     "filepath": "hanamark.logs",

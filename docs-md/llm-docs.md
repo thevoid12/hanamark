@@ -149,7 +149,8 @@ Complete config.json with all options:
   },
   "indexHomepageHtml": {
     "type": "section",
-    "name": "blog"
+    "name": "blog",
+    "titletag": "My Blog - Welcome"
   },
   "logger": {
     "filepath": "hanamark.logs",

@@ -9,7 +9,8 @@
   },
   "indexHomepageHtml": {
     "type": "section",
-    "name": "blog"
+    "name": "blog",
+    "titletag":"this text will be added inside title tag of index page"
   },
   "logger": {
     "filepath": "hanamark.logs",

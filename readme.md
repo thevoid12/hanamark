@@ -330,7 +330,8 @@ Configuration is stored in `./configurables/config.json`.
   },
   "indexHomepageHtml": {
     "type": "section",
-    "name": "blog"
+    "name": "blog",
+    "titletag": "My Blog - Welcome"
   },
   "logger": {
     "filepath": "hanamark.logs",
@@ -368,9 +369,16 @@ Controls what content appears on the root `index.html`:
 ```json
 "indexHomepageHtml": {
   "type": "section",
-  "name": "blog"
+  "name": "blog",
+  "titletag": "My Custom Site Title"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Either `section` or `page` |
+| `name` | string | Name of the section or page to use |
+| `titletag` | string (optional) | Custom text for the `<title>` tag of the root index.html. If not provided, defaults to the section/folder name |
 
 | Type | Behavior |
 |------|----------|
@@ -385,6 +393,13 @@ Controls what content appears on the root `index.html`:
 "indexHomepageHtml": {
   "type": "section",
   "name": "blog"
+}
+
+// Use blog section with custom title tag
+"indexHomepageHtml": {
+  "type": "section",
+  "name": "blog",
+  "titletag": "My Awesome Blog - Home"
 }
 
 // Use about.html as homepage

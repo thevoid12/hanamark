@@ -189,8 +189,18 @@ func RenderBaseLinkTemplate(ctx context.Context, metaList []*model.PageMeta, lp 
 		m.DestPageDir = dir
 	}
 	// wrap data for base template
+	pageTitle := base
+
+	// Check if this is the root index.html and if titletag is configured
+	if baseFolderName == "." {
+		titleTag := viper.GetString("indexHomepageHtml.titletag")
+		if titleTag != "" {
+			pageTitle = titleTag
+		}
+	}
+
 	data := map[string]interface{}{
-		"PageTitle": base,
+		"PageTitle": pageTitle,
 		"List":      metaList,
 	}
 
