@@ -82,11 +82,12 @@ full-release: release-check build-dist push-codeberg
 .PHONY: add-tag
 add-tag:
 	@if git rev-parse "v$(VERSION)" >/dev/null 2>&1; then \
-		echo "Tag v$(VERSION) already exists"; \
-	else \
-		git tag -a v$(VERSION) -m "v$(VERSION)" && \
-		git push origin v$(VERSION); \
+		echo "Tag v$(VERSION) already exists, deleting and recreating on current commit..."; \
+		git tag -d v$(VERSION); \
+		git push origin :refs/tags/v$(VERSION) 2>/dev/null || true; \
 	fi
+	@git tag -a v$(VERSION) -m "v$(VERSION)"
+	@git push origin v$(VERSION)
 
 .PHONY: full-release-draft
 full-release-draft:add-tag release-check build-dist 
