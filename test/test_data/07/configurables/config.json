@@ -19,17 +19,16 @@
         "authorEmailID": "test@example.com",
         "rssOutputName": "feed.xml"
     },
+    "site": {
+        "title": "Test Site",
+        "description": "Test site description for SEO",
+        "url": "https://testsite.com",
+        "image": "/static/images/og-default.png"
+    },
     "opengraph": {
-    "enabled": true,
-    "siteName": "Test Site",
-    "baseUrl": "https://testsite.com",
-    "defaultImage": "/static/images/og-default.png",
-    "imageWidth": "1200",
-    "imageHeight": "630",
-    "twitterCard": "summary_large_image"
+        "enabled": true
     },
     "tags": false,
     "sortFilesByCreatedOn": true,
     "servePort": "3000"
-
 }
