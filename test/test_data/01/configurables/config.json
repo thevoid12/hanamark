@@ -1,27 +1,34 @@
-
 {
   "filepath": {
-   "sourceMDDir": "./test_data/01/configurables/point_A",
+    "sourceMDDir": "./test_data/01/configurables/point_A",
     "destHtmlDir": "./test_output/point_B_01",
     "templatePath": "./test_data/01/configurables/templates",
     "sourceStaticFiles": "./test_data/01/configurables/static",
     "mdAssetsSourcePath": "",
-    "mdAssetsDestPath":""
+    "mdAssetsDestPath": ""
   },
-  
   "logger": {
     "filepath": "hanamark.logs",
     "level": "debug"
   },
-    "rss":{
-    "isRssEnabled":true,
-    "title":"void blog",
-    "link":"https://thisisvoid.in",
-    "authorName":"void",
-    "authorEmailID":"thevoidddd1@gmail.com",
-    "rssOutputName":"feed.xml"
+  "rss": {
+    "isRssEnabled": true,
+    "title": "void blog",
+    "link": "https://thisisvoid.in",
+    "authorName": "void",
+    "authorEmailID": "thevoidddd1@gmail.com",
+    "rssOutputName": "feed.xml"
   },
-  "tags":true,
-  "sortFilesByCreatedOn":true,
-  "servePort":"3000"
+  "site": {
+    "title": "Test Site",
+    "description": "Test site description",
+    "url": "https://thisisvoid.in",
+    "image": "/static/images/og-default.png"
+  },
+  "opengraph": {
+    "enabled": true
+  },
+  "tags": true,
+  "sortFilesByCreatedOn": true,
+  "servePort": "3000"
 }

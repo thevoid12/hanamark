@@ -1,60 +1,61 @@
 {{- if config "opengraph.enabled" -}}
-{{- $ogTitle := .PageTitle -}}
-{{- $siteName := config "opengraph.sitename" -}}
-{{- $baseUrl := config "opengraph.baseurl" -}}
-{{- $defaultImage := config "opengraph.defaultimage" -}}
-{{- $imageWidth := config "opengraph.imagewidth" -}}
-{{- $imageHeight := config "opengraph.imageheight" -}}
-{{- $twitterCard := config "opengraph.twittercard" -}}
+{{- $siteTitle := config "site.title" -}}
+{{- $siteDesc := config "site.description" -}}
+{{- $baseUrl := config "site.url" -}}
+{{- $defaultImage := config "site.image" -}}
 
-{{- $ogDescription := "" -}}
-{{- $ogImage := $defaultImage -}}
-{{- $ogUrl := "" -}}
+{{- $pageTitle := .PageTitle -}}
+{{- if not $pageTitle }}{{- $pageTitle = $siteTitle -}}{{- end -}}
+{{- $pageDesc := $siteDesc -}}
+{{- $pageImage := $defaultImage -}}
+{{- $pageUrl := "" -}}
 
 {{- if .FrontMatterMap -}}
 {{- if .FrontMatterMap.description -}}
-{{- $ogDescription = .FrontMatterMap.description -}}
+{{- $pageDesc = .FrontMatterMap.description -}}
 {{- end -}}
 {{- if .FrontMatterMap.ogimage -}}
-{{- $ogImage = .FrontMatterMap.ogimage -}}
+{{- $pageImage = .FrontMatterMap.ogimage -}}
 {{- end -}}
 {{- end -}}
 
 {{- if and $baseUrl .DestPageDir -}}
-{{- $ogUrl = urlJoin $baseUrl .DestPageDir -}}
+{{- $pageUrl = urlJoin $baseUrl .DestPageDir -}}
 {{- end -}}
 
-<meta property="og:title" content="{{ $ogTitle }}">
+<!-- Primary Meta Tags -->
+<meta name="title" content="{{ $pageTitle }}">
+{{- if $pageDesc }}
+<meta name="description" content="{{ $pageDesc }}">
+{{- end }}
+
+<!-- Open Graph / Facebook -->
+{{- if $siteTitle }}
+<meta property="og:site_name" content="{{ $siteTitle }}">
+{{- end }}
+<meta property="og:title" content="{{ $pageTitle }}">
 <meta property="og:type" content="article">
-{{- if $ogUrl }}
-<meta property="og:url" content="{{ $ogUrl }}">
-<link rel="canonical" href="{{ $ogUrl }}">
+{{- if $pageUrl }}
+<meta property="og:url" content="{{ $pageUrl }}">
+<link rel="canonical" href="{{ $pageUrl }}">
 {{- end }}
-{{- if $ogDescription }}
-<meta property="og:description" content="{{ $ogDescription }}">
+{{- if $pageDesc }}
+<meta property="og:description" content="{{ $pageDesc }}">
 {{- end }}
-{{- if $ogImage }}
-<meta property="og:image" content="{{ if hasPrefix $ogImage " http" }}{{ $ogImage }}{{ else }}{{ urlJoin $baseUrl
-    $ogImage }}{{ end }}">
+{{- if $pageImage }}
+<meta property="og:image" content="{{ if hasPrefix $pageImage "http" }}{{ $pageImage }}{{ else }}{{ urlJoin $baseUrl $pageImage }}{{ end }}">
 {{- end }}
-{{- if $siteName }}
-<meta property="og:site_name" content="{{ $siteName }}">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+{{- if $pageUrl }}
+<meta name="twitter:url" content="{{ $pageUrl }}">
 {{- end }}
-{{- if $imageWidth }}
-<meta property="og:image:width" content="{{ $imageWidth }}">
+<meta name="twitter:title" content="{{ $pageTitle }}">
+{{- if $pageDesc }}
+<meta name="twitter:description" content="{{ $pageDesc }}">
 {{- end }}
-{{- if $imageHeight }}
-<meta property="og:image:height" content="{{ $imageHeight }}">
-{{- end }}
-{{- if $twitterCard }}
-<meta name="twitter:card" content="{{ $twitterCard }}">
-{{- end }}
-<meta name="twitter:title" content="{{ $ogTitle }}">
-{{- if $ogDescription }}
-<meta name="twitter:description" content="{{ $ogDescription }}">
-{{- end }}
-{{- if $ogImage }}
-<meta name="twitter:image" content="{{ if hasPrefix $ogImage " http" }}{{ $ogImage }}{{ else }}{{ urlJoin $baseUrl
-    $ogImage }}{{ end }}">
+{{- if $pageImage }}
+<meta name="twitter:image" content="{{ if hasPrefix $pageImage "http" }}{{ $pageImage }}{{ else }}{{ urlJoin $baseUrl $pageImage }}{{ end }}">
 {{- end }}
 {{- end -}}

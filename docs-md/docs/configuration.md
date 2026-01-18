@@ -34,18 +34,18 @@ Configuration is stored in `./configurables/config.json`.
     "authorEmailID": "you@example.com",
     "rssOutputName": "feed.xml"
   },
+  "site": {
+    "title": "My Awesome Blog",
+    "description": "A blog about technology and life",
+    "url": "https://example.com",
+    "image": "/static/images/og-default.png"
+  },
+  "opengraph": {
+    "enabled": true
+  },
   "tags": true,
   "sortFilesByCreatedOn": true,
-  "servePort": "3000",
-  "opengraph": {
-    "enabled": true,
-    "siteName": "My Awesome Blog",
-    "baseUrl": "https://example.com",
-    "defaultImage": "/static/images/og-default.png",
-    "imageWidth": "1200",
-    "imageHeight": "630",
-    "twitterCard": "summary_large_image"
-  }
+  "servePort": "3000"
 }
 ```
 
@@ -177,29 +177,80 @@ templates/
 
 > **Note:** If you have an `index.md` in your source root, it takes precedence over all these settings.
 
-## OpenGraph Support (SE0)
+## Site Metadata
 
-Configure OpenGraph and Twitter Card metadata for better social media sharing.
+Site-level metadata used for SEO, OpenGraph, and other features.
 
 ```json
-"opengraph": {
-  "enabled": true,
-  "siteName": "My Awesome Blog",
-  "baseUrl": "https://example.com",
-  "defaultImage": "/static/images/og-default.png",
-  "imageWidth": "1200",
-  "imageHeight": "630",
-  "twitterCard": "summary_large_image"
+"site": {
+  "title": "My Awesome Blog",
+  "description": "A blog about technology and life",
+  "url": "https://example.com",
+  "image": "/static/images/og-default.png"
 }
 ```
 
 | Key | Description | Required |
 |-----|-------------|----------|
-| `enabled` | Enable/disable generation | Yes |
-| `siteName` | Site name for `og:site_name` | No |
-| `baseUrl` | Base URL (essential for valid absolute URLs) | **Yes** |
-| `defaultImage` | Default fallback image if page has no image | No |
-| `twitterCard` | Twitter card type (usually `summary_large_image`) | No |
+| `title` | Site name (used in `og:site_name`) | Yes |
+| `description` | Default meta description for pages without frontmatter description | Yes |
+| `url` | Base URL for generating absolute URLs | **Yes** |
+| `image` | Default OpenGraph image (relative or absolute URL) | No |
+
+## OpenGraph Support (SEO)
+
+Enable OpenGraph and Twitter Card metadata for better social media sharing.
+
+```json
+"opengraph": {
+  "enabled": true
+}
+```
+
+| Key | Description | Default |
+|-----|-------------|---------|
+| `enabled` | Enable/disable OpenGraph meta tag generation | `true` |
+
+When enabled, generates all necessary meta tags for Facebook, Twitter, and other social platforms. Twitter cards use `summary_large_image` format by default.
+
+### Generated Meta Tags
+
+When enabled, the following meta tags are generated:
+
+```html
+<!-- Primary Meta Tags -->
+<meta name="title" content="Page Title">
+<meta name="description" content="Page or site description">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:site_name" content="Site Title">
+<meta property="og:title" content="Page Title">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://example.com/page.html">
+<meta property="og:description" content="Description">
+<meta property="og:image" content="https://example.com/image.png">
+<link rel="canonical" href="https://example.com/page.html">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://example.com/page.html">
+<meta name="twitter:title" content="Page Title">
+<meta name="twitter:description" content="Description">
+<meta name="twitter:image" content="https://example.com/image.png">
+```
+
+### Page-Level Overrides
+
+Override site defaults using frontmatter:
+
+```yaml
+---
+description: "Custom description for this page"
+ogImage: "/static/images/custom-og.png"
+---
+```
+
+See [Front Matter](front-matter.md) for all available fields
 
 ## Logger
 

@@ -22,6 +22,20 @@ Available in `single.html` templates:
 | `.FrontMatterMap` | map | All front matter as key-value pairs |
 | `.Tags` | []*Tag | List of tags |
 
+### Accessing FrontMatterMap
+
+Custom frontmatter fields are accessible via `.FrontMatterMap` (keys are lowercased):
+
+```html
+{{- if .FrontMatterMap.description -}}
+  <meta name="description" content="{{ .FrontMatterMap.description }}">
+{{- end -}}
+
+{{- if .FrontMatterMap.ogimage -}}
+  <meta property="og:image" content="{{ .FrontMatterMap.ogimage }}">
+{{- end -}}
+```
+
 ### Example Usage
 
 ```html
@@ -106,6 +120,42 @@ Available in `list.html` templates:
     <li><a href="{{ .FileDestPath }}">{{ .FileHeading }}</a></li>
   {{ end }}
 </ul>
+```
+
+## Template Functions
+
+Custom functions available in all templates:
+
+| Function | Description | Example |
+|----------|-------------|---------|
+| `config` | Get value from config.json | `{{ config "site.title" }}` |
+| `hasPrefix` | Check if string starts with prefix | `{{ if hasPrefix $url "http" }}` |
+| `urlJoin` | Join URL parts safely | `{{ urlJoin $baseUrl $path }}` |
+
+### Config Function Examples
+
+```html
+{{- $siteTitle := config "site.title" -}}
+{{- $siteUrl := config "site.url" -}}
+{{- $ogEnabled := config "opengraph.enabled" -}}
+
+{{ if $ogEnabled }}
+  <meta property="og:site_name" content="{{ $siteTitle }}">
+{{ end }}
+```
+
+### URL Handling Example
+
+```html
+{{- $baseUrl := config "site.url" -}}
+{{- $image := .FrontMatterMap.ogimage -}}
+
+<!-- Handle both relative and absolute URLs -->
+{{ if hasPrefix $image "http" }}
+  <meta property="og:image" content="{{ $image }}">
+{{ else }}
+  <meta property="og:image" content="{{ urlJoin $baseUrl $image }}">
+{{ end }}
 ```
 
 ## Date Formatting

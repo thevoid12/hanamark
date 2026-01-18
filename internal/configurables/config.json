@@ -10,7 +10,7 @@
   "indexHomepageHtml": {
     "type": "section",
     "name": "blog",
-    "titletag":"this text will be added inside title tag of index page"
+    "titletag": "this text will be added inside title tag of index page"
   },
   "logger": {
     "filepath": "hanamark.logs",
@@ -24,16 +24,16 @@
     "authorEmailID": "youremailID@gmail.com",
     "rssOutputName": "feed.xml"
   },
+  "site": {
+    "title": "My Site",
+    "description": "Default site description for SEO",
+    "url": "https://example.com",
+    "image": "/static/images/og-default.png"
+  },
+  "opengraph": {
+    "enabled": true
+  },
   "tags": false,
   "sortFilesByCreatedOn": true,
-  "servePort": "3000",
-  "opengraph": {
-    "enabled": false,
-    "siteName": "My Site",
-    "baseUrl": "https://example.com",
-    "defaultImage": "/static/images/og-default.png",
-    "imageWidth": "1200",
-    "imageHeight": "630",
-    "twitterCard": "summary_large_image"
-  }
+  "servePort": "3000"
 }
