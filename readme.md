@@ -34,6 +34,7 @@
     - [File Paths](#file-paths)
     - [Index Homepage](#index-homepage)
     - [RSS Feed](#rss-feed)
+    - [Site Metadata & OpenGraph Support](#site-metadata--opengraph-support)
     - [Logger](#logger)
     - [Other Options](#other-options)
   - [Content Organization](#content-organization)
@@ -345,6 +346,15 @@ Configuration is stored in `./configurables/config.json`.
     "authorEmailID": "you@example.com",
     "rssOutputName": "feed.xml"
   },
+  "site": {
+    "title": "My Blog",
+    "description": "A blog about technology and life",
+    "url": "https://example.com",
+    "image": "/static/images/og-default.png"
+  },
+  "opengraph": {
+    "enabled": true
+  },
   "tags": true,
   "sortFilesByCreatedOn": true,
   "servePort": "3000"
@@ -488,35 +498,68 @@ templates/
 | `authorEmailID` | Author email | No |
 | `rssOutputName` | Output filename (default: `feed.xml`) | No |
 
-### OpenGraph Support (Social Media Metadata)
+### Site Metadata & OpenGraph Support
 
-Hanamark supports OpenGraph and Twitter Card metadata generation. This allows your pages to look great when shared on social media.
+Hanamark supports OpenGraph and Twitter Card metadata for social media sharing. Configure site-level metadata that's reused across features:
 
 **Configuration:**
 
 ```json
+"site": {
+  "title": "My Awesome Blog",
+  "description": "A blog about technology and life",
+  "url": "https://example.com",
+  "image": "/static/images/og-default.png"
+},
 "opengraph": {
-  "enabled": true,
-  "siteName": "My Awesome Blog",
-  "baseUrl": "https://example.com",
-  "defaultImage": "/static/images/og-default.png",
-  "imageWidth": "1200",
-  "imageHeight": "630",
-  "twitterCard": "summary_large_image"
+  "enabled": true
 }
 ```
 
+**Site Block:**
+
 | Key | Description | Required |
 |-----|-------------|----------|
-| `enabled` | Enable/disable generation | Yes |
-| `siteName` | Site name for `og:site_name` | No |
-| `baseUrl` | Base URL (essential for valid absolute URLs) | **Yes** |
-| `defaultImage` | Default fallback image if page has no image | No |
-| `twitterCard` | Twitter card type (usually `summary_large_image`) | No |
+| `title` | Site name (used in `og:site_name`) | Yes |
+| `description` | Default meta description for pages | Yes |
+| `url` | Base URL for generating absolute URLs | **Yes** |
+| `image` | Default OpenGraph image (relative or absolute URL) | No |
+
+**OpenGraph Block:**
+
+| Key | Description | Default |
+|-----|-------------|---------|
+| `enabled` | Enable/disable OpenGraph meta tag generation | `true` |
+
+When enabled, generates all necessary meta tags for Facebook, Twitter, and other platforms. Twitter cards use `summary_large_image` format.
+
+**Generated Meta Tags:**
+
+```html
+<!-- Primary Meta Tags -->
+<meta name="title" content="Page Title">
+<meta name="description" content="Description">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:site_name" content="Site Title">
+<meta property="og:title" content="Page Title">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://example.com/page.html">
+<meta property="og:description" content="Description">
+<meta property="og:image" content="https://example.com/image.png">
+<link rel="canonical" href="https://example.com/page.html">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://example.com/page.html">
+<meta name="twitter:title" content="Page Title">
+<meta name="twitter:description" content="Description">
+<meta name="twitter:image" content="https://example.com/image.png">
+```
 
 **Front Matter Overrides:**
 
-You can override OpenGraph data per page using standard front matter fields:
+Override site defaults per page:
 
 ```markdown
 ---
@@ -526,8 +569,8 @@ ogImage: "/static/images/special-cover.png"
 ---
 ```
 
-- `description`: Used for `og:description` and `twitter:description`
-- `ogImage`: Used for `og:image` and `twitter:image` (overrides `defaultImage`)
+- `description`: Overrides `site.description` for this page
+- `ogImage`: Overrides `site.image` for this page
 
 ### Logger
 
