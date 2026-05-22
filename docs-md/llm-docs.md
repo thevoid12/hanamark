@@ -162,7 +162,8 @@ Complete config.json with all options:
     "link": "https://example.com",
     "authorName": "Your Name",
     "authorEmailID": "you@example.com",
-    "rssOutputName": "feed.xml"
+    "rssOutputName": "feed.xml",
+    "rssLimit": -1
   },
   "tags": true,
   "sortFilesByCreatedOn": true,

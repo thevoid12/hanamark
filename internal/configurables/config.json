@@ -22,7 +22,8 @@
     "link": "https://thisisvoid.in",
     "authorName": "void",
     "authorEmailID": "youremailID@gmail.com",
-    "rssOutputName": "feed.xml"
+    "rssOutputName": "feed.xml",
+    "rssLimit": -1
   },
   "site": {
     "title": "My Site",

@@ -26,7 +26,8 @@ Enable RSS in your `config.json`:
     "link": "https://example.com",
     "authorName": "Your Name",
     "authorEmailID": "you@example.com",
-    "rssOutputName": "feed.xml"
+    "rssOutputName": "feed.xml",
+    "rssLimit": -1
   }
 }
 ```
@@ -41,6 +42,7 @@ Enable RSS in your `config.json`:
 | `authorName` | Author name for feed items | No |
 | `authorEmailID` | Author email | No |
 | `rssOutputName` | Output filename (default: `feed.xml`) | No |
+| `rssLimit` | Max posts in feed. `-1` or omit = all posts; positive integer = latest N posts only | No |
 
 ## Mark Sections for RSS
 
@@ -84,7 +86,8 @@ After building, `feed.xml` is generated in the output root directory.
     "title": "My Tech Blog",
     "link": "https://myblog.com",
     "authorName": "John Doe",
-    "rssOutputName": "feed.xml"
+    "rssOutputName": "feed.xml",
+    "rssLimit": 10
   }
 }
 ```
