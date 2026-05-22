@@ -6,9 +6,9 @@ import (
 	"hanamark/model"
 	"hanamark/util"
 	"path/filepath"
+	"sort"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/feeds"
 	"github.com/spf13/viper"
 )
@@ -53,7 +53,18 @@ func GetRssFeedItems(metaList []*model.PageMeta) ([]*feeds.Item, error) {
 		return nil, errors.New("link of the root page of your blog is mandatory to config to setup rss")
 	}
 
-	for _, meta := range metaList {
+	sorted := make([]*model.PageMeta, len(metaList))
+	copy(sorted, metaList)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].CreatedDate.After(sorted[j].CreatedDate)
+	})
+
+	rssLimit := viper.GetInt("rss.rssLimit")
+	if rssLimit > 0 && rssLimit < len(sorted) {
+		sorted = sorted[:rssLimit]
+	}
+
+	for _, meta := range sorted {
 		joinedLink, err := util.JoinURL(link, meta.DestPageDir)
 		if err != nil {
 			return nil, err
@@ -62,12 +73,9 @@ func GetRssFeedItems(metaList []*model.PageMeta) ([]*feeds.Item, error) {
 			Title: meta.PageTitle,
 			Link: &feeds.Link{
 				Href: joinedLink,
-				// Rel:    "",
-				// Type:   "",
-				// Length: "",
 			},
 			Author:      &feeds.Author{Name: viper.GetString("rss.authorName"), Email: viper.GetString("rss.authorEmailID")},
-			Id:          uuid.NewString(),
+			Id:          joinedLink,
 			Updated:     meta.UpdatedDate,
 			Created:     meta.CreatedDate,
 			Content:     meta.GenHtml,

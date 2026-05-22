@@ -32,7 +32,8 @@ Configuration is stored in `./configurables/config.json`.
     "link": "https://example.com",
     "authorName": "Your Name",
     "authorEmailID": "you@example.com",
-    "rssOutputName": "feed.xml"
+    "rssOutputName": "feed.xml",
+    "rssLimit": -1
   },
   "site": {
     "title": "My Awesome Blog",

@@ -7,7 +7,6 @@ toolchain go1.24.3
 require (
 	github.com/adrg/frontmatter v0.2.0
 	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a
-	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.27.1

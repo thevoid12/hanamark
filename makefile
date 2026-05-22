@@ -66,18 +66,10 @@ build-dist:
 	# --skip=publish ensures nothing is uploaded automatically
 	goreleaser release --clean --snapshot --skip=publish
 
-.PHONY: push-codeberg
-push-codeberg:
-	# Ensure codeberg remote is added: git remote add codeberg <url>
-	git push codeberg main
-	git push codeberg v$(VERSION)
-
 .PHONY: full-release
-full-release: release-check build-dist push-codeberg
+full-release: release-check build-dist
 	# 1. Run goreleaser for GitHub (using your .goreleaser.yaml)
 	goreleaser release --clean
-	# 2. Reminder for Codeberg
-	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
 .PHONY: add-tag
 add-tag:
@@ -94,8 +86,6 @@ full-release-draft:add-tag release-check build-dist
 	# 1. Run goreleaser for GitHub (using your .goreleaser.yaml)
 	goreleaser release --clean --draft
 	@echo "manually check the changes in github and click publish"
-	# 2. Reminder for Codeberg
-	@echo "Binary generation complete. Upload files from ./dist/ to Codeberg manually or via API."
 
 
 
