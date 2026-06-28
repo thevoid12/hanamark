@@ -34,9 +34,10 @@ const (
 	TEMPLATE FrontMatterKey = "template"   // custom templating instead of single and list if needed
 	TAGS     FrontMatterKey = "tags"       // tag list for the document
 	DRAFT    FrontMatterKey = "draft"      // draft mode documents are not published
-	DATE     FrontMatterKey = "created_on" // date at which the md file is first created
-	RSS      FrontMatterKey = "rss"        // rss support
-	TITLE    FrontMatterKey = "title"      // custom title for blogs (using this title overwrites the actual generated title in list pages of blogs)
+	DATE       FrontMatterKey = "created_on" // date at which the md file is first created
+	UPDATED_ON FrontMatterKey = "updated_on" // date at which the md file was last updated; falls back to created_on when absent
+	RSS        FrontMatterKey = "rss"        // rss support
+	TITLE      FrontMatterKey = "title"      // custom title for blogs (using this title overwrites the actual generated title in list pages of blogs)
 )
 
 // Tags

@@ -9,7 +9,7 @@ endif
 build:
 	echo "building executable version $(VERSION)..."
 	go mod tidy
-	@echo "package constants\n\nconst Version = \"$(VERSION)\"" > constant/version.go
+	@printf 'package constants\n\nconst Version = "%s"\n' "$(VERSION)" > constant/version.go
 	# build for linux
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hanamark
 # 	# build for intel mac
