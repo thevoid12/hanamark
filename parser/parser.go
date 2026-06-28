@@ -490,8 +490,6 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			return nil, err
 		}
 
-		lastModfiedTime := info.ModTime()
-
 		isPresent, val, err := FrontMatterValidator(ctx, path, fm, model.DATE)
 		if err != nil {
 			return nil, err
@@ -508,6 +506,22 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		} else {
 			return nil, fmt.Errorf("created_on value in frontmatter is not a string for path: %s", path)
 		}
+
+		lastModfiedTime := info.ModTime()
+		isPresentUpdated, updatedVal, err := FrontMatterValidator(ctx, path, fm, model.UPDATED_ON)
+		if err != nil {
+			return nil, err
+		}
+		if isPresentUpdated {
+			if s, ok := updatedVal.(string); ok {
+				t, err := util.ParseTimeFlexible(s)
+				if err != nil {
+					return nil, err
+				}
+				lastModfiedTime = t
+			}
+		}
+
 		// Generate markdown with file links
 		generatedHtml, err := ParseMarkdownToHtml(ctx, path)
 		if err != nil {
