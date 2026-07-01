@@ -1,0 +1,44 @@
+{
+  "filepath": {
+    "sourceMDDir": "./test_data/08/configurables/point_A",
+    "destHtmlDir": "./test_output/point_B_08",
+    "templatePath": "./test_data/08/configurables/templates",
+    "sourceStaticFiles": "./test_data/08/configurables/static",
+    "mdAssetsSourcePath": "./test_data/08/configurables/point_A/assets",
+    "mdAssetsDestPath": "./test_output/point_B_08/assets"
+  },
+  "logger": {
+    "filepath": "hanamark.logs",
+    "level": "debug"
+  },
+  "rss": {
+    "isRssEnabled": false,
+    "title": "void blog",
+    "link": "https://thisisvoid.in",
+    "authorName": "void",
+    "authorEmailID": "thevoidddd1@gmail.com",
+    "rssOutputName": "feed.xml"
+  },
+  "site": {
+    "title": "Test Site",
+    "description": "Test site description",
+    "url": "https://thisisvoid.in",
+    "image": "/static/images/og-default.png"
+  },
+  "opengraph": {
+    "enabled": false
+  },
+  "image": {
+    "enabled": true,
+    "outputFormat": "webp",
+    "backupOriginalFormat": true,
+    "quality": { "webp": 82 },
+    "presets": {
+      "banner":  { "width": 200, "breakpoints": [100, 200], "loading": "eager", "fetchpriority": "high", "sizes": "100vw" },
+      "content": { "width": 120, "breakpoints": [60, 120],  "loading": "lazy",  "fetchpriority": "auto", "sizes": "(max-width: 600px) 100vw, 120px" }
+    }
+  },
+  "tags": false,
+  "sortFilesByCreatedOn": true,
+  "servePort": "3000"
+}

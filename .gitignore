@@ -7,6 +7,7 @@ templates/v_project_template.html
 test/configurables
 test/point_B
 test/test_output
+hanamark_internal/
 # docs/
 hanamark
 # Added by goreleaser init:

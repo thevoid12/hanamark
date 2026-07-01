@@ -3,14 +3,18 @@ package parser
 import (
 	"context"
 	"fmt"
+	"hanamark/imageproc"
+	"hanamark/model"
 	"hanamark/util"
 	"os"
+	"strings"
 
 	"github.com/gomarkdown/markdown/ast"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
+	"github.com/spf13/viper"
 )
 
 // ParseMarkdownToHtml parses markdown from source directory into html string
@@ -36,6 +40,10 @@ func ParseMarkdownToHtml(ctx context.Context, sourceMDPath string) (string, erro
 	// create HTML renderer with extensions
 	htmlFlags := html.CommonFlags | html.HrefTargetBlank
 	opts := html.RendererOptions{Flags: htmlFlags}
+	if imageproc.Enabled() {
+		wantsBanner := strings.EqualFold(fmt.Sprint(fm[string(model.FIRST_IMAGE_PRESET)]), imageproc.PresetBanner)
+		opts.RenderNodeHook = imageproc.NewImageRenderHook(ctx, sourceMDPath, viper.GetString("filepath.mdAssetsDestPath"), wantsBanner)
+	}
 	renderer := html.NewRenderer(opts)
 	result := markdown.Render(doc, renderer)
 
