@@ -65,6 +65,8 @@ Images referenced in Markdown are copied from `mdAssetsSourcePath` to `mdAssetsD
 
 The image will be copied to `output_html/assets/photo.png` and the path will be updated in the generated HTML.
 
+> **Tip:** Images referenced in Markdown don't just get copied — by default Hanamark also resizes them, generates WebP versions, and emits responsive `<picture>` markup automatically. See [Image Optimization](/docs/image-optimization.html) for how to configure presets and per-image overrides (`?preset=`, `?w=`, `?h=`, `?fetchpriority=`).
+
 ## Directory Structure
 
 ```
