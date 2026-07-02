@@ -62,9 +62,10 @@ type TagList struct {
 // only applies to block-level elements, never inline images, so this is the
 // only way to annotate an individual image directly in markdown.
 type Directive struct {
-	Preset string
-	Width  int
-	Height int
+	Preset        string
+	Width         int
+	Height        int
+	FetchPriority string // overrides the preset's fetchpriority="" for this image only; "high", "low", or "auto"
 }
 
 // Variant is one generated size of an image in one format.

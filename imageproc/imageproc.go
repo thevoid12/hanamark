@@ -105,6 +105,20 @@ func PresetFetchPriority(name string) string {
 	return viper.GetString(presetKey(name, "fetchpriority"))
 }
 
+// isValidFetchPriority reports whether v is one of the fetchpriority values
+// defined by the HTML spec. Anything else (including empty, meaning no
+// override was given) is rejected so a malformed ?fetchpriority= directive
+// silently falls back to the preset's own value instead of emitting garbage
+// into the generated markup.
+func isValidFetchPriority(v string) bool {
+	switch v {
+	case "high", "low", "auto":
+		return true
+	default:
+		return false
+	}
+}
+
 // PresetSizes returns the sizes="" attribute value for a preset.
 func PresetSizes(name string) string {
 	return viper.GetString(presetKey(name, "sizes"))
@@ -186,6 +200,9 @@ func ParseDestination(dest string) (string, model.Directive) {
 		if n, err := strconv.Atoi(h); err == nil && n > 0 {
 			d.Height = n
 		}
+	}
+	if fp := values.Get("fetchpriority"); isValidFetchPriority(fp) {
+		d.FetchPriority = fp
 	}
 	if d.Width > 0 && d.Height > 0 {
 		// Resize-only (no crop) can't honor both without distorting the
@@ -605,7 +622,12 @@ func (st *imageHookState) renderImage(w io.Writer, img *ast.Image) (ast.WalkStat
 		return ast.SkipChildren, true
 	}
 
-	writePicture(w, result, alt, title, PresetLoading(preset), PresetFetchPriority(preset), PresetSizes(preset))
+	fetchPriority := PresetFetchPriority(preset)
+	if directive.FetchPriority != "" {
+		fetchPriority = directive.FetchPriority
+	}
+
+	writePicture(w, result, alt, title, PresetLoading(preset), fetchPriority, PresetSizes(preset))
 	return ast.SkipChildren, true
 }
 

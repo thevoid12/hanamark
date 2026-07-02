@@ -309,6 +309,25 @@ func TestImageProcessingPipeline(t *testing.T) {
 		}
 	})
 
+	t.Run("per-image fetchpriority directive overrides the preset without changing loading", func(t *testing.T) {
+		html := readOutput(t, "override.html")
+		firstIdx := strings.Index(html, "<picture>")
+		secondIdx := strings.Index(html[firstIdx+1:], "<picture>")
+		if firstIdx == -1 || secondIdx == -1 {
+			t.Fatalf("expected 2 <picture> blocks, got:\n%s", html)
+		}
+		// The second photo (./assets/photo2.png?w=90&fetchpriority=high) uses
+		// the content preset (lazy loading) but explicitly opts into
+		// fetchpriority=high per-image, independent of any preset change.
+		secondBlock := html[firstIdx+secondIdx:]
+		if !strings.Contains(secondBlock, `loading="lazy"`) {
+			t.Errorf("expected second image to keep the content preset's lazy loading, got:\n%s", secondBlock)
+		}
+		if !strings.Contains(secondBlock, `fetchpriority="high"`) {
+			t.Errorf("expected ?fetchpriority=high to override the content preset's fetchpriority, got:\n%s", secondBlock)
+		}
+	})
+
 	t.Run("image.enabled=false falls back to plain img", func(t *testing.T) {
 		viper.Set("image.enabled", false)
 		defer viper.Set("image.enabled", true)

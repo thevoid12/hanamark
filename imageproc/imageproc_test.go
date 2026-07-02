@@ -58,22 +58,27 @@ func writeTestPNG(t *testing.T, path string, w, h int) {
 
 func TestParseDestination(t *testing.T) {
 	cases := []struct {
-		name       string
-		dest       string
-		wantPath   string
-		wantPreset string
-		wantWidth  int
-		wantHeight int
+		name              string
+		dest              string
+		wantPath          string
+		wantPreset        string
+		wantWidth         int
+		wantHeight        int
+		wantFetchPriority string
 	}{
-		{"no query", "./assets/hero.jpg", "./assets/hero.jpg", "", 0, 0},
-		{"preset only", "./assets/hero.jpg?preset=banner", "./assets/hero.jpg", "banner", 0, 0},
-		{"width only", "./assets/shot.png?w=1000", "./assets/shot.png", "", 1000, 0},
-		{"height only", "./assets/portrait.png?h=1200", "./assets/portrait.png", "", 0, 1200},
-		{"width wins over height when both given", "./assets/shot.png?w=1000&h=500", "./assets/shot.png", "", 1000, 0},
-		{"malformed query is ignored", "./assets/x.png?%zz", "./assets/x.png", "", 0, 0},
-		{"negative width ignored", "./assets/x.png?w=-5", "./assets/x.png", "", 0, 0},
-		{"percent-encoded space is decoded", "../../assets/Pasted%20image%2020260527210847.png", "../../assets/Pasted image 20260527210847.png", "", 0, 0},
-		{"percent-encoded path with a directive", "./assets/my%20photo.png?w=800", "./assets/my photo.png", "", 800, 0},
+		{"no query", "./assets/hero.jpg", "./assets/hero.jpg", "", 0, 0, ""},
+		{"preset only", "./assets/hero.jpg?preset=banner", "./assets/hero.jpg", "banner", 0, 0, ""},
+		{"width only", "./assets/shot.png?w=1000", "./assets/shot.png", "", 1000, 0, ""},
+		{"height only", "./assets/portrait.png?h=1200", "./assets/portrait.png", "", 0, 1200, ""},
+		{"width wins over height when both given", "./assets/shot.png?w=1000&h=500", "./assets/shot.png", "", 1000, 0, ""},
+		{"malformed query is ignored", "./assets/x.png?%zz", "./assets/x.png", "", 0, 0, ""},
+		{"negative width ignored", "./assets/x.png?w=-5", "./assets/x.png", "", 0, 0, ""},
+		{"percent-encoded space is decoded", "../../assets/Pasted%20image%2020260527210847.png", "../../assets/Pasted image 20260527210847.png", "", 0, 0, ""},
+		{"percent-encoded path with a directive", "./assets/my%20photo.png?w=800", "./assets/my photo.png", "", 800, 0, ""},
+		{"fetchpriority high", "./assets/hero.jpg?fetchpriority=high", "./assets/hero.jpg", "", 0, 0, "high"},
+		{"fetchpriority low", "./assets/x.png?fetchpriority=low", "./assets/x.png", "", 0, 0, "low"},
+		{"invalid fetchpriority ignored", "./assets/x.png?fetchpriority=urgent", "./assets/x.png", "", 0, 0, ""},
+		{"fetchpriority combined with width", "./assets/x.png?w=400&fetchpriority=high", "./assets/x.png", "", 400, 0, "high"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -81,8 +86,8 @@ func TestParseDestination(t *testing.T) {
 			if path != tc.wantPath {
 				t.Errorf("path = %q, want %q", path, tc.wantPath)
 			}
-			if d.Preset != tc.wantPreset || d.Width != tc.wantWidth || d.Height != tc.wantHeight {
-				t.Errorf("directive = %+v, want preset=%q width=%d height=%d", d, tc.wantPreset, tc.wantWidth, tc.wantHeight)
+			if d.Preset != tc.wantPreset || d.Width != tc.wantWidth || d.Height != tc.wantHeight || d.FetchPriority != tc.wantFetchPriority {
+				t.Errorf("directive = %+v, want preset=%q width=%d height=%d fetchpriority=%q", d, tc.wantPreset, tc.wantWidth, tc.wantHeight, tc.wantFetchPriority)
 			}
 		})
 	}

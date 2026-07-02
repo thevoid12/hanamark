@@ -65,7 +65,7 @@ func GetRssFeedItems(metaList []*model.PageMeta) ([]*feeds.Item, error) {
 	}
 
 	for _, meta := range sorted {
-		joinedLink, err := util.JoinURL(link, meta.DestPageDir)
+		joinedLink, err := util.JoinURL(link, util.CleanURLPath(meta.DestPageDir))
 		if err != nil {
 			return nil, err
 		}

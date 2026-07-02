@@ -562,6 +562,9 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 		}
 		readTime := util.CalculateReadTime(string(mdContent))
 
+		diskPath := destPath
+		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlDir"))
+
 		meta = &model.PageMeta{
 			GenHtml:        generatedHtml,
 			ReadTime:       readTime,
@@ -573,13 +576,10 @@ func parseMarkDownFile(ctx context.Context, path, baseFiledir string, info os.Fi
 			BaseFile:       baseFiledir,
 			FrontMatterMap: fm,
 		}
-		err = tmplt.RenderTemplate(ctx, meta, templatePath)
+		err = tmplt.RenderTemplate(ctx, meta, templatePath, diskPath)
 		if err != nil {
 			return nil, err
 		}
-
-		destPath = util.RemoveRootPartOfDir(destPath, viper.GetString("filepath.destHtmlDir"))
-		meta.DestPageDir = destPath // TODO: this is bad and this will cause confusion
 	}
 
 	return meta, nil

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	logs "hanamark/logger"
 	"hanamark/model"
+	"hanamark/util"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -57,6 +58,7 @@ func getTemplate(targetTemplatePath string) (*template.Template, string, error) 
 			}
 			return result
 		},
+		"cleanUrl": util.CleanURLPath,
 	}
 
 	// Parse the target content first with custom functions
@@ -106,10 +108,9 @@ func getTemplate(targetTemplatePath string) (*template.Template, string, error) 
 }
 
 // takes in the base template and appends the content the base template and gives us back the final html string
-func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string) error {
+func RenderTemplate(ctx context.Context, meta *model.PageMeta, templatePath string, opFile string) error {
 	l := logs.GetLoggerctx(ctx)
 
-	opFile := meta.DestPageDir
 	tmpl, execName, err := getTemplate(templatePath)
 	if err != nil {
 		l.Sugar().Error("Template parsing error:", err)
