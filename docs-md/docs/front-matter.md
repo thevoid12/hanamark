@@ -37,6 +37,7 @@ ogImage: "/static/images/opengraph-guide.png"
 | `title` | string | Custom title for document (overrides H1) | No |
 | `description` | string | Description for meta tags (OpenGraph, Twitter) | No |
 | `ogImage` | string | Custom image URL for social media previews | No |
+| `first_image_preset` | string | Set to `banner` to opt the page's first Markdown image into the banner image preset (eager loading, high fetch priority). Any other value, or omitting the field, uses the default `content` preset | No |
 
 ## updated_on
 
@@ -105,6 +106,21 @@ draft: true
 
 This post won't appear in the build.
 ```
+
+## First Image Preset
+
+Opt a page's very first Markdown image into the `banner` image preset (eager loading, high fetch priority — meant for hero/above-the-fold images):
+
+```markdown
+---
+created_on: 2026-01-25
+first_image_preset: banner
+---
+
+![Hero image](./assets/hero.jpg)
+```
+
+Every other image on the page still uses the default `content` preset. See [Image Optimization](/docs/image-optimization.html) for full details, including per-image overrides.
 
 ## Custom Templates
 

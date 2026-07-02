@@ -44,6 +44,30 @@ Configuration is stored in `./configurables/config.json`.
   "opengraph": {
     "enabled": true
   },
+  "image": {
+    "enabled": true,
+    "outputFormat": "webp",
+    "backupOriginalFormat": true,
+    "quality": {
+      "webp": 82
+    },
+    "presets": {
+      "banner": {
+        "width": 1600,
+        "breakpoints": [480, 800, 1200, 1600],
+        "loading": "eager",
+        "fetchpriority": "high",
+        "sizes": "100vw"
+      },
+      "content": {
+        "width": 800,
+        "breakpoints": [400, 800],
+        "loading": "lazy",
+        "fetchpriority": "auto",
+        "sizes": "(max-width: 800px) 100vw, 800px"
+      }
+    }
+  },
   "tags": true,
   "sortFilesByCreatedOn": true,
   "servePort": "3000"
@@ -251,7 +275,23 @@ ogImage: "/static/images/custom-og.png"
 ---
 ```
 
-See [Front Matter](front-matter.md) for all available fields
+See [Front Matter](/docs/front-matter.html) for all available fields
+
+## Image Optimization
+
+Controls automatic responsive image generation (resizing, WebP encoding, `<picture>` markup) for images referenced in Markdown.
+
+```json
+"image": {
+  "enabled": true,
+  "presets": {
+    "banner": { "width": 1600, "loading": "eager", "fetchpriority": "high" },
+    "content": { "width": 800, "loading": "lazy", "fetchpriority": "auto" }
+  }
+}
+```
+
+See [Image Optimization](/docs/image-optimization.html) for the full config reference, preset behavior, and per-image `?w=`, `?h=`, `?preset=`, `?fetchpriority=` directives.
 
 ## Logger
 

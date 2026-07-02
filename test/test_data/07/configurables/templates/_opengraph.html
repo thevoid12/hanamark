@@ -20,7 +20,7 @@
 {{- end -}}
 
 {{- if and $baseUrl .DestPageDir -}}
-{{- $pageUrl = urlJoin $baseUrl .DestPageDir -}}
+{{- $pageUrl = urlJoin $baseUrl (cleanUrl .DestPageDir) -}}
 {{- end -}}
 
 <!-- Primary Meta Tags -->

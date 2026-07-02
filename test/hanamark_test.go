@@ -8,7 +8,9 @@ import (
 	"hanamark/util"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -241,4 +243,105 @@ func TestBuildFileFlag(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestImageProcessingPipeline exercises the image-optimization pipeline end
+// to end against test_data/08: an un-annotated page (both images default to
+// the "content" preset), a page opting its first image into "banner" via
+// frontmatter, a page using per-image markdown query-string overrides, and
+// the image.enabled=false fallback which must reproduce today's plain <img>
+// output byte-for-byte.
+func TestImageProcessingPipeline(t *testing.T) {
+	configDir := "./test_data/08/configurables/"
+	env := setTest(t, configDir)
+
+	if err := parser.ParseFiles(env.Ctx); err != nil {
+		t.Fatalf("parse files failed: %v", err)
+	}
+
+	destHtmlDir := viper.GetString("filepath.destHtmlDir")
+	readOutput := func(t *testing.T, name string) string {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(destHtmlDir, name))
+		if err != nil {
+			t.Fatalf("reading generated %s: %v", name, err)
+		}
+		return string(data)
+	}
+
+	t.Run("un-annotated images use the content preset", func(t *testing.T) {
+		html := readOutput(t, "about.html")
+		if strings.Count(html, "<picture>") != 2 {
+			t.Fatalf("expected 2 <picture> blocks, got:\n%s", html)
+		}
+		if strings.Contains(html, `fetchpriority="high"`) {
+			t.Error("no image on this page opted into banner treatment, but fetchpriority=\"high\" was found")
+		}
+		if strings.Count(html, `loading="lazy"`) != 2 {
+			t.Errorf("expected both images to be loading=\"lazy\" (content preset):\n%s", html)
+		}
+	})
+
+	t.Run("first_image_preset banner opts the first image in", func(t *testing.T) {
+		html := readOutput(t, "banner.html")
+		firstIdx := strings.Index(html, "<picture>")
+		secondIdx := strings.Index(html[firstIdx+1:], "<picture>")
+		if firstIdx == -1 || secondIdx == -1 {
+			t.Fatalf("expected 2 <picture> blocks, got:\n%s", html)
+		}
+		firstBlock := html[:firstIdx+secondIdx]
+		if !strings.Contains(firstBlock, `loading="eager"`) || !strings.Contains(firstBlock, `fetchpriority="high"`) {
+			t.Errorf("expected first image to use the banner preset (eager/high), got:\n%s", firstBlock)
+		}
+		secondBlock := html[firstIdx+secondIdx:]
+		if !strings.Contains(secondBlock, `loading="lazy"`) || strings.Contains(secondBlock, `fetchpriority`) {
+			t.Errorf("expected second image to use the content preset (lazy, no fetchpriority), got:\n%s", secondBlock)
+		}
+	})
+
+	t.Run("markdown directive overrides win", func(t *testing.T) {
+		html := readOutput(t, "override.html")
+		if !strings.Contains(html, `fetchpriority="high"`) {
+			t.Errorf("expected ?preset=banner to apply the banner preset, got:\n%s", html)
+		}
+		if !strings.Contains(html, `width="90"`) {
+			t.Errorf("expected ?w=90 to set an explicit width, got:\n%s", html)
+		}
+	})
+
+	t.Run("per-image fetchpriority directive overrides the preset without changing loading", func(t *testing.T) {
+		html := readOutput(t, "override.html")
+		firstIdx := strings.Index(html, "<picture>")
+		secondIdx := strings.Index(html[firstIdx+1:], "<picture>")
+		if firstIdx == -1 || secondIdx == -1 {
+			t.Fatalf("expected 2 <picture> blocks, got:\n%s", html)
+		}
+		// The second photo (./assets/photo2.png?w=90&fetchpriority=high) uses
+		// the content preset (lazy loading) but explicitly opts into
+		// fetchpriority=high per-image, independent of any preset change.
+		secondBlock := html[firstIdx+secondIdx:]
+		if !strings.Contains(secondBlock, `loading="lazy"`) {
+			t.Errorf("expected second image to keep the content preset's lazy loading, got:\n%s", secondBlock)
+		}
+		if !strings.Contains(secondBlock, `fetchpriority="high"`) {
+			t.Errorf("expected ?fetchpriority=high to override the content preset's fetchpriority, got:\n%s", secondBlock)
+		}
+	})
+
+	t.Run("image.enabled=false falls back to plain img", func(t *testing.T) {
+		viper.Set("image.enabled", false)
+		defer viper.Set("image.enabled", true)
+
+		if err := parser.ParseFiles(env.Ctx); err != nil {
+			t.Fatalf("parse files failed: %v", err)
+		}
+
+		html := readOutput(t, "about.html")
+		if strings.Contains(html, "<picture>") {
+			t.Errorf("expected no <picture> markup when image.enabled=false, got:\n%s", html)
+		}
+		if !strings.Contains(html, `<img src="./assets/photo1.png" alt="First photo" />`) {
+			t.Errorf("expected plain passthrough <img> tag, got:\n%s", html)
+		}
+	})
 }

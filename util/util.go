@@ -27,6 +27,21 @@ func RemoveExtentionFromFile(path string) string {
 	return path
 }
 
+// CleanURLPath converts a generated ".../name.html" destination path into the
+// extension-less form static hosts with "clean URL" rewriting (e.g. Cloudflare Pages)
+// actually serve without a redirect: ".../index.html" -> ".../", ".../name.html" -> ".../name".
+func CleanURLPath(p string) string {
+	p = filepath.ToSlash(p)
+	dir, file := path.Split(p)
+	if file == "index.html" {
+		return dir
+	}
+	if strings.HasSuffix(file, ".html") {
+		return dir + strings.TrimSuffix(file, ".html")
+	}
+	return p
+}
+
 func RemoveRootPartOfDir(oldpath, destHtmlDir string) string {
 	// Normalize destHtmlDir to match the format of originalPath
 	normalizedRoot := strings.TrimPrefix(destHtmlDir, "./")

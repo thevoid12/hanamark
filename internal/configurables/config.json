@@ -34,6 +34,16 @@
   "opengraph": {
     "enabled": true
   },
+  "image": {
+    "enabled": true,
+    "outputFormat": "webp",
+    "backupOriginalFormat": true,
+    "quality": { "webp": 82 },
+    "presets": {
+      "banner":  { "width": 1600, "breakpoints": [480, 800, 1200, 1600], "loading": "eager", "fetchpriority": "high", "sizes": "100vw" },
+      "content": { "width": 800,  "breakpoints": [400, 800],             "loading": "lazy",  "fetchpriority": "auto", "sizes": "(max-width: 800px) 100vw, 800px" }
+    }
+  },
   "tags": false,
   "sortFilesByCreatedOn": true,
   "servePort": "3000"

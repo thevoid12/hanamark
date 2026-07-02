@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ .PageTitle }}</title>
+  {{ template "_opengraph.html" . }}
+</head>
+<body>
+  {{ template "_header.html" }}
+  {{ block "main" . }}{{ end }}
+  {{ template "_footer.html" }}
+</body>
+</html>

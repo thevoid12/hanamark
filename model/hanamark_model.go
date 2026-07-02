@@ -31,13 +31,14 @@ type FrontMatterKey string
 
 // Supported front matter keys
 const (
-	TEMPLATE FrontMatterKey = "template"   // custom templating instead of single and list if needed
-	TAGS     FrontMatterKey = "tags"       // tag list for the document
-	DRAFT    FrontMatterKey = "draft"      // draft mode documents are not published
-	DATE       FrontMatterKey = "created_on" // date at which the md file is first created
-	UPDATED_ON FrontMatterKey = "updated_on" // date at which the md file was last updated; falls back to created_on when absent
-	RSS        FrontMatterKey = "rss"        // rss support
-	TITLE      FrontMatterKey = "title"      // custom title for blogs (using this title overwrites the actual generated title in list pages of blogs)
+	TEMPLATE           FrontMatterKey = "template"           // custom templating instead of single and list if needed
+	TAGS               FrontMatterKey = "tags"               // tag list for the document
+	DRAFT              FrontMatterKey = "draft"              // draft mode documents are not published
+	DATE               FrontMatterKey = "created_on"         // date at which the md file is first created
+	UPDATED_ON         FrontMatterKey = "updated_on"         // date at which the md file was last updated; falls back to created_on when absent
+	RSS                FrontMatterKey = "rss"                // rss support
+	TITLE              FrontMatterKey = "title"              // custom title for blogs (using this title overwrites the actual generated title in list pages of blogs)
+	FIRST_IMAGE_PRESET FrontMatterKey = "first_image_preset" // set to "banner" to opt the page's first markdown image into the banner image preset; any other value (or absence) uses the default content preset
 )
 
 // Tags
@@ -53,6 +54,33 @@ type TagList struct {
 	TagName     string
 	TagDestPath string // the path that leads us to the individual tag list
 	Count       int    // the number of records with the tag name
+}
+
+// Directive is a per-image override parsed from the query string appended to
+// a markdown image's destination URL, e.g. "./assets/hero.jpg?preset=banner".
+// gomarkdown's ast.Image has no attribute map and its {#id .class} extension
+// only applies to block-level elements, never inline images, so this is the
+// only way to annotate an individual image directly in markdown.
+type Directive struct {
+	Preset        string
+	Width         int
+	Height        int
+	FetchPriority string // overrides the preset's fetchpriority="" for this image only; "high", "low", or "auto"
+}
+
+// Variant is one generated size of an image in one format.
+type Variant struct {
+	Width int
+	URL   string
+}
+
+// Result is the full set of generated variants for one source image, ready
+// to be rendered into a <picture> block.
+type Result struct {
+	Width, Height int // intrinsic dimensions (largest variant) for the width/height attrs
+	WebP          []Variant
+	Fallback      []Variant // same-format-as-source raster, for browsers without WebP support
+	FallbackExt   string
 }
 
 // IndexHomepageHtml type constants for config
