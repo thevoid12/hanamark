@@ -37,6 +37,7 @@ func ParseMarkdownToHtml(ctx context.Context, sourceMDPath string) (string, erro
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.SuperSubscript | parser.Includes
 	p := parser.NewWithExtensions(extensions)
 	doc := p.Parse(mdInputfile)
+	rewriteMdLinksToHtml(doc)
 	// create HTML renderer with extensions
 	htmlFlags := html.CommonFlags | html.HrefTargetBlank
 	opts := html.RendererOptions{Flags: htmlFlags}
@@ -48,6 +49,42 @@ func ParseMarkdownToHtml(ctx context.Context, sourceMDPath string) (string, erro
 	result := markdown.Render(doc, renderer)
 
 	return string(result), nil
+}
+
+// rewriteMdLinksToHtml walks the AST and rewrites relative links pointing to
+// ".md" source files (eg. "./paper_reading/test.md") so they point to the
+// generated ".html" output instead, since the output tree mirrors the
+// source tree but with .md files rendered to .html.
+func rewriteMdLinksToHtml(doc ast.Node) {
+	ast.WalkFunc(doc, func(node ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.GoToNext
+		}
+		link, ok := node.(*ast.Link)
+		if !ok {
+			return ast.GoToNext
+		}
+		dest := string(link.Destination)
+		if dest == "" {
+			return ast.GoToNext
+		}
+		// leave external links, mailto, and anchors untouched
+		if strings.Contains(dest, "://") || strings.HasPrefix(dest, "mailto:") {
+			return ast.GoToNext
+		}
+
+		path := dest
+		suffix := ""
+		if idx := strings.IndexAny(path, "?#"); idx != -1 {
+			suffix = path[idx:]
+			path = path[:idx]
+		}
+		if strings.HasSuffix(path, ".md") {
+			path = strings.TrimSuffix(path, ".md") + ".html"
+			link.Destination = []byte(path + suffix)
+		}
+		return ast.GoToNext
+	})
 }
 
 // TODO: need to take care of fontmatter as well
