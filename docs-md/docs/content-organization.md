@@ -77,3 +77,36 @@ docs/
 ```
 
 Each section with `_index.md` gets its own list page.
+
+## Companion Files (Link Targets, Not Posts)
+
+Sometimes you want a `.md` file's own subfolder to hold files that are only meant to be linked to from that file — not shown as standalone posts. Name the folder the same as the file (minus `.md`) and Hanamark treats every `.md` inside as a **companion file**:
+
+```
+blog/
+├── paper_reading.md            # normal post
+└── paper_reading/              # folder name matches paper_reading.md
+    └── mpr.md                  # companion file
+```
+
+Companion files are still rendered to HTML (so links to them work), but they are:
+- excluded from the parent section's list page
+- excluded from tag pages, even if they set `tags` in frontmatter
+
+**Output:** `paper_reading.html` and `paper_reading/mpr.html`, but `blog/index.html` lists only `paper_reading.html`.
+
+## Linking Between `.md` Files
+
+Write links to other posts using their `.md` source path, and Hanamark rewrites the destination to `.html` at render time:
+
+```markdown
+[map reduce](./paper_reading/mpr.md)
+```
+
+Renders as:
+
+```html
+<a href="./paper_reading/mpr.html">map reduce</a>
+```
+
+External links (`https://...`), `mailto:` links, and anchors/query strings are left untouched.

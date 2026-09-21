@@ -128,6 +128,19 @@ func ParseFiles(ctx context.Context) error {
 				return nil
 			}
 			templatePath = filepath.Dir(templatePath)
+
+			// companion files: a file living in a folder whose name matches a
+			// sibling .md file's basename (eg. paper_reading/mpr.md next to
+			// paper_reading.md) is treated as a link target only, referenced
+			// from its parent page. It still gets rendered to html so links
+			// resolve, but it is excluded from list pages and tag pages.
+			parentDir := filepath.Dir(path)
+			siblingMD := filepath.Join(filepath.Dir(parentDir), filepath.Base(parentDir)+".md")
+			isCompanionFile := false
+			if _, statErr := os.Stat(siblingMD); statErr == nil {
+				isCompanionFile = true
+			}
+
 			// non directory will have single templates!
 			fm, err := ParseFrontMatter(ctx, path)
 			if err != nil {
@@ -215,7 +228,7 @@ func ParseFiles(ctx context.Context) error {
 			}
 			// TODO: parse tag
 			// process tag
-			if len(tags) > 0 {
+			if len(tags) > 0 && !isCompanionFile {
 				for _, tag := range tags {
 					tagMeta, tagErr := ProcessTags(ctx, tag)
 					if tagErr != nil {
@@ -243,11 +256,13 @@ func ParseFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			folderName := filepath.Dir(relSourcePath)
-			if folderMetaMap[folderName] == nil {
-				folderMetaMap[folderName] = make([]*model.PageMeta, 0)
+			if !isCompanionFile {
+				folderName := filepath.Dir(relSourcePath)
+				if folderMetaMap[folderName] == nil {
+					folderMetaMap[folderName] = make([]*model.PageMeta, 0)
+				}
+				folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
 			}
-			folderMetaMap[folderName] = append(folderMetaMap[folderName], meta)
 		}
 
 		return nil
